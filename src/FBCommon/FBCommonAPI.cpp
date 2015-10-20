@@ -1236,7 +1236,7 @@ void FBCommonAPI::ExecCommonFuncID(long ulFuncID, FB::VariantList aArrayArgIN, F
 
 			free(pb64_data);
 
-			m_randomAdminPin =  strB64;
+			m_AdminPin =  strB64;
 
 			return;
 		}
@@ -1244,7 +1244,7 @@ void FBCommonAPI::ExecCommonFuncID(long ulFuncID, FB::VariantList aArrayArgIN, F
 		//单独解锁密码
 	case 20:
 		{
-			ulResult = CAPI_KEY_UnlockPin(m_szAuthKey,OPE_USB_TARGET_OTHER,(char *)m_randomAdminPin.c_str(),m_szPIN,&m_ulRetry);
+			ulResult = CAPI_KEY_UnlockPin(m_szAuthKey,OPE_USB_TARGET_OTHER,(char *)m_AdminPin.c_str(),m_szPIN,&m_ulRetry);
 		}
 		break;
 		// 插拔KEY事件检测   用于登录

@@ -100,10 +100,10 @@ public:
 
 	HANDLE hThrd; // Ïß³Ì¾ä±ú
 	DWORD threadId;
-	char m_szPIN[BUFFER_LEN_1K];
+	char m_szPIN[64];
 	int m_iPINLen;
 
-	char m_szValidCode[BUFFER_LEN_1K];
+	char m_szValidCode[10];
 	int m_iValidCodeLen;
 
 	int ulContype;
@@ -147,7 +147,7 @@ private:
 
 	DEVINFO m_devInfo;
 	
-	std::string m_randomAdminPin;
+	std::string m_AdminPin;
 
     std::string m_testString;
 };
