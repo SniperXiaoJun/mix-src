@@ -20,7 +20,7 @@
 #include "sm2.h"
 #include "KMS_CAPI.h"
 #include "encodes_witch.h"
-#include "../NPBankAPILib/WTF_Interface.h"
+#include "WTF_Interface.h"
 
 static char DEFAULT_CONTAINER[] = "ContainerSM2";
 static char DEFAULT_APPLICATION[] = "DEFAULT_APPLICATION";
