@@ -46,20 +46,15 @@ public:
 
 	void ExecCommonFuncID(long aFuncID, FB::VariantList aArrayArgIN, FB::VariantList aArrayArgOUT);
 
-	///////////////////////////////////////////////////////////////////////
-	// 版本1
-	// 证书请求
+	// 初始化证书申请者信息
 	void InitArgsUserInfo(FB::VariantList aArrayArgIN);
-
-	///////////////////////////////////////////////////////////////////////
-	// 版本2
 	// 生成签名密钥对
-	void InitArgsSKFSetPIN(FB::VariantList aArrayArgIN);
-	void InitArgsSKFSetPINAndValidCode(FB::VariantList variantList);
+	void InitArgsSKFSetUserPIN(FB::VariantList aArrayArgIN);
+	void InitArgsSKFSetUserPINAndValidCode(FB::VariantList variantList);
 	// 初始化交换数字信封
 	void InitArgsSKFImportSM2KeyPair(FB::VariantList aArrayArgIN);
 	void InitArgsSKFImportCerts(FB::VariantList variantList);
-	void InitArgsSKFSetPINAndUserInfo(FB::VariantList variantList);
+	void InitArgsSKFSetUserPINAndUserInfo(FB::VariantList variantList);
 	void InitArgsShowCert(FB::VariantList variantList);
 
 	bool get_isrun();
@@ -79,6 +74,8 @@ public:
 	std::string get_authKeyName();
 	unsigned long get_authKeyType();
 	std::string get_sigValue();
+
+	std::string get_sn();
 
     void set_testString(const std::string& val);
 
@@ -147,6 +144,10 @@ public:
 private:
     FBCommonWeakPtr m_plugin;
     FB::BrowserHostPtr m_host;
+
+	DEVINFO m_devInfo;
+	
+	std::string m_randomAdminPin;
 
     std::string m_testString;
 };

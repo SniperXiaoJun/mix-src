@@ -9,6 +9,9 @@
 #define _KMS_CAPI_H
 
 #include "o_all_type_def.h"
+#include <Windows.h>
+#include "SKFInterface.h"
+#include "SKFError.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -16,6 +19,9 @@ extern "C"
 #endif
 	// 设置初始化PIN
 	unsigned int CAPI_KEY_SetPin(char * pszKeyOn,int ulKeyTarget, char * pszPINAdmin,char * pszPINUser);
+
+	// 解锁用户密码
+	unsigned int CAPI_KEY_UnlockPin(char * pszKeyOn,int ulKeyTarget, char * pszPINAdmin,char * pszPINUser, unsigned int * pulRetry);
 	// 设置Key类型
 	unsigned int CAPI_KEY_SetMeta(char * pszKeyOn, int ulKeyTarget,OPT_ST_USB_META * pMeta, char * pszPIN, unsigned int * pulRetry);
 	// 生成密钥对
@@ -33,15 +39,18 @@ extern "C"
 	// 检测目标Key是否存在
 	unsigned int CAPI_KEY_CheckOnOff(char * pszKeyOn,int ulKeyTarget, OPT_ST_USB_META * pstMeta);
 	// 解锁Key
-	unsigned int CAPI_KEY_Unlock(char * pszKeyOn,int ulKeyTarget, OPT_ST_USB_META * pstMeta,char * pszPIN,unsigned int * pulRetry);
+	unsigned int CAPI_KEY_UnlockWeb(char * pszKeyOn,int ulKeyTarget, OPT_ST_USB_META * pstMeta,char * pszPIN,unsigned int * pulRetry);
 	// 检测目标Key的安全状态（解决是否 要再次输入密码）
 	unsigned int CAPI_KEY_SecureState(char * pszKeyOn,int ulKeyTarget, OPT_ST_USB_META * pstMeta);
+	// 获取设备信息
+	unsigned int CAPI_KEY_GetInfo(/*IN OUT*/char * pszKeyOn, int ulKeyTarget,DEVINFO * pInfo);
 
+	// 删除所有应用
+	unsigned int CAPI_KEY_ClearApp(/*IN OUT*/char * pszKeyOn, int ulKeyTarget);
 
 	unsigned int CAPI_KEY_SetStr(char * strIN);
 
 	unsigned int CAPI_KEY_GetStr(char * strOut);
-
 
 #ifdef __cplusplus
 }

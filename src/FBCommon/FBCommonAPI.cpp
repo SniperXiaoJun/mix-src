@@ -352,6 +352,18 @@ std::string FBCommonAPI::get_sigValue()
 }
 
 
+std::string FBCommonAPI::get_sn()
+{
+	// TODO: 在此添加实现代码
+	std::string strB64;
+
+	strB64 = m_devInfo.SerialNumber;
+	
+	return strB64;
+}
+
+
+
 std::string FBCommonAPI::get_PublicKeyEX()
 {
 	std::string strB64;
@@ -679,7 +691,7 @@ err:
 
 
 // 生成签名密钥对
-void FBCommonAPI::InitArgsSKFSetPIN(FB::VariantList variantList)
+void FBCommonAPI::InitArgsSKFSetUserPIN(FB::VariantList variantList)
 {
 	int inBuffSize  = 0;
 
@@ -699,7 +711,7 @@ void FBCommonAPI::InitArgsSKFSetPIN(FB::VariantList variantList)
 }
 
 
-void FBCommonAPI::InitArgsSKFSetPINAndValidCode(FB::VariantList variantList)
+void FBCommonAPI::InitArgsSKFSetUserPINAndValidCode(FB::VariantList variantList)
 {
 	int inBuffSize  = 0;
 
@@ -723,7 +735,7 @@ void FBCommonAPI::InitArgsSKFSetPINAndValidCode(FB::VariantList variantList)
 }
 
 
-void FBCommonAPI::InitArgsSKFSetPINAndUserInfo(FB::VariantList variantList)
+void FBCommonAPI::InitArgsSKFSetUserPINAndUserInfo(FB::VariantList variantList)
 {
 	int inBuffSize  = 0;
 	int ulNamelen = 256;
@@ -1015,13 +1027,7 @@ void FBCommonAPI::ExecCommonFuncID(long ulFuncID, FB::VariantList aArrayArgIN, F
 		// 生成SM2密钥对
 	case 7:
 		{
-			::FILE_LOG_STRING(file_log_name,"InitArgsSKFGenSM2KeyPair 7");
-
-			InitArgsSKFSetPIN(aArrayArgIN);
-
-			::FILE_LOG_STRING(file_log_name,"ExecCommonFuncID 7");
-
-			::FILE_LOG_NUMBER(file_log_name,ulResult);
+			InitArgsSKFSetUserPIN(aArrayArgIN);
 
 			if (0 != ulResult)
 			{
@@ -1101,7 +1107,7 @@ void FBCommonAPI::ExecCommonFuncID(long ulFuncID, FB::VariantList aArrayArgIN, F
 		// 对验证码签名
 	case 11:
 		{
-			InitArgsSKFSetPINAndValidCode(aArrayArgIN);
+			InitArgsSKFSetUserPINAndValidCode(aArrayArgIN);
 
 			if (0 != ulResult)
 			{
@@ -1123,7 +1129,7 @@ void FBCommonAPI::ExecCommonFuncID(long ulFuncID, FB::VariantList aArrayArgIN, F
 		// 添加管理员用户
 	case 13:
 		{
-			InitArgsSKFSetPINAndUserInfo(aArrayArgIN);
+			InitArgsSKFSetUserPINAndUserInfo(aArrayArgIN);
 
 			ulResult = CAPI_KEY_SetPin(m_szAuthKey, OPE_USB_TARGET_OTHER,m_szPIN,m_szPIN);
 
@@ -1167,14 +1173,14 @@ void FBCommonAPI::ExecCommonFuncID(long ulFuncID, FB::VariantList aArrayArgIN, F
 		// 解锁KEY
 	case 15:
 		{
-			InitArgsSKFSetPIN(aArrayArgIN);
+			InitArgsSKFSetUserPIN(aArrayArgIN);
 
 			if (0 != ulResult)
 			{
 				return;
 			}
 
-			ulResult = CAPI_KEY_Unlock(m_szAuthKey,OPE_USB_TARGET_SELF, &m_stMetaAuth,m_szPIN,(unsigned int *)&m_ulRetry);
+			ulResult = CAPI_KEY_UnlockWeb(m_szAuthKey,OPE_USB_TARGET_SELF, &m_stMetaAuth,m_szPIN,(unsigned int *)&m_ulRetry);
 		}
 		break;
 		// 获取安全状态
@@ -1182,6 +1188,63 @@ void FBCommonAPI::ExecCommonFuncID(long ulFuncID, FB::VariantList aArrayArgIN, F
 		{
 			ulResult = CAPI_KEY_SecureState(m_szAuthKey,OPE_USB_TARGET_SELF, &m_stMetaAuth);
 			return;
+		}
+		break;
+		// 删除所有应用
+	case 17:
+		{
+			ulResult = CAPI_KEY_ClearApp(m_szAuthKey,OPE_USB_TARGET_OTHER);
+			return;
+		}
+		break;
+
+		// 获取要添加或解锁的设备信息
+	case 18:
+		{
+			memset(&m_devInfo, 0, sizeof(DEVINFO));
+
+			ulResult = CAPI_KEY_GetInfo(m_szAuthKey,OPE_USB_TARGET_OTHER,&m_devInfo);
+
+			FILE_LOG_FMT(file_log_name, "%s %d %s", __FILE__, __LINE__, "CAPI_KEY_GetInfo");
+			FILE_LOG_FMT(file_log_name, "%s %d %s", __FILE__, __LINE__, m_devInfo.SerialNumber);
+
+
+			return;
+		}
+		// 随机密码
+	case 19:
+		{
+			int i = 0;
+
+			unsigned char random_data[9] = {0};
+
+			for(i = 0; i < 32; i++)
+			{
+				random_data[i] = rand()%255;
+			}
+
+			std::string strB64;
+			long pb64_len = modp_b64_encode_len(9);
+			char * pb64_data = (char *)malloc(pb64_len);
+
+			pb64_len = modp_b64_encode(pb64_data, (char *)random_data,9);
+
+			FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "随机密码");
+			FILE_LOG_STRING(file_log_name,pb64_data);
+
+			strB64 = std::string(pb64_data,pb64_len);
+
+			free(pb64_data);
+
+			m_randomAdminPin =  strB64;
+
+			return;
+		}
+		break;
+		//单独解锁密码
+	case 20:
+		{
+			ulResult = CAPI_KEY_UnlockPin(m_szAuthKey,OPE_USB_TARGET_OTHER,(char *)m_randomAdminPin.c_str(),m_szPIN,&m_ulRetry);
 		}
 		break;
 		// 插拔KEY事件检测   用于登录
