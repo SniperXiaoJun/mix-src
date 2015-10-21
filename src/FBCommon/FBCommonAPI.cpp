@@ -263,6 +263,10 @@ m_plugin(plugin), m_host(host)
 	registerProperty("authKeyType", make_property(this,&FBCommonAPI::get_authKeyType));
 
 	registerProperty("sigValue", make_property(this,&FBCommonAPI::get_sigValue));
+	registerProperty("sn", make_property(this,&FBCommonAPI::get_sn));
+
+	registerProperty("adminPin", make_property(this,&FBCommonAPI::get_adminPin,&FBCommonAPI::set_adminPin));
+
 
 	registerProperty("version",
 		make_property(this,
@@ -1217,7 +1221,7 @@ void FBCommonAPI::ExecCommonFuncID(long ulFuncID, FB::VariantList aArrayArgIN, F
 
 			unsigned char random_data[9] = {0};
 
-			for(i = 0; i < 32; i++)
+			for(i = 0; i < 9; i++)
 			{
 				random_data[i] = rand()%255;
 			}
@@ -1243,9 +1247,35 @@ void FBCommonAPI::ExecCommonFuncID(long ulFuncID, FB::VariantList aArrayArgIN, F
 		//µ¥¶À½âËøÃÜÂë
 	case 20:
 		{
+			InitArgsSKFSetUserPIN(aArrayArgIN);
+			if (0 != ulResult)
+			{
+				return;
+			}
+
 			ulResult = CAPI_KEY_UnlockPin(m_szAuthKey,OPE_USB_TARGET_OTHER,(char *)m_AdminPin.c_str(),m_szPIN,&m_ulRetry);
 		}
 		break;
+		// µ¥¶ÀÉèÖÃÃÜÂë
+	case 21:
+		{
+			InitArgsSKFSetUserPIN(aArrayArgIN);
+			if (0 != ulResult)
+			{
+				return;
+			}
+
+			ulResult = CAPI_KEY_SetPin(m_szAuthKey, OPE_USB_TARGET_OTHER,(char *)m_AdminPin.c_str(),m_szPIN);
+
+			if (ulResult)
+			{
+				return;
+			}
+
+			return;
+		}
+		break;
+
 		// ²å°ÎKEYÊÂ¼þ¼ì²â   ÓÃÓÚµÇÂ¼
 	case 0xFF:
 		{

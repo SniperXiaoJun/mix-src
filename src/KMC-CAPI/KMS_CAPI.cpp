@@ -1894,7 +1894,7 @@ unsigned int CAPI_KEY_ClearApp(/*IN OUT*/char * pszKeyOn, int ulKeyTarget)
 	HANDLE hAppSKF = NULL;
 
 	ULONG ulDevNameLists = BUFFER_LEN_1K;
-	ULONG ulAppNameLists = 0;
+	ULONG ulAppNameLists = BUFFER_LEN_1K;
 
 	int ulKeyCount = 0;
 
@@ -1953,6 +1953,8 @@ unsigned int CAPI_KEY_ClearApp(/*IN OUT*/char * pszKeyOn, int ulKeyTarget)
 	FILE_LOG_NUMBER(file_log_name,(long)ulRet);
 
 	ulRet = CAPI_KEY_DevAuth(hDevSKF);
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "CAPI_KEY_DevAuth");
+	FILE_LOG_NUMBER(file_log_name,(long)ulRet);
 	if(ulRet)
 	{
 		goto err;
@@ -1960,6 +1962,8 @@ unsigned int CAPI_KEY_ClearApp(/*IN OUT*/char * pszKeyOn, int ulKeyTarget)
 
 	// 枚举应用
 	ulRet = SKF_EnumApplication(hDevSKF,szAppNameLists, &ulAppNameLists);
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "SKF_EnumApplication");
+	FILE_LOG_NUMBER(file_log_name,(long)ulRet);
 
 	// 删除所有应用
 	{
@@ -1967,13 +1971,18 @@ unsigned int CAPI_KEY_ClearApp(/*IN OUT*/char * pszKeyOn, int ulKeyTarget)
 
 		for (ptr = szAppNameLists;*ptr;)
 		{
-			ptr += strlen(ptr);
-			ptr++;
 			ulRet = SKF_DeleteApplication(hDevSKF, ptr);//删除应用
+			FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "SKF_DeleteApplication");
+			FILE_LOG_NUMBER(file_log_name,(long)ulRet);
 			if(ulRet)
 			{
 				goto err;
 			}
+
+			// 移动到下一个应用
+			ptr += strlen(ptr);
+			ptr++;
+
 		}
 	}
 	
@@ -1999,10 +2008,8 @@ unsigned int CAPI_KEY_GetInfo(/*IN OUT*/char * pszKeyOn, int ulKeyTarget,DEVINFO
 	unsigned long ulRet;
 
 	char szDevNameLists[BUFFER_LEN_1K] = {0};
-	char szAppNameLists[BUFFER_LEN_1K] = {0};
 
 	HANDLE hDevSKF = NULL;
-	HANDLE hAppSKF = NULL;
 
 	DEVINFO devInfo = {0};
 
@@ -2080,11 +2087,6 @@ unsigned int CAPI_KEY_GetInfo(/*IN OUT*/char * pszKeyOn, int ulKeyTarget,DEVINFO
 	memcpy(pInfo,&devInfo,sizeof(DEVINFO));
 
 err:
-
-	if (hAppSKF)
-	{
-		SKF_CloseApplication(hAppSKF);
-	}
 
 	if (hDevSKF)
 	{
