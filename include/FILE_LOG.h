@@ -10,7 +10,7 @@
 
 #include "common.h"
 
-#define FILE_LOG_TO_FILE 1
+#define FILE_LOG_TO_FILE 0
 
 #ifdef _WINDOWS
 
