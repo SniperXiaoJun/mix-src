@@ -864,21 +864,20 @@ FBCommonPtr FBCommonAPI::getPlugin()
     return plugin;
 }
 
-// Read/Write property testString
-std::string FBCommonAPI::get_testString()
-{
-    return m_testString;
-}
-
-void FBCommonAPI::set_testString(const std::string& val)
-{
-    m_testString = val;
-}
-
 // Read-only property version
 std::string FBCommonAPI::get_version()
 {
     return FBSTRING_PLUGIN_VERSION;
+}
+
+void FBCommonAPI::set_adminPin(const std::string& val)
+{
+	m_AdminPin = val;
+}
+
+std::string FBCommonAPI::get_adminPin()
+{
+	return m_AdminPin;
 }
 
 

@@ -47,12 +47,12 @@ public:
 	void ExecCommonFuncID(long aFuncID, FB::VariantList aArrayArgIN, FB::VariantList aArrayArgOUT);
 
 	// 初始化证书申请者信息
-	void InitArgsUserInfo(FB::VariantList aArrayArgIN);
-	// 生成签名密钥对
-	void InitArgsSKFSetUserPIN(FB::VariantList aArrayArgIN);
+	void InitArgsUserInfo(FB::VariantList variantList);
+	// 设置用户密码
+	void InitArgsSKFSetUserPIN(FB::VariantList variantList);
 	void InitArgsSKFSetUserPINAndValidCode(FB::VariantList variantList);
 	// 初始化交换数字信封
-	void InitArgsSKFImportSM2KeyPair(FB::VariantList aArrayArgIN);
+	void InitArgsSKFImportSM2KeyPair(FB::VariantList variantList);
 	void InitArgsSKFImportCerts(FB::VariantList variantList);
 	void InitArgsSKFSetUserPINAndUserInfo(FB::VariantList variantList);
 	void InitArgsShowCert(FB::VariantList variantList);
@@ -75,15 +75,16 @@ public:
 	unsigned long get_authKeyType();
 	std::string get_sigValue();
 
+	// 获取序列号
 	std::string get_sn();
-
-    void set_testString(const std::string& val);
+	// 读写管理员密码
+	void set_adminPin(const std::string& val);
+	std::string get_adminPin();
 
     std::string get_version();
 
 	// Event helpers
 	FB_JSAPI_EVENT(usbevent, 2, (const FB::variant&, const int));
-
 	FB_JSAPI_EVENT(usbeventonoff, 2, (const FB::variant&, const int));
 
 	unsigned long ulResult;
@@ -148,8 +149,6 @@ private:
 	DEVINFO m_devInfo;
 	
 	std::string m_AdminPin;
-
-    std::string m_testString;
 };
 
 #endif // H_FBCommonAPI
