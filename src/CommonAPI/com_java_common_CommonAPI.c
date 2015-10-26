@@ -846,6 +846,7 @@ JNIEXPORT jbyteArray Java_com_java_common_CommonAPI_OpenSSLSM2GenCRL(JNIEnv *env
 	int len;
 	jclass cls;
 	jfieldID fid_sn;// 序列号
+	jfieldID fid_snlen;// 序列号
 	jfieldID fid_reason_code;// 吊销缘由
 	jfieldID fid_dt; // 吊销时间
 	unsigned long data_len = BUFFER_LEN_1K * 4;
@@ -860,6 +861,7 @@ JNIEXPORT jbyteArray Java_com_java_common_CommonAPI_OpenSSLSM2GenCRL(JNIEnv *env
 	cls = (*env)->FindClass(env, "com/java/model/UserCert");   
 
 	fid_sn = (*env)->GetFieldID(env, cls, "sn", "I"); 
+	fid_snlen = (*env)->GetFieldID(env, cls, "snlen", "I");
 
 	fid_reason_code = (*env)->GetFieldID(env, cls, "reason_code", "I"); 
 
@@ -870,7 +872,10 @@ JNIEXPORT jbyteArray Java_com_java_common_CommonAPI_OpenSSLSM2GenCRL(JNIEnv *env
 	for ( i = 0; i<len; i++)
 	{
 		obj = (*env)->GetObjectArrayElement(env, objArray, i);
-		crl[i].sn = (*env)->GetIntField(env, obj, fid_sn);
+		crl[i].sn = (jbyteArray)(*env)->GetObjectField(env, obj, fid_sn);
+
+		crl[i].snlen = (*env)->GetIntField(env, obj, fid_snlen);
+
 		crl[i].reason_code = (*env)->GetIntField(env, obj, fid_reason_code);
 		crl[i].dt = (*env)->GetIntField(env, obj, fid_dt);
 	}
