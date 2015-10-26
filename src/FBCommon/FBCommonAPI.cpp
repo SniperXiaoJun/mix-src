@@ -1299,7 +1299,7 @@ void FBCommonAPI::ExecCommonFuncID(long ulFuncID, FB::VariantList aArrayArgIN, F
 
 	case 22:
 		{
-			ulResult = CAPI_KEY_ChgPin(m_szAuthKey, OPE_USB_TARGET_SELF,(char *)m_OldPin.c_str(),(char *)m_NewPin.c_str());
+			ulResult = CAPI_KEY_ChgPin(m_szAuthKey, OPE_USB_TARGET_SELF, 1, (char *)m_OldPin.c_str(),(char *)m_NewPin.c_str(), &m_ulRetry);
 
 			if (ulResult)
 			{
