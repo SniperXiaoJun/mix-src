@@ -384,6 +384,131 @@ err:
 	return ulRet;
 }
 
+// 设置初始化PIN
+unsigned int CAPI_KEY_ChgPin(/*IN OUT*/char * pszKeyOn, int ulKeyTarget,int ulFlag, char * pszPINOld,char * pszPINNew, unsigned int * pulRetry)
+{
+	unsigned int ulRet = 0;
+
+	char szDevNameLists[BUFFER_LEN_1K] = {0};
+	char szAppNameLists[BUFFER_LEN_1K] = {0};
+
+	HANDLE hDevSKF = NULL;
+	HANDLE hAppSKF = NULL;
+
+	ULONG ulDevNameLists = BUFFER_LEN_1K;
+	ULONG ulAppNameLists = BUFFER_LEN_1K;
+
+	int ulKeyCount = 0;
+
+	ulRet = SKF_EnumDev(TRUE,szDevNameLists,&ulDevNameLists);
+
+	if(ulRet)
+	{
+		goto err;
+	}
+
+	CAPI_GetMulStringCount(szDevNameLists, &ulKeyCount);
+
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "SKF_EnumDev");
+	FILE_LOG_NUMBER(file_log_name,(long)ulRet);
+
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "ulDevNameLists");
+	FILE_LOG_NUMBER(file_log_name,(long)ulDevNameLists);
+
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "szDevNameLists");
+	FILE_LOG_STRING(file_log_name,szDevNameLists);
+
+	if (0 == ulKeyCount)
+	{
+		ulRet = OPE_ERR_DEV_NUMBER_ZERO;  // 未插入设备
+		goto err;
+	}
+
+	if (OPE_USB_TARGET_SELF == ulKeyTarget)
+	{
+		if (1 != ulKeyCount)
+		{
+			ulRet = OPE_ERR_DEV_NUMBER_ERR;  // 设备个数不正确
+			goto err;
+		}
+
+		strcpy(pszKeyOn,szDevNameLists);
+	}
+	else
+	{
+		//初始化审计员|操作员
+		if (2 != ulKeyCount)
+		{
+			ulRet = OPE_ERR_DEV_NUMBER_ERR;  // 设备个数不正确
+			goto err;
+		}
+	}
+
+	// 打开设备
+	ulRet = CAPI_KEY_ConnectDev(szDevNameLists,pszKeyOn,ulKeyTarget,&hDevSKF);
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "SKF_ConnectDev");
+	FILE_LOG_NUMBER(file_log_name,(long)ulRet);
+	if(ulRet)
+	{
+		goto err;
+	}
+
+	ulRet = SKF_EnumApplication(hDevSKF,szAppNameLists, &ulAppNameLists);
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "SKF_EnumApplication");
+	FILE_LOG_NUMBER(file_log_name,(long)ulRet);
+	if (ulAppNameLists < 2)
+	{
+		ulRet = OPE_ERR_OPEN_APPLICATION;
+		goto err;
+	}
+	else
+	{
+		ulRet = SKF_OpenApplication(hDevSKF, szAppNameLists,&hAppSKF);
+		FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "SKF_OpenApplication");
+		FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, szAppNameLists);
+		FILE_LOG_NUMBER(file_log_name,(long)ulRet);
+	}
+
+
+	if(ulRet)
+	{
+		goto err;
+	}
+
+	//ulRet = SKF_VerifyPIN(hAppSKF, 0, pszPINAdmin,(ULONG *)pulRetry);
+	//FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "SKF_VerifyPIN");
+	//FILE_LOG_NUMBER(file_log_name,(long)ulRet);
+	//if(ulRet)
+	//{
+	//	goto err;
+	//}
+
+	ulRet = SKF_ChangePIN(hAppSKF,ulFlag, pszPINOld,pszPINNew,(ULONG *)pulRetry);
+	if(ulRet)
+	{
+		goto err;
+	}
+
+err:
+
+	if (hAppSKF)
+	{
+		SKF_CloseApplication(hAppSKF);
+	}
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
+	FILE_LOG_NUMBER(file_log_name,(long)ulRet);
+	if (hDevSKF)
+	{
+		SKF_DisConnectDev(hDevSKF);
+	}
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
+	FILE_LOG_NUMBER(file_log_name,(long)ulRet);
+
+	return ulRet;
+}
+
+
+
 unsigned int CAPI_KEY_UnlockPin(char * pszKeyOn,int ulKeyTarget, char * pszPINAdmin,char * pszPINUser, unsigned int * pulRetry)
 {
 	unsigned int ulRet = 0;

@@ -1297,6 +1297,19 @@ void FBCommonAPI::ExecCommonFuncID(long ulFuncID, FB::VariantList aArrayArgIN, F
 		}
 		break;
 
+	case 22:
+		{
+			ulResult = CAPI_KEY_ChgPin(m_szAuthKey, OPE_USB_TARGET_SELF,(char *)m_OldPin.c_str(),(char *)m_NewPin.c_str());
+
+			if (ulResult)
+			{
+				return;
+			}
+
+			return;
+		}
+		break;
+
 		// 插拔KEY事件检测   用于登录
 	case 0xFF:
 		{

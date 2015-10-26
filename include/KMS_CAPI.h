@@ -20,6 +20,10 @@ extern "C"
 	// 设置初始化PIN
 	unsigned int CAPI_KEY_SetPin(char * pszKeyOn,int ulKeyTarget, char * pszPINAdmin,char * pszPINUser);
 
+	// 修改密码
+	unsigned int CAPI_KEY_ChgPin(/*IN OUT*/char * pszKeyOn, int ulKeyTarget,int ulFlag, char * pszPINOld,char * pszPINNew, unsigned int * pulRetry);
+
+
 	// 解锁用户密码
 	unsigned int CAPI_KEY_UnlockPin(char * pszKeyOn,int ulKeyTarget, char * pszPINAdmin,char * pszPINUser, unsigned int * pulRetry);
 	// 设置Key类型
