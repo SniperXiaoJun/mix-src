@@ -2394,6 +2394,7 @@ unsigned long OpenSSL_SM2GenCRL(const OPST_CRL * pstCRLList, unsigned long ulCRL
 	ASN1_TIME * prevtm[COUNT_1K] = {NULL};
 	ASN1_ENUMERATED *rtmp[COUNT_1K] = {NULL};
 	ASN1_INTEGER * tmpser[COUNT_1K] = {NULL};
+	BIGNUM * bnSN = NULL;
 
 	crl = X509_CRL_new();
 
@@ -2404,6 +2405,11 @@ unsigned long OpenSSL_SM2GenCRL(const OPST_CRL * pstCRLList, unsigned long ulCRL
 
 	x509 = d2i_X509(NULL ,&in_ptr,ulX509CertLen );
 	if (NULL == x509)
+	{
+		goto err;
+	}
+
+	if(NULL == (bnSN = BN_new()))
 	{
 		goto err;
 	}
@@ -2461,8 +2467,12 @@ unsigned long OpenSSL_SM2GenCRL(const OPST_CRL * pstCRLList, unsigned long ulCRL
 			goto err;
 		}
 
-		// ���к�
-		ASN1_INTEGER_set(tmpser[i],pstCRLList[i].sn);
+		// 设置序列号
+
+		BN_bin2bn(pstCRLList[i].sn, pstCRLList[i].snlen, bnSN);
+		BN_to_ASN1_INTEGER(bnSN,tmpser[i]);
+
+		//ASN1_INTEGER_set(tmpser[i],pstCRLList[i].sn);
 
 		X509_REVOKED_set_serialNumber(r[i], tmpser[i]);
 
@@ -2494,6 +2504,12 @@ err:
 	if (x509)
 	{
 		X509_free(x509);
+	}
+
+
+	if (bnSN)
+	{
+		BN_free(bnSN);
 	}
 
 	for (i = 0; i < ulCRLListSize; i++) 
