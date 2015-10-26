@@ -860,7 +860,7 @@ JNIEXPORT jbyteArray Java_com_java_common_CommonAPI_OpenSSLSM2GenCRL(JNIEnv *env
 
 	cls = (*env)->FindClass(env, "com/java/model/UserCert");   
 
-	fid_sn = (*env)->GetFieldID(env, cls, "sn", "I"); 
+	fid_sn = (*env)->GetFieldID(env, cls, "sn", "[B"); 
 	fid_snlen = (*env)->GetFieldID(env, cls, "snlen", "I");
 
 	fid_reason_code = (*env)->GetFieldID(env, cls, "reason_code", "I"); 
@@ -872,7 +872,7 @@ JNIEXPORT jbyteArray Java_com_java_common_CommonAPI_OpenSSLSM2GenCRL(JNIEnv *env
 	for ( i = 0; i<len; i++)
 	{
 		obj = (*env)->GetObjectArrayElement(env, objArray, i);
-		crl[i].sn = (jbyteArray)(*env)->GetObjectField(env, obj, fid_sn);
+		crl[i].sn =  (*env)->GetByteArrayElements(env,(jbyteArray)(*env)->GetObjectField(env, obj, fid_sn),0);
 
 		crl[i].snlen = (*env)->GetIntField(env, obj, fid_snlen);
 
