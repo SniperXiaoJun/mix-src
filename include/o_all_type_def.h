@@ -273,7 +273,8 @@ extern "C" {
 
 	typedef struct _OPST_CRL
 	{
-		unsigned long sn;		// 序列号
+		unsigned char * sn;		// 序列号
+		unsigned char snlen;
 		unsigned int reason_code;	// 原由
 		unsigned long dt;				// 日期时间
 	}OPST_CRL;
