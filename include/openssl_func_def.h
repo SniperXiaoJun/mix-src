@@ -79,7 +79,8 @@ extern "C" {
 	失败：
 	功能描述:	生成根证书
 	*/
-	COMMON_API unsigned long OpenSSL_SM2GenRootCert(const unsigned char * pbCSR,unsigned long ulCSRLen, unsigned long ulSerialNumber,
+	COMMON_API unsigned long OpenSSL_SM2GenRootCert(const unsigned char * pbCSR,unsigned long ulCSRLen, 
+		unsigned char * pbSerialNumber,unsigned long ulSerialNumberLen,
 		unsigned long ulNotBefore, unsigned long ulNotAfter, 
 		unsigned char * pbX509Cert, unsigned long * pulX509CertLen);
 
@@ -99,7 +100,7 @@ extern "C" {
 	*/
 	COMMON_API unsigned long OpenSSL_SM2GenCert(const unsigned char * pbCSR,unsigned long ulCSRLen, 
 		const unsigned char * pbX509CACert, unsigned long ulX509CACertLen, 
-		unsigned long ulSerialNumber,
+		unsigned char * pbSerialNumber,unsigned long ulSerialNumberLen,
 		unsigned long ulNotBefore, unsigned long ulNotAfter, unsigned long ulSignFlag,
 		unsigned char * pbX509Cert, unsigned long * pulX509CertLen);
 	
@@ -121,7 +122,7 @@ extern "C" {
 		const unsigned char * pbPublicKeyX, unsigned long ulPublicKeyXLen, 
 		const unsigned char * pbPublicKeyY, unsigned long ulPublicKeyYLen,
 		const unsigned char * pbX509CACert, unsigned long ulX509CACertLen, 
-		unsigned long ulSerialNumber,
+		unsigned char * pbSerialNumber,unsigned long ulSerialNumberLen,
 		unsigned long ulNotBefore, unsigned long ulNotAfter, unsigned long ulSignFlag,
 		unsigned char * pbX509Cert, unsigned long * pulX509CertLen);
 
