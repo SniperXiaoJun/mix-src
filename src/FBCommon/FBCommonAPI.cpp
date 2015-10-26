@@ -267,6 +267,9 @@ m_plugin(plugin), m_host(host)
 
 	registerProperty("adminPin", make_property(this,&FBCommonAPI::get_adminPin,&FBCommonAPI::set_adminPin));
 
+	registerProperty("oldPin", make_property(this,&FBCommonAPI::get_oldPin,&FBCommonAPI::set_oldPin));
+	registerProperty("newPin", make_property(this,&FBCommonAPI::get_newPin,&FBCommonAPI::set_newPin));
+
 
 	registerProperty("version",
 		make_property(this,
@@ -884,7 +887,25 @@ std::string FBCommonAPI::get_adminPin()
 	return m_AdminPin;
 }
 
+void FBCommonAPI::set_oldPin(const std::string& val)
+{
+	m_OldPin = val;
+}
 
+std::string FBCommonAPI::get_oldPin()
+{
+	return m_OldPin;
+}
+
+void FBCommonAPI::set_newPin(const std::string& val)
+{
+	m_NewPin = val;
+}
+
+std::string FBCommonAPI::get_newPin()
+{
+	return m_NewPin;
+}
 
 void GetArrayLength(FB::VariantList& variantList, int* pLength)
 {

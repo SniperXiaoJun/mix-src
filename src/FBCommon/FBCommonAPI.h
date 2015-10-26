@@ -81,6 +81,12 @@ public:
 	void set_adminPin(const std::string& val);
 	std::string get_adminPin();
 
+	void set_oldPin(const std::string& val);
+	void set_newPin(const std::string& val);
+	std::string get_newPin();
+	std::string get_oldPin();
+
+
     std::string get_version();
 
 	// Event helpers
@@ -149,6 +155,8 @@ private:
 	DEVINFO m_devInfo;
 	
 	std::string m_AdminPin;
+	std::string m_OldPin;
+	std::string m_NewPin;
 };
 
 #endif // H_FBCommonAPI
