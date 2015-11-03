@@ -10,8 +10,7 @@
 // 最多支持设备个数
 #define MAX_DEV_NUM	16
 #define MAX_CON_NUM 1024    // 每个设备最大容器个数
-// 加密蓝牙耳机容器
-#define  SDKEY_CONTAINER_NAME	"win-trust-ebt"
+
 // SM2私钥长度
 #define SM2_BYTES_LEN 32
 #define SM2_BITS_LEN 256
@@ -349,7 +348,7 @@ extern "C" {
 	typedef enum _OPE_USB_META_USE_TYPE
 	{
 		OPE_USB_META_USE_TYPE_AUTH = 0 , //认证登录KEY
-		OPE_USB_META_USE_TYPE_CERT = 1 , //证书KEY（蓝牙耳机）
+		OPE_USB_META_USE_TYPE_CERT = 1 , //证书KEY
 	}OPE_USB_META_USE_TYPE;
 
 	// USB使用类型
