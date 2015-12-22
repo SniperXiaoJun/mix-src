@@ -420,6 +420,14 @@ extern "C" {
 		const unsigned char * pbX509Cert, unsigned long ulX509CertLen,
 		unsigned char * pbPublicKey, unsigned long * pulPublicKeyLen);
 
+
+	/*
+	获取证书序列号
+	*/
+	COMMON_API unsigned long OpenSSL_CertGetSN(
+		const unsigned char * pbX509Cert, unsigned long ulX509CertLen,
+		unsigned char * pbSN, unsigned long * pulSNLen);
+
 	/*
 	功能名称:	获取证书主题项
 	函数名称:	OpenSSL_CertGetSubjectItem
