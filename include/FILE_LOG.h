@@ -12,7 +12,7 @@
 
 #define FILE_LOG_TO_FILE 0
 
-#ifdef _WINDOWS
+#if defined(_WINDOWS) || defined(WIN32)
 
 #define file_log_name "D:\\LOG.TXT"
 #define file_path "D:/"
