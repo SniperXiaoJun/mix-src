@@ -24,7 +24,9 @@ void FILE_READ(const char * dir, const char * fileName, unsigned char * byte, un
 
 	if (file)
 	{
-		* length = fread(byte, 1, BUFFER_LEN_1K * 4, file);
+		* length = fread(byte, 1,BUFFER_LEN_1K * 4, file);
+
+		fflush(file);
 
 		fclose(file);
 	}
@@ -44,10 +46,96 @@ void FILE_WRITE(const char * dir, const char * fileName, const unsigned char * b
 	{
 		fwrite(byte, 1, length, file);
 
+		fflush(file);
+
 		fclose(file);
 	}
 }
 
+void FILE_WRITE_STRING(const char * fileName, const char * cstring)
+{
+	FILE * file = fopen(fileName, "a+");
+
+	if (file)
+	{
+		fwrite(cstring, 1, strlen(cstring), file);
+		fwrite("\n",1,1,file);
+
+		fclose(file);
+	}
+}
+
+void FILE_WRITE_HEX(const char * fileName, const unsigned char * byte, unsigned long length)
+{
+	long i = 0;
+	FILE * file = fopen(fileName, "a+");
+
+	//fwrite(byte, 1, length, file);
+	//fwrite("\n",1,1,file);
+
+	long dataLen = length * 2 + 1;
+
+	char * dataValue = (char *)malloc(dataLen); 
+
+	if (file)
+	{
+		for(i = 0; i < length; i++)
+		{
+			sprintf(dataValue + i * 2, "%02x", byte[i]);
+		}
+
+		fwrite(dataValue, 1, dataLen, file);
+		fwrite("\n",1,1,file);
+
+		free(dataValue);
+
+		fclose(file);
+	}
+}
+
+void FILE_WRITE_NUMBER(const char * fileName, long number)
+{
+	FILE * file = fopen(fileName, "a+");
+
+	char data[20] = {0};
+
+	if (file)
+	{
+		sprintf(data, "%08x", number);
+
+		fwrite(data, 1, strlen(data), file);
+		fwrite("\n",1,1,file);
+
+		fclose(file);
+	}
+}
+
+void FILE_WRITE_BYTE(const char * fileName, const unsigned char * byte, unsigned long length)
+{
+	FILE * file = fopen(fileName, "wb");
+
+	if (file)
+	{
+		fwrite(byte,1,length, file);
+
+		fclose(file);
+	}
+}
+
+void FILE_WRITE_FMT(const char * fileName,const char *format,...)
+{
+	FILE * file = fopen(fileName, "a+");
+	va_list arglist;
+
+	if (file)
+	{
+		va_start(arglist, format);
+		vfprintf(file,format,arglist);
+		fwrite("\n",1,1,file);
+
+		fclose(file);
+	}
+}
 
 
 #if FILE_LOG_TO_FILE
