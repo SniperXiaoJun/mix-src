@@ -51,106 +51,19 @@
 						$('#btn-left')
 								.click(
 										function() {
+											alert(plugin());
+										
 											try{
-												
-												if(1 != plugin().slotCount)
+												if(plugin().signDataWithHashAlg($('#user_data').val(), $('#hash_alg').val()))
 												{
-													alert("数据错误！")
-													return;
+													$('#err_msg').text(plugin().errMsg);
 												}
-												
-												if(2 != plugin().certCount)
+												else
 												{
-													alert("数据错误！")
-													return;
+													$('#publickey_data').val(plugin().publicKeyData);
+													$('#cert_data').val(plugin().certData);
+													$('#sign_data').val(plugin().signData);
 												}
-
-												var params = [];
-
-												params.push({
-													name : "sip_no",
-													value : $('#sip_no').val()
-												});
-
-												params.push({
-													name : "sip_pw",
-													value : $('#sip_pw').val()
-												});
-
-												params.push({
-													name : "user_name",
-													value : $('#user_name').val()
-												});
-												
-												params.push({
-													name : "mobilephone",
-													value : $('#mobilephone').val()
-												});
-												
-												params.push({
-													name : "unit",
-													value : $('#unit').val()
-												});
-												
-												
-												params.push({
-													name : "cert_sign_sn",
-													value : $('#cert_sign_sn').val()
-												});
-												
-												params.push({
-													name : "cert_ex_sn",
-													value : $('#cert_ex_sn').val()
-												});
-												
-												params.push({
-													name : "cert_ex",
-													value : plugin().exCert
-												});
-												
-												params.push({
-													name : "cert_sign",
-													value : plugin().signCert
-												});
-												
-												$
-														.ajax({
-															type : "POST",
-															url : "doiframe_user_cert_import.do",
-															data : params,
-															dataType : 'json',
-															contentType : "application/x-www-form-urlencoded; charset=utf-8",
-
-															success : function(
-																	response) {
-																if (response['success']) {
-																	
-																	 plugin().sipPW = $('#sip_pw').val();
-																	 plugin().sipNO = $('#sip_no').val();
-																	 plugin().sipDomain = $('#sip_domain').val();
-																	 
-																	 plugin().ExecCommonFuncID(4,[],[]);
-																	 
-																	 if(plugin().ulResult)
-																	 {
-																		 alert("写入数据失败!");
-																		 
-																		 return;
-																	 }
-																	 
-																	 $('#err_msg')
-																		.text("证书导入成功！");
-																	window.top.location.href = "iframe_user_cert_import.do";
-																} else {
-																	alert(response['err_msg']);
-																}
-
-															},
-															error : function(msg) {
-																alert(
-																		'证书导入出错!');
-															}
-														});
 											}
 											catch(e)
 											{
