@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>选择证书签名</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<link rel="stylesheet" href="bootstrap.min.css" media="screen">
+
+<script src="jquery.min.js"></script>
+<script src="bootstrap.min.js"></script>
+<script src="bootswatch.js"></script>
+
+<script>
+	$(document)
+			.ready(
+					function() {
+					
+					$('#radioDay1').change(function() {
+        	try{
+        		var today = new Date();
+        		
+			    $('#to').attr("readonly",false)//去除input元素的readonly属性
+			    $('#from').attr("readonly",false)//去除input元素的readonly属性
+          		
+      			$('#to').val(getCurToday(today));
+      			$('#from').val(getYestoday(today));
+        	}
+        	catch(e)
+        	{
+        		alert(e);
+        	}
+        })
+        
+        $('#radioDay2').change(function() {
+        	try{
+        		var today = new Date();
+        		
+			    $('#to').attr("readonly",false)//去除input元素的readonly属性
+			    $('#from').attr("readonly",false)//去除input元素的readonly属性
+
+      			$('#to').val(getCurToday(today));
+      			$('#from').val(getLastMonthYestdy(today));
+        	}
+        	catch(e)
+        	{
+        		alert(e);
+        	}
+
+        })
+						$('#btn-left')
+								.click(
+										function() {
+											try{
+												
+												if(1 != plugin().slotCount)
+												{
+													alert("数据错误！")
+													return;
+												}
+												
+												if(2 != plugin().certCount)
+												{
+													alert("数据错误！")
+													return;
+												}
+
+												var params = [];
+
+												params.push({
+													name : "sip_no",
+													value : $('#sip_no').val()
+												});
+
+												params.push({
+													name : "sip_pw",
+													value : $('#sip_pw').val()
+												});
+
+												params.push({
+													name : "user_name",
+													value : $('#user_name').val()
+												});
+												
+												params.push({
+													name : "mobilephone",
+													value : $('#mobilephone').val()
+												});
+												
+												params.push({
+													name : "unit",
+													value : $('#unit').val()
+												});
+												
+												
+												params.push({
+													name : "cert_sign_sn",
+													value : $('#cert_sign_sn').val()
+												});
+												
+												params.push({
+													name : "cert_ex_sn",
+													value : $('#cert_ex_sn').val()
+												});
+												
+												params.push({
+													name : "cert_ex",
+													value : plugin().exCert
+												});
+												
+												params.push({
+													name : "cert_sign",
+													value : plugin().signCert
+												});
+												
+												$
+														.ajax({
+															type : "POST",
+															url : "doiframe_user_cert_import.do",
+															data : params,
+															dataType : 'json',
+															contentType : "application/x-www-form-urlencoded; charset=utf-8",
+
+															success : function(
+																	response) {
+																if (response['success']) {
+																	
+																	 plugin().sipPW = $('#sip_pw').val();
+																	 plugin().sipNO = $('#sip_no').val();
+																	 plugin().sipDomain = $('#sip_domain').val();
+																	 
+																	 plugin().ExecCommonFuncID(4,[],[]);
+																	 
+																	 if(plugin().ulResult)
+																	 {
+																		 alert("写入数据失败!");
+																		 
+																		 return;
+																	 }
+																	 
+																	 $('#err_msg')
+																		.text("证书导入成功！");
+																	window.top.location.href = "iframe_user_cert_import.do";
+																} else {
+																	alert(response['err_msg']);
+																}
+
+															},
+															error : function(msg) {
+																alert(
+																		'证书导入出错!');
+															}
+														});
+											}
+											catch(e)
+											{
+												alert(e);
+											}
+										});
+
+						$('#btn-right').click(function() {
+							$('#user_data').val('');
+							$('#publickey_data').val('');
+							$('#cert_data').val('');
+							$('#sign_data').val('');
+							$('#err_msg').text('');
+						});
+
+					});
+</script>
+
+</head>
+
+<body>
+
+	<div class="navbar navbar-default navbar-fixed-top">
+		<div class="container">
+			<div class="navbar-header">
+			</div>
+			<div class="navbar-collapse collapse" id="navbar-main">
+				<ul class="nav navbar-nav">
+				</ul>
+				<ul class="nav navbar-nav navbar-left">
+					<li class="active"><a href="">选择证书签名</a></li>
+				</ul>
+			</div>
+		</div>
+	</div>
+
+	<div class="container">
+		<div class="page-header" id="banner">
+			<div class="col-lg-12">
+			</div>
+		</div>
+
+		<form class="form-horizontal">
+			<fieldset>
+				<legend>输入信息</legend>
+				<div class="form-group form-group-sm">
+					<label class="col-lg-2 control-label">原始数据：</label>
+					<div class="col-lg-10">
+						<textarea class="form-control" rows="3" id="user_data" value="hello world" style="margin-top: 0px; margin-bottom: 0px; height: 85px;"></textarea>
+					</div>
+				</div>
+				
+				<div class="form-group">
+				  <label for="hash_alg" class="col-lg-2 control-label">哈希算法</label>
+				  <div class="col-lg-10">
+					<select class="form-control" id="hash_alg">
+					  <option>MD5</option>
+					  <option>SHA1</option>
+					</select>
+				  </div>
+				</div>
+				
+				<div class="form-group">
+					<label for="hash_alg" class="col-lg-2 control-label">证书</label>
+					<div class="col-lg-10">
+						<textarea class="form-control" id="cert_data" style="margin-top: 0px; margin-bottom: 0px; height: 85px;"></textarea>
+					</div>
+				</div>
+				
+				<div class="form-group">
+				  <label for="hash_alg" class="col-lg-2 control-label">公钥</label>
+				  <div class="col-lg-10">
+					<textarea class="form-control" id="publickey_data" style="margin-top: 0px; margin-bottom: 0px; height: 85px;"></textarea>
+				  </div>
+				</div>
+				
+				<div class="form-group">
+				  <label for="hash_alg" class="col-lg-2 control-label">签名值</label>
+				  <div class="col-lg-10">
+					<textarea class="form-control" id="sign_data" style="margin-top: 0px; margin-bottom: 0px; height: 85px;"></textarea>
+				  </div>
+				</div>
+				
+				<div class="form-group form-group-sm">
+					<label class="col-lg-2 control-label"></label>
+					<div class="col-lg-10">
+						<div class="err_msg" id="err_msg"></div>
+					</div>
+				</div>
+				
+				<div class="form-group form-group-sm">
+					<div
+						class="row col-lg-8 col-md-8 col-sm-8 col-xs-8 col-lg-offset-3 col-md-offset-3 col-sm-offset-3 col-xs-offset-3">
+
+						<div class="row">
+							<a href="#"
+								class="col-lg-4 col-md-4 col-sm-4 col-xs-4 btn btn-sm btn-primary"
+								id="btn-left">确定</a> <a href="#"
+								class="col-lg-4 col-md-4 col-sm-4 col-xs-4 col-lg-offset-2 col-md-offset-2 col-sm-offset-2 col-xs-offset-2 btn btn-sm btn-default"
+								id="btn-right">刷新</a>
+						</div>
+					</div>
+				</div>
+
+				<object id="plugin0" type="application/x-fbshahaisignplugin" width="0"
+					height="0"></object>
+			</fieldset>
+		</form>
+	</div>
+</body>
+
+<script>
+	function plugin0() {
+		return document.getElementById('plugin0');
+	}
+	plugin = plugin0;
+</script>
+
+</html>
