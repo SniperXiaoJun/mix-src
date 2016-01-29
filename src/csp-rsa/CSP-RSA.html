@@ -12,47 +12,9 @@
 <script src="bootswatch.js"></script>
 
 <script>
-	$(document)
-			.ready(
-					function() {
-					
-					$('#radioDay1').change(function() {
-        	try{
-        		var today = new Date();
-        		
-			    $('#to').attr("readonly",false)//去除input元素的readonly属性
-			    $('#from').attr("readonly",false)//去除input元素的readonly属性
-          		
-      			$('#to').val(getCurToday(today));
-      			$('#from').val(getYestoday(today));
-        	}
-        	catch(e)
-        	{
-        		alert(e);
-        	}
-        })
-        
-        $('#radioDay2').change(function() {
-        	try{
-        		var today = new Date();
-        		
-			    $('#to').attr("readonly",false)//去除input元素的readonly属性
-			    $('#from').attr("readonly",false)//去除input元素的readonly属性
-
-      			$('#to').val(getCurToday(today));
-      			$('#from').val(getLastMonthYestdy(today));
-        	}
-        	catch(e)
-        	{
-        		alert(e);
-        	}
-
-        })
 						$('#btn-left')
 								.click(
 										function() {
-											alert(plugin());
-										
 											try{
 												if(plugin().signDataWithHashAlg($('#user_data').val(), $('#hash_alg').val()))
 												{
@@ -121,7 +83,10 @@
 				  <div class="col-lg-10">
 					<select class="form-control" id="hash_alg">
 					  <option>MD5</option>
+					  <option>SHA</option>
 					  <option>SHA1</option>
+					  <option>SHA_256</option>
+					  <option>SHA_384</option>
 					</select>
 				  </div>
 				</div>
