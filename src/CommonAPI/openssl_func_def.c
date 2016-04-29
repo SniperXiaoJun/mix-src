@@ -1480,7 +1480,7 @@ unsigned long OpenSSL_SM2GenCert(const unsigned char * pbCSR,unsigned long ulCSR
 	}
 	else
 	{
-		strBaseKeyUsage = "nonRepudiation,keyEncipherment";
+		strBaseKeyUsage = "keyEncipherment,dataEncipherment";
 	}
 
 	if((pktmp=X509_REQ_get_pubkey(req)) == NULL)
@@ -1660,7 +1660,7 @@ unsigned long OpenSSL_SM2GenCertEX(const unsigned char * pbCSR,unsigned long ulC
 	}
 	else
 	{
-		strBaseKeyUsage = "nonRepudiation,keyEncipherment";
+		strBaseKeyUsage = "keyEncipherment,dataEncipherment";
 	}
 
 	// �õ�req�еĹ�Կ
