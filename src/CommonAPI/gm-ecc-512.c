@@ -970,13 +970,13 @@ int tcm_gmecc512_get_message_hash(unsigned char *msg, unsigned int msgLen, unsig
 
 	if(!digest)
 	{
-		*puDigestLen = SM3_DIGEST_LEN;
+		*puDigestLen = SM3_DIGEST_LEN*2;
 		nRet = 0;  // OK
 		goto err;
 	}
-	if(*puDigestLen < SM3_DIGEST_LEN)
+	if(*puDigestLen < SM3_DIGEST_LEN*2)
 	{
-		*puDigestLen = SM3_DIGEST_LEN;
+		*puDigestLen = SM3_DIGEST_LEN*2;
 		nRet = OPE_ERR_NOT_ENOUGH_MEMORY;
 		goto err;
 	}
@@ -992,7 +992,15 @@ int tcm_gmecc512_get_message_hash(unsigned char *msg, unsigned int msgLen, unsig
 	tcm_sch_update(&sm3Ctx, zIDDigest, SM3_DIGEST_LEN);
 	tcm_sch_update(&sm3Ctx, msg, msgLen);
 	tcm_sch_finish(&sm3Ctx, digest);
-	*puDigestLen = SM3_DIGEST_LEN;
+
+	memset(&sm3Ctx,0x00,sizeof(sm3Ctx));
+
+	// twice digest
+	tcm_sch_starts(&sm3Ctx);
+	tcm_sch_update(&sm3Ctx, digest, SM3_DIGEST_LEN);
+	tcm_sch_finish(&sm3Ctx, digest + SM3_DIGEST_LEN);
+	
+	*puDigestLen = SM3_DIGEST_LEN*2;
 
 	return 0;
 err:
