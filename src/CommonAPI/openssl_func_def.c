@@ -25,6 +25,10 @@
 #include "string.h"
 #include "openssl/x509v3.h"
 
+#if defined(GM_ECC_512_SUPPORT)
+#include "gm-ecc-512.h"
+#endif 
+
 
 extern EC_GROUP *g_group;
 
@@ -267,11 +271,20 @@ unsigned long OpenSSL_Initialize()
 	// ��ʼ��SM2����
 	tcm_ecc_init();
 
+#if defined(GM_ECC_512_SUPPORT)
+	tcm_gmecc512_init();
+#endif 
+
 	return 0;
 }
 
 unsigned long OpenSSL_Finalize()
 {
+
+#if defined(GM_ECC_512_SUPPORT)
+	tcm_gmecc512_release();
+#endif 
+
 	return tcm_ecc_release();
 }
 
