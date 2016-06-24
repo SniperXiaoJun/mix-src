@@ -3588,14 +3588,14 @@ unsigned long OpenSSL_SM2EncryptInner(
 	// C2=M^t
 	for( i = 0; i< ulINLen; i++)
 	{
-		c2[i] = pbOUT[i] ^ t[i];
+		c2[i] = pbIN[i] ^ t[i];
 	}
 	// 第七步
 	// C3=Hash(x2||M||y2)
 	memset(&sm3Ctx,0x00,sizeof(sm3Ctx));
 	tcm_sch_starts(&sm3Ctx);
 	tcm_sch_update(&sm3Ctx, x2y2, SM2_BYTES_LEN);
-	tcm_sch_update(&sm3Ctx, (unsigned char *)pbOUT, ulINLen);
+	tcm_sch_update(&sm3Ctx, (unsigned char *)pbIN, ulINLen);
 	tcm_sch_update(&sm3Ctx, x2y2+SM2_BYTES_LEN, SM2_BYTES_LEN);
 	tcm_sch_finish(&sm3Ctx, c3);
 
