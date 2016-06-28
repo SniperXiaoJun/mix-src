@@ -1335,7 +1335,7 @@ err:
 
 int tcm_gmecc512_exchange(unsigned char fA, unsigned char prikey_A[GM_ECC_512_BYTES_LEN], unsigned char pubkey_A[(GM_ECC_512_BYTES_LEN*2)+1], unsigned char prikey_RA[GM_ECC_512_BYTES_LEN], unsigned char pubkey_RA[(GM_ECC_512_BYTES_LEN*2)+1],
 	unsigned char pubkey_B[(GM_ECC_512_BYTES_LEN*2)+1], unsigned char pubkey_RB[(GM_ECC_512_BYTES_LEN*2)+1], unsigned char Za[GM_ECC_512_BYTES_LEN], unsigned char Zb[GM_ECC_512_BYTES_LEN], /*out*/unsigned char key[16],
-	/*out*/unsigned char S1[32], /*out*/unsigned char Sa[32])
+	/*out*/unsigned char S1[32], /*out*/unsigned char Sa[32], int keyLen)
 {
 	int nRet;
 	BN_CTX *ctx = NULL;
@@ -1548,7 +1548,7 @@ int tcm_gmecc512_exchange(unsigned char fA, unsigned char prikey_A[GM_ECC_512_BY
 	}
 
 	// get key, must 16 bytes
-	nRet = tcm_kdf( key, 16, pKdfInData, 2*GM_ECC_512_BYTES_LEN + 2*SM3_DIGEST_LEN);
+	nRet = tcm_kdf( key, keyLen, pKdfInData, 2*GM_ECC_512_BYTES_LEN + 2*SM3_DIGEST_LEN);
 	if(0 != nRet)
 		goto err;
 
