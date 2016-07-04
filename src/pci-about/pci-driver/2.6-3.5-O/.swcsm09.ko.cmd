@@ -1,0 +1,1 @@
+cmd_/home/stoneskill/pci/pci-driver/2.6-3.5-O/swcsm09.ko := ld -r -m elf_x86_64 -T /usr/src/kernels/3.10.0-327.el7.x86_64/scripts/module-common.lds --build-id  -o /home/stoneskill/pci/pci-driver/2.6-3.5-O/swcsm09.ko /home/stoneskill/pci/pci-driver/2.6-3.5-O/swcsm09.o /home/stoneskill/pci/pci-driver/2.6-3.5-O/swcsm09.mod.o

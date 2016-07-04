@@ -1,0 +1,15 @@
+#Install driver for SWXA PCI CSM01
+#Copyright (c)2009 SWXA
+#http://www.sansec.com.cn
+
+#!! this driver only support 2.6.x
+
+INSTALL
+1. compile driver with 'make'
+2. make dir '/lib/swcsmdrv'
+3. copy 'loaddrv' and 'swcsm01.ko' to '/lib/swcsmdrv'
+4. edit '/etc/rc.local' or '/etc/rc.d/rc.local', add new line '/lib/swcsmdrv/loaddrv'
+5. OK!
+
+BeiJing SWXA
+2009.10.07
