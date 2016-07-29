@@ -131,15 +131,17 @@ LRESULT CALLBACK WndProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 		}
 
-		if (g_plgnObjVectorLoginKeyOnOff.size() > 0)
+		if(wParam == DBT_DEVICEREMOVECOMPLETE)
 		{
-			g_plgnObjVectorLoginKeyOnOff[i]->ulResult = CAPI_KEY_CheckOnOff(g_plgnObjVectorLoginKeyOnOff[i]->m_szAuthKey,OPE_USB_TARGET_SELF, &(g_plgnObjVectorLoginKeyOnOff[i]->m_stMetaAuth));
-
-			for (i = 0; i < g_plgnObjVectorLoginKeyOnOff.size(); i++)
+			if (g_plgnObjVectorLoginKeyOnOff.size() > 0)
 			{
-				(g_plgnObjVectorLoginKeyOnOff[i])->fire_usbeventonoff(g_plgnObjVectorLoginKeyOnOff[i]->m_stMetaAuth.szName,g_plgnObjVectorLoginKeyOnOff[i]->ulResult);
-			}
+				//g_plgnObjVectorLoginKeyOnOff[i]->ulResult = CAPI_KEY_CheckOnOff(g_plgnObjVectorLoginKeyOnOff[i]->m_szAuthKey,OPE_USB_TARGET_SELF, &(g_plgnObjVectorLoginKeyOnOff[i]->m_stMetaAuth));
 
+				for (i = 0; i < g_plgnObjVectorLoginKeyOnOff.size(); i++)
+				{
+					(g_plgnObjVectorLoginKeyOnOff[i])->fire_usbeventonoff(g_plgnObjVectorLoginKeyOnOff[i]->m_stMetaAuth.szName,g_plgnObjVectorLoginKeyOnOff[i]->ulResult);
+				}
+			}
 		}
 
 		break;
@@ -1305,6 +1307,38 @@ void FBCommonAPI::ExecCommonFuncID(long ulFuncID, FB::VariantList aArrayArgIN, F
 			{
 				return;
 			}
+
+			return;
+		}
+		break;
+
+		// 添加管理员用户 第一个设备
+	case 23:
+		{
+			InitArgsSKFSetUserPINAndUserInfo(aArrayArgIN);
+
+			ulResult = CAPI_KEY_SetPin(m_szAuthKey, OPE_USB_TARGET_SELF,m_szPIN,m_szPIN);
+
+			if (ulResult)
+			{
+				return;
+			}
+
+			ulResult = CAPI_KEY_SetMeta(m_szAuthKey, OPE_USB_TARGET_SELF, &m_stMetaAuthAdd, m_szPIN,(unsigned int *)&m_ulRetry);
+
+			if (ulResult)
+			{
+				return;
+			}
+
+			ulResult = CAPI_KEY_GenKeyPair(m_szAuthKey, OPE_USB_TARGET_SELF, m_szPIN,(unsigned int *)&m_ulRetry);
+
+			if (ulResult)
+			{
+				return;
+			}
+
+			ulResult = CAPI_KEY_ExportPK(m_szAuthKey, OPE_USB_TARGET_SELF,1, m_szPublicKeySIGN);
 
 			return;
 		}
