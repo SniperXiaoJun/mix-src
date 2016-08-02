@@ -1262,7 +1262,7 @@ unsigned long OpenSSL_SM2GenCSRWithPubkey(const OPST_USERINFO *pstUserInfo,
 	X509_REQ_set_pubkey(req, pkey);
 
 	name = X509_REQ_get_subject_name(req);
-	// ����������
+	//
 	//Add_Name(name, "C", (char*)pstUserInfo->countryName, strlen(pstUserInfo->countryName));
 	//Add_Name(name, "ST", (char*)pstUserInfo->stateOrProvinceName, strlen(pstUserInfo->stateOrProvinceName));
 	//Add_Name(name, "L", (char*)pstUserInfo->localityName, strlen(pstUserInfo->localityName));
@@ -1272,7 +1272,13 @@ unsigned long OpenSSL_SM2GenCSRWithPubkey(const OPST_USERINFO *pstUserInfo,
 	//Add_Name(name, "emailAddress", (char*)pstUserInfo->emailAddress, strlen(pstUserInfo->emailAddress));
 	//Add_Name(name, "challengePassword", (char*)pstUserInfo->challengePassword, strlen(pstUserInfo->challengePassword));
 	//Add_Name(name, "unstructuredName", (char*)pstUserInfo->unstructuredName, strlen(pstUserInfo->unstructuredName));
-	// �������֤��չ
+	//
+
+	// they 4 are all ok and must be CN, others not invalid
+	//X509_NAME_add_entry_by_txt(name, "C", MBSTRING_ASC,"CN", -1, -1, 0);
+	//X509_NAME_add_entry_by_NID(name,NID_countryName, MBSTRING_ASC,"CN", -1,-1,0);
+	//X509_NAME_add_entry_by_NID(name,NID_countryName, MBSTRING_UTF8,"CN", -1,-1,0);
+	//X509_NAME_add_entry_by_NID(name,NID_countryName, MBSTRING_UTF8,"CN", 2,-1,0);
 
 	OpenSSL_AddNameByName(name, "C", (unsigned char *)pstUserInfo->countryName,pstUserInfo->ulLenC,0);
 	OpenSSL_AddNameByName(name, "ST", (unsigned char *)pstUserInfo->stateOrProvinceName,pstUserInfo->ulLenST,0);
@@ -1283,6 +1289,7 @@ unsigned long OpenSSL_SM2GenCSRWithPubkey(const OPST_USERINFO *pstUserInfo,
 	OpenSSL_AddNameByName(name, "emailAddress",(unsigned char *) pstUserInfo->emailAddress,pstUserInfo->ulLenEA,0);
 	OpenSSL_AddNameByName(name, "challengePassword",(unsigned char *)pstUserInfo->challengePassword, pstUserInfo->ulLenCP, 0);
 	OpenSSL_AddNameByName(name, "unstructuredName",(unsigned char *)pstUserInfo->unstructuredName,pstUserInfo->ulLenUN,0);
+	
 
 	ptr_out = pbCSR;
 
