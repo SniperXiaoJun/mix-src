@@ -130,6 +130,33 @@ ULONG CAPI_KEY_ConnectDev(char * pszDevList, char * pszKeyOn, int ulKeyTarget, H
 	}
 }
 
+
+unsigned int CAPI_KEY_GetKeyCount(int * pulKeyCount)
+{
+	unsigned int ulRet = 0;
+	char szDevNameLists[BUFFER_LEN_1K] = {0};
+
+	ULONG ulDevNameLists = BUFFER_LEN_1K;
+
+	ECCSIGNATUREBLOB stSigBlob = {0};
+
+	int ulKeyCount = 0;
+
+	ulRet = SKF_EnumDev(TRUE,szDevNameLists,&ulDevNameLists);
+
+	if(ulRet)
+	{
+		goto err;
+	}
+
+	CAPI_GetMulStringCount(szDevNameLists, &ulKeyCount);
+
+err:
+	* pulKeyCount = ulKeyCount;
+
+	return 0;
+}
+
 unsigned int CAPI_KEY_SignDigest(char * pszKeyOn,int ulKeyTarget, char * pszPIN, unsigned char *pbDigest, unsigned char * pbSigValue, unsigned int * pulRetry)
 {
 	unsigned int ulRet = 0;

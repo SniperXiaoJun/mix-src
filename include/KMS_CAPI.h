@@ -23,6 +23,8 @@ extern "C"
 	// 修改密码
 	unsigned int CAPI_KEY_ChgPin(/*IN OUT*/char * pszKeyOn, int ulKeyTarget,int ulFlag, char * pszPINOld,char * pszPINNew, unsigned int * pulRetry);
 
+	// 获取KEY个数
+	unsigned int CAPI_KEY_GetKeyCount(int * pulKeyCount);
 
 	// 解锁用户密码
 	unsigned int CAPI_KEY_UnlockPin(char * pszKeyOn,int ulKeyTarget, char * pszPINAdmin,char * pszPINUser, unsigned int * pulRetry);
