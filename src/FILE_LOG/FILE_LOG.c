@@ -10,7 +10,7 @@
 #include "stdlib.h"
 #include <stdarg.h>
 
-void FILE_READ(const char * dir, const char * fileName, unsigned char * byte, unsigned long * length)
+void FILE_READ(const char * dir, const char * fileName, unsigned char * byte, unsigned int * length)
 {
 	char path[BUFFER_LEN_1K] = {0};
 	FILE * file = NULL;
@@ -32,7 +32,7 @@ void FILE_READ(const char * dir, const char * fileName, unsigned char * byte, un
 	}
 }
 
-void FILE_WRITE(const char * dir, const char * fileName, const unsigned char * byte, unsigned long length)
+void FILE_WRITE(const char * dir, const char * fileName, const unsigned char * byte, unsigned int length)
 {
 	char path[BUFFER_LEN_1K] = {0};
 	FILE * file = NULL;
@@ -65,15 +65,15 @@ void FILE_WRITE_STRING(const char * fileName, const char * cstring)
 	}
 }
 
-void FILE_WRITE_HEX(const char * fileName, const unsigned char * byte, unsigned long length)
+void FILE_WRITE_HEX(const char * fileName, const unsigned char * byte, unsigned int length)
 {
-	long i = 0;
+	int i = 0;
 	FILE * file = fopen(fileName, "a+");
 
 	//fwrite(byte, 1, length, file);
 	//fwrite("\n",1,1,file);
 
-	long dataLen = length * 2 + 1;
+	int dataLen = length * 2 + 1;
 
 	char * dataValue = (char *)malloc(dataLen); 
 
@@ -93,7 +93,7 @@ void FILE_WRITE_HEX(const char * fileName, const unsigned char * byte, unsigned 
 	}
 }
 
-void FILE_WRITE_NUMBER(const char * fileName, long number)
+void FILE_WRITE_NUMBER(const char * fileName, int number)
 {
 	FILE * file = fopen(fileName, "a+");
 
@@ -110,7 +110,7 @@ void FILE_WRITE_NUMBER(const char * fileName, long number)
 	}
 }
 
-void FILE_WRITE_BYTE(const char * fileName, const unsigned char * byte, unsigned long length)
+void FILE_WRITE_BYTE(const char * fileName, const unsigned char * byte, unsigned int length)
 {
 	FILE * file = fopen(fileName, "wb");
 
@@ -153,15 +153,15 @@ void FILE_LOG_STRING(const char * fileName, const char * cstring)
 	}
 }
 
-void FILE_LOG_HEX(const char * fileName, const unsigned char * byte, unsigned long length)
+void FILE_LOG_HEX(const char * fileName, const unsigned char * byte, unsigned int length)
 {
-	long i = 0;
+	int i = 0;
     FILE * file = fopen(fileName, "a+");
 
 	//fwrite(byte, 1, length, file);
 	//fwrite("\n",1,1,file);
 
-	long dataLen = length * 2 + 1;
+	int dataLen = length * 2 + 1;
 
 	char * dataValue = (char *)malloc(dataLen); 
 
@@ -181,7 +181,7 @@ void FILE_LOG_HEX(const char * fileName, const unsigned char * byte, unsigned lo
 	}
 }
 
-void FILE_LOG_NUMBER(const char * fileName, long number)
+void FILE_LOG_NUMBER(const char * fileName, int number)
 {
     FILE * file = fopen(fileName, "a+");
 	
@@ -198,7 +198,7 @@ void FILE_LOG_NUMBER(const char * fileName, long number)
 	}
 }
 
-void FILE_LOG_BYTE(const char * fileName, const unsigned char * byte, unsigned long length)
+void FILE_LOG_BYTE(const char * fileName, const unsigned char * byte, unsigned int length)
 {
 	FILE * file = fopen(fileName, "wb");
 
@@ -232,17 +232,17 @@ void FILE_LOG_STRING(const char * fileName, const char * cstring)
 
 }
 
-void FILE_LOG_HEX(const char * fileName, const unsigned char * byte, unsigned long length)
+void FILE_LOG_HEX(const char * fileName, const unsigned char * byte, unsigned int length)
 {
 	
 }
 
-void FILE_LOG_NUMBER(const char * fileName, long number)
+void FILE_LOG_NUMBER(const char * fileName, int number)
 {
 
 }
 
-void FILE_LOG_BYTE(const char * fileName, const unsigned char * byte, unsigned long length)
+void FILE_LOG_BYTE(const char * fileName, const unsigned char * byte, unsigned int length)
 {
 
 }

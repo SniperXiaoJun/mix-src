@@ -5,18 +5,18 @@
 #include "stdio.h"
 
 
-unsigned long OPF_Str2Bin(const char *pbIN,unsigned long ulINLen,unsigned char *pbOUT,unsigned long * pulOUTLen)
+unsigned int OPF_Str2Bin(const char *pbIN,unsigned int uiINLen,unsigned char *pbOUT,unsigned int * puiOUTLen)
 {
-	long i;
-	unsigned long sn_len = ulINLen / 2;
+	int i;
+	unsigned int sn_len = uiINLen / 2;
 
-	if(sn_len > *pulOUTLen)
+	if(sn_len > *puiOUTLen)
 	{
-		*pulOUTLen = sn_len;
+		*puiOUTLen = sn_len;
 		return -1;
 	}
 
-	*pulOUTLen = sn_len;
+	*puiOUTLen = sn_len;
 
 	if(0 == pbOUT)
 	{
@@ -34,18 +34,18 @@ unsigned long OPF_Str2Bin(const char *pbIN,unsigned long ulINLen,unsigned char *
 	return 0;
 }
 
-unsigned long OPF_Bin2Str(const unsigned char *pbIN,unsigned long ulINLen,char *pbOUT,unsigned long * pulOUTLen)
+unsigned int OPF_Bin2Str(const unsigned char *pbIN,unsigned int uiINLen,char *pbOUT,unsigned int * puiOUTLen)
 {
-	long i;
-	unsigned long sn_len = ulINLen * 2;
+	int i;
+	unsigned int sn_len = uiINLen * 2;
 
-	if(sn_len > *pulOUTLen)
+	if(sn_len > *puiOUTLen)
 	{
-		*pulOUTLen = sn_len;
+		*puiOUTLen = sn_len;
 		return -1;
 	}
 
-	*pulOUTLen = sn_len;
+	*puiOUTLen = sn_len;
 
 	if(0 == pbOUT)
 	{
@@ -53,7 +53,7 @@ unsigned long OPF_Bin2Str(const unsigned char *pbIN,unsigned long ulINLen,char *
 	}
 	else
 	{
-		for (i = 0; i < ulINLen; i++) {
+		for (i = 0; i < uiINLen; i++) {
 			sprintf(pbOUT + 2 * i, "%02X", pbIN[i]);
 		}
 	}
@@ -63,7 +63,7 @@ unsigned long OPF_Bin2Str(const unsigned char *pbIN,unsigned long ulINLen,char *
 
 
 // 添加已分配的内存指针到列表
-unsigned long OPF_AddMallocedHandleNodeDataToLink(OPST_HANDLE_NODE * * ppstHeader, void * pvNodeData)
+unsigned int OPF_AddMallocedHandleNodeDataToLink(OPST_HANDLE_NODE * * ppstHeader, void * pvNodeData)
 {
 	OPST_HANDLE_NODE * ptr = NULL;
 
@@ -83,7 +83,7 @@ unsigned long OPF_AddMallocedHandleNodeDataToLink(OPST_HANDLE_NODE * * ppstHeade
 }
 
 // 释放指定的指针内存所在列表的节点以及指针本身
-unsigned long OPF_DelAndFreeHandleNodeDataFromLink(OPST_HANDLE_NODE * * ppstHeader,  void * pvNodeData)
+unsigned int OPF_DelAndFreeHandleNodeDataFromLink(OPST_HANDLE_NODE * * ppstHeader,  void * pvNodeData)
 {
 	OPST_HANDLE_NODE * ptr = 0, * ptr2free = 0;
 
@@ -126,7 +126,7 @@ unsigned long OPF_DelAndFreeHandleNodeDataFromLink(OPST_HANDLE_NODE * * ppstHead
 }
 
 
-unsigned long OPF_CheckExistHandleNodeDataFromLink(OPST_HANDLE_NODE * * ppstHeader,  void * pvNodeData)
+unsigned int OPF_CheckExistHandleNodeDataFromLink(OPST_HANDLE_NODE * * ppstHeader,  void * pvNodeData)
 {
 	OPST_HANDLE_NODE * ptr = 0;
 
@@ -149,7 +149,7 @@ unsigned long OPF_CheckExistHandleNodeDataFromLink(OPST_HANDLE_NODE * * ppstHead
 	return -1;
 }
 
-unsigned long OPF_ClearExistHandleNodeDataFromLink(OPST_HANDLE_NODE * * ppstHeader)
+unsigned int OPF_ClearExistHandleNodeDataFromLink(OPST_HANDLE_NODE * * ppstHeader)
 {
 	while(* ppstHeader)
 	{

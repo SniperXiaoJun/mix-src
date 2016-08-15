@@ -18,7 +18,7 @@ extern "C" {
 	失败：
 	功能描述:	初始化资源全局变量，打开P11_SESSION|OPEN_SSL
 	*/
-	COMMON_API unsigned long OPF_Initialize();
+	COMMON_API unsigned int OPF_Initialize();
 	
 	/*
 	功能名称:	释放资源
@@ -29,7 +29,7 @@ extern "C" {
 	失败：
 	功能描述:	重置全局变量，关闭P11_SESSION|OPEN_SSL
 	*/
-	COMMON_API unsigned long OPF_Finalize();
+	COMMON_API unsigned int OPF_Finalize();
 
 	/*
 	功能名称:	导入证书
@@ -42,8 +42,8 @@ extern "C" {
 	失败：
 	功能描述:	将证书导入到容器
 	*/
-	COMMON_API unsigned long OPF_CertImport(OPT_HCONTAINER hContainer, 
-		const unsigned char * pbX509Cert, unsigned long ulX509CertLen);
+	COMMON_API unsigned int OPF_CertImport(OPT_HCONTAINER hContainer, 
+		const unsigned char * pbX509Cert, unsigned int uiX509CertLen);
 
 	/*
 	功能名称:	用现有SM2密钥对生成证书请求
@@ -56,8 +56,8 @@ extern "C" {
 	失败：
 	功能描述:	用现有SM2密钥对生成证书请求
 	*/
-	COMMON_API unsigned long OPF_SM2GenCSR(OPT_HCONTAINER hContainer,
-		const OPST_USERINFO *pstUserInfo,unsigned char * pbCSR, unsigned long * pulCSRLen);
+	COMMON_API unsigned int OPF_SM2GenCSR(OPT_HCONTAINER hContainer,
+		const OPST_USERINFO *pstUserInfo,unsigned char * pbCSR, unsigned int * puiCSRLen);
 
 	/*
 	功能名称:	签名证书请求
@@ -67,64 +67,64 @@ extern "C" {
 				ain_len_csr		请求长度
 	输出参数:	aout_value		签名内容
 				aout_len		签名长度
-				ulAlg			算法
+				uiAlg			算法
 	返回值:   
 	失败：
 	功能描述:	签名证书请求
 	*/
-	COMMON_API unsigned long OPF_SM2SignCSR(OPT_HCONTAINER hContainer,
-		const unsigned char *pbCSR, unsigned long ulCSR,unsigned long ulAlg,
-		unsigned char * pbCSRSigned, unsigned long * pulCSRSignedLen);
+	COMMON_API unsigned int OPF_SM2SignCSR(OPT_HCONTAINER hContainer,
+		const unsigned char *pbCSR, unsigned int uiCSR,unsigned int uiAlg,
+		unsigned char * pbCSRSigned, unsigned int * puiCSRSignedLen);
 
 	/*
 	功能名称:	签名证书
 	函数名称:	OPF_SM2SignCert
 	输入参数:	hSessionHandle			PCI句柄
 				pbX509Cert   证书值
-				ulX509CertLen	证书长度
-				ulAlg			算法
+				uiX509CertLen	证书长度
+				uiAlg			算法
 	输出参数:	pbX509CertSigned		签名过后证书内容
-				pulX509CertSignedLen		签名过后证书长度
+				puiX509CertSignedLen		签名过后证书长度
 	返回值:   
 	失败：
 	功能描述:	签名证书
 	*/
-	COMMON_API unsigned long OPF_SM2SignCert(void * hSessionHandle,
-		const unsigned char *pbX509Cert, unsigned long ulX509CertLen,unsigned long ulAlg,
-		unsigned char * pbX509CertSigned, unsigned long * pulX509CertSignedLen);
+	COMMON_API unsigned int OPF_SM2SignCert(void * hSessionHandle,
+		const unsigned char *pbX509Cert, unsigned int uiX509CertLen,unsigned int uiAlg,
+		unsigned char * pbX509CertSigned, unsigned int * puiX509CertSignedLen);
 
 	/*
 	功能名称:	签名CRL
 	函数名称:	OPF_SM2SignCert
 	输入参数:	hSessionHandle			PCI句柄
 				pbX509Cert   						证书值
-				ulX509CertLen						证书长度
+				uiX509CertLen						证书长度
 				pbCRL										CRL内容
-				ulCRL										CRL长度
-				ulAlg									算法
+				uiCRL										CRL长度
+				uiAlg									算法
 	输出参数:	pbCRLSigned				签名过后CRL内容
-				pulCRLSigned					签名过后CRL长度
+				puiCRLSigned					签名过后CRL长度
 	返回值:   
 	失败：
 	功能描述:	签名CRL
 	*/
-	COMMON_API unsigned long OPF_SM2SignCRL(void * hSessionHandle,
-		const unsigned char *pbX509Cert, unsigned long ulX509CertLen,
-		const unsigned char *pbCRL, unsigned long ulCRL,unsigned long ulAlg,
-		unsigned char * pbCRLSigned, unsigned long * pulCRLSigned);
+	COMMON_API unsigned int OPF_SM2SignCRL(void * hSessionHandle,
+		const unsigned char *pbX509Cert, unsigned int uiX509CertLen,
+		const unsigned char *pbCRL, unsigned int uiCRL,unsigned int uiAlg,
+		unsigned char * pbCRLSigned, unsigned int * puiCRLSigned);
 
 
 	// 二进制与HEX相互转换
-	COMMON_API unsigned long OPF_Str2Bin(const char *pbIN,unsigned long ulIN,unsigned char *pbOUT,unsigned long * pulOUT);
+	COMMON_API unsigned int OPF_Str2Bin(const char *pbIN,unsigned int uiIN,unsigned char *pbOUT,unsigned int * puiOUT);
 	// 二进制与HEX相互转换
-	COMMON_API unsigned long OPF_Bin2Str(const unsigned char *ain_data_value,unsigned long ain_data_len,
-		char *aout_data_value,unsigned long * aout_data_len);
+	COMMON_API unsigned int OPF_Bin2Str(const unsigned char *ain_data_value,unsigned int ain_data_len,
+		char *aout_data_value,unsigned int * aout_data_len);
 
 	// 单向列表操作
-	COMMON_API unsigned long OPF_AddMallocedHandleNodeDataToLink(OPST_HANDLE_NODE * * ppstHeader, void * pvNodeData);
-	COMMON_API unsigned long OPF_DelAndFreeHandleNodeDataFromLink(OPST_HANDLE_NODE * * ppstHeader,  void * pvNodeData);
-	COMMON_API unsigned long OPF_CheckExistHandleNodeDataFromLink(OPST_HANDLE_NODE * * ppstHeader,  void * pvNodeData);
-	COMMON_API unsigned long OPF_ClearExistHandleNodeDataFromLink(OPST_HANDLE_NODE * * ppstHeader);
+	COMMON_API unsigned int OPF_AddMallocedHandleNodeDataToLink(OPST_HANDLE_NODE * * ppstHeader, void * pvNodeData);
+	COMMON_API unsigned int OPF_DelAndFreeHandleNodeDataFromLink(OPST_HANDLE_NODE * * ppstHeader,  void * pvNodeData);
+	COMMON_API unsigned int OPF_CheckExistHandleNodeDataFromLink(OPST_HANDLE_NODE * * ppstHeader,  void * pvNodeData);
+	COMMON_API unsigned int OPF_ClearExistHandleNodeDataFromLink(OPST_HANDLE_NODE * * ppstHeader);
 
 #ifdef __cplusplus
 }

@@ -33,19 +33,19 @@
 extern "C" {
 #endif
     COMMON_API void FILE_LOG_STRING(const char * fileName,const char * cstring);
-    COMMON_API void FILE_LOG_HEX(const char * fileName, const unsigned char * byte, unsigned long length);
-    COMMON_API void FILE_LOG_NUMBER(const char * fileName,long number);
-	COMMON_API void FILE_LOG_BYTE(const char * fileName, const unsigned char * byte, unsigned long length);
+    COMMON_API void FILE_LOG_HEX(const char * fileName, const unsigned char * byte, unsigned int length);
+    COMMON_API void FILE_LOG_NUMBER(const char * fileName,int number);
+	COMMON_API void FILE_LOG_BYTE(const char * fileName, const unsigned char * byte, unsigned int length);
 	COMMON_API void FILE_LOG_FMT(const char * fileName,const char *format,...);
 
 	COMMON_API void FILE_WRITE_STRING(const char * fileName,const char * cstring);
-	COMMON_API void FILE_WRITE_HEX(const char * fileName, const unsigned char * byte, unsigned long length);
-	COMMON_API void FILE_WRITE_NUMBER(const char * fileName,long number);
-	COMMON_API void FILE_WRITE_BYTE(const char * fileName, const unsigned char * byte, unsigned long length);
+	COMMON_API void FILE_WRITE_HEX(const char * fileName, const unsigned char * byte, unsigned int length);
+	COMMON_API void FILE_WRITE_NUMBER(const char * fileName,int number);
+	COMMON_API void FILE_WRITE_BYTE(const char * fileName, const unsigned char * byte, unsigned int length);
 	COMMON_API void FILE_WRITE_FMT(const char * fileName,const char *format,...);
 
-	COMMON_API void FILE_READ(const char * dir, const char * fileName, unsigned char * byte, unsigned long * length);
-	COMMON_API void FILE_WRITE(const char * dir, const char * fileName, const unsigned char * byte, unsigned long length);
+	COMMON_API void FILE_READ(const char * dir, const char * fileName, unsigned char * byte, unsigned int * length);
+	COMMON_API void FILE_WRITE(const char * dir, const char * fileName, const unsigned char * byte, unsigned int length);
 #ifdef __cplusplus
 }
 #endif
