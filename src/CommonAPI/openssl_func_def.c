@@ -36,13 +36,13 @@ extern EC_GROUP *g_group;
 int copy_extensions(X509 *x, X509_REQ *req, int copy_type);
 short Add_Ext(X509 *cert, X509 * root, int nid, char *value);
 
-unsigned long OpenSSL_AddNameByID(X509_NAME * aX509Name,  unsigned long aType, unsigned char * aDataValue, unsigned long aDataLen, unsigned long aDataType);//��Ӣ�Ĵ���
-unsigned long OpenSSL_AddNameByName(X509_NAME * aX509Name, const char * aType, unsigned char * aDataValue, unsigned long aDataLen, unsigned long aDataType);//��Ӣ�Ĵ���
+unsigned int OpenSSL_AddNameByID(X509_NAME * aX509Name,  unsigned int aType, unsigned char * aDataValue, unsigned int aDataLen, unsigned int aDataType);//��Ӣ�Ĵ���
+unsigned int OpenSSL_AddNameByName(X509_NAME * aX509Name, const char * aType, unsigned char * aDataValue, unsigned int aDataLen, unsigned int aDataType);//��Ӣ�Ĵ���
 
 
 EVP_PKEY * OpenSSL_NewEVP_PKEY_OF_SM2_PublicKey(
-	const unsigned char * pbPublicKeyX, unsigned long ulPublicKeyXLen, 
-	const unsigned char * pbPublicKeyY, unsigned long ulPublicKeyYLen
+	const unsigned char * pbPublicKeyX, unsigned int ulPublicKeyXLen, 
+	const unsigned char * pbPublicKeyY, unsigned int ulPublicKeyYLen
 	)
 {
 	EVP_PKEY	*pkey = NULL;
@@ -141,10 +141,10 @@ ASN1_SEQUENCE_END(SM2SIGN_DATA)
 	IMPLEMENT_ASN1_FUNCTIONS(SM2SIGN_DATA)
 
 
-	unsigned long SM2SignAsn1Convert(
-	unsigned char *pbR, unsigned long nRLen,
-	unsigned char *pbS, unsigned long nSLen,
-	unsigned char *pbOutDer, unsigned long *pOutDerLen) 
+	unsigned int SM2SignAsn1Convert(
+	unsigned char *pbR, unsigned int nRLen,
+	unsigned char *pbS, unsigned int nSLen,
+	unsigned char *pbOutDer, unsigned int *pOutDerLen) 
 {	
 	unsigned long			nOutLen = 0;
 	unsigned long			nRet = 0;
@@ -210,12 +210,12 @@ ErrExit:
 	return nRet;
 }
 
-unsigned long SM2SignAsn1DeConvert(
-	unsigned char *pbR, unsigned long *nRLen,
-	unsigned char *pbS, unsigned long *nSLen,
-	unsigned char *pbDer, unsigned long nDerLen) 
+unsigned int SM2SignAsn1DeConvert(
+	unsigned char *pbR, unsigned int *nRLen,
+	unsigned char *pbS, unsigned int *nSLen,
+	unsigned char *pbDer, unsigned int nDerLen) 
 {	
-	unsigned long 		nOutLen = 0;
+	unsigned int 		nOutLen = 0;
 	unsigned long		nRet = 0;
 
 	unsigned char * pPtr = pbDer;
@@ -261,7 +261,7 @@ ErrExit:
 	return nRet;
 }
 
-unsigned long OpenSSL_Initialize()
+unsigned int OpenSSL_Initialize()
 {
 	// OpenSSL ���ʼ��
 	OpenSSL_add_all_algorithms();
@@ -278,7 +278,7 @@ unsigned long OpenSSL_Initialize()
 	return 0;
 }
 
-unsigned long OpenSSL_Finalize()
+unsigned int OpenSSL_Finalize()
 {
 
 #if defined(GM_ECC_512_SUPPORT)
@@ -288,9 +288,9 @@ unsigned long OpenSSL_Finalize()
 	return tcm_ecc_release();
 }
 
-unsigned long OpenSSL_SM2GenKeys(unsigned char * pbPublicKeyX,  unsigned long * pulPublicKeyXLen, 
-	unsigned char * pbPublicKeyY,  unsigned long * pulPublicKeyYLen,
-	unsigned char * pbPrivateKey,  unsigned long * pulPrivateKeyLen)
+unsigned int OpenSSL_SM2GenKeys(unsigned char * pbPublicKeyX,  unsigned int * puiPublicKeyXLen, 
+	unsigned char * pbPublicKeyY,  unsigned int * puiPublicKeyYLen,
+	unsigned char * pbPrivateKey,  unsigned int * puiPrivateKeyLen)
 {
 	EC_KEY		*ec = NULL;
 	unsigned long		rv	= -1;
@@ -302,9 +302,9 @@ unsigned long OpenSSL_SM2GenKeys(unsigned char * pbPublicKeyX,  unsigned long * 
 	unsigned char data_value_x[SM2_BYTES_LEN]= {0};
 	unsigned char data_value_y[SM2_BYTES_LEN]= {0};
 	unsigned char data_value_prv[SM2_BYTES_LEN]= {0};
-	unsigned long data_len_x = SM2_BYTES_LEN;
-	unsigned long data_len_y = SM2_BYTES_LEN;
-	unsigned long data_len_prv = SM2_BYTES_LEN;
+	unsigned int data_len_x = SM2_BYTES_LEN;
+	unsigned int data_len_y = SM2_BYTES_LEN;
+	unsigned int data_len_prv = SM2_BYTES_LEN;
 
 	// ������Կ��
 	if ( !(ctx = BN_CTX_new()) )
@@ -344,16 +344,16 @@ unsigned long OpenSSL_SM2GenKeys(unsigned char * pbPublicKeyX,  unsigned long * 
 	data_len_y = BN_bn2bin(pubkey_y,data_value_y);
 	data_len_prv = BN_bn2bin(prvkey,data_value_prv);
 
-	if(* pulPublicKeyYLen < SM2_BYTES_LEN || * pulPublicKeyXLen <SM2_BYTES_LEN || *pulPrivateKeyLen < SM2_BYTES_LEN)
+	if(* puiPublicKeyYLen < SM2_BYTES_LEN || * puiPublicKeyXLen <SM2_BYTES_LEN || *puiPrivateKeyLen < SM2_BYTES_LEN)
 	{
 		rv = -1;
 		goto err;
 	}
 	else
 	{
-		*pulPublicKeyYLen = SM2_BYTES_LEN;
-		*pulPublicKeyXLen = SM2_BYTES_LEN;
-		*pulPrivateKeyLen = SM2_BYTES_LEN;
+		*puiPublicKeyYLen = SM2_BYTES_LEN;
+		*puiPublicKeyXLen = SM2_BYTES_LEN;
+		*puiPrivateKeyLen = SM2_BYTES_LEN;
 
 		memcpy(pbPublicKeyX,data_value_x,data_len_x);
 		memcpy(pbPublicKeyY,data_value_y,data_len_y);
@@ -375,26 +375,26 @@ err:
 	return rv;
 }
 
-unsigned long OpenSSL_SM2VerifyCert(const unsigned char *pbX509Cert, unsigned long ulX509CertLen,unsigned long ulAlg,
-	const unsigned char *pbPublicKeyX, unsigned long ulPublicKeyXLen,
-	const unsigned char *pbPublicKeyY, unsigned long ulPublicKeyYLen)
+unsigned int OpenSSL_SM2VerifyCert(const unsigned char *pbX509Cert, unsigned int ulX509CertLen,unsigned int ulAlg,
+	const unsigned char *pbPublicKeyX, unsigned int ulPublicKeyXLen,
+	const unsigned char *pbPublicKeyY, unsigned int ulPublicKeyYLen)
 {
-	unsigned long rv = -1;
+	unsigned int rv = -1;
 	X509 * x509 =  NULL;
 	unsigned char pbSig[BUFFER_LEN_1K] = {0};
-	unsigned long ulSigLen = BUFFER_LEN_1K;
+	unsigned int ulSigLen = BUFFER_LEN_1K;
 
 	unsigned char digest_value[SM3_DIGEST_LEN] = {0};
 	unsigned int digest_len = SM3_DIGEST_LEN;
 
-	unsigned long r_len = SM3_DIGEST_LEN;
-	unsigned long s_len = SM3_DIGEST_LEN;
+	unsigned int r_len = SM3_DIGEST_LEN;
+	unsigned int s_len = SM3_DIGEST_LEN;
 
-	unsigned long pubkey_xy_len = 2 * SM2_BYTES_LEN + 1;
+	unsigned int pubkey_xy_len = 2 * SM2_BYTES_LEN + 1;
 	unsigned char pubkey_xy_value[2 * SM2_BYTES_LEN + 1] = {0};
 
 	unsigned char info_value[BUFFER_LEN_1K * 4] = {0};
-	unsigned long info_len = BUFFER_LEN_1K * 4;
+	unsigned int info_len = BUFFER_LEN_1K * 4;
 	unsigned char *ptr_out = info_value;
 	const unsigned char * ptr_in = NULL;
 
@@ -444,27 +444,27 @@ err:
 }
 
 
-unsigned long OpenSSL_SM2VerifyCRL(const unsigned char *pbCRL, unsigned long ulCRLLen,unsigned long ulAlg,
-	const unsigned char *pbPublicKeyX, unsigned long ulPublicKeyXLen,
-	const unsigned char *pbPublicKeyY, unsigned long ulPublicKeyYLen)
+unsigned int OpenSSL_SM2VerifyCRL(const unsigned char *pbCRL, unsigned int ulCRLLen,unsigned int ulAlg,
+	const unsigned char *pbPublicKeyX, unsigned int ulPublicKeyXLen,
+	const unsigned char *pbPublicKeyY, unsigned int ulPublicKeyYLen)
 {
-	unsigned long rv = -1;
+	unsigned int rv = -1;
 	X509_CRL * crl =  NULL;
 	unsigned char pbSig[BUFFER_LEN_1K] = {0};
-	unsigned long ulSigLen = BUFFER_LEN_1K;
+	unsigned int ulSigLen = BUFFER_LEN_1K;
 	EC_KEY      * ecPubkey = NULL;
 
 	unsigned char digest_value[SM3_DIGEST_LEN] = {0};
 	unsigned int digest_len = SM3_DIGEST_LEN;
 
-	unsigned long r_len = SM3_DIGEST_LEN;
-	unsigned long s_len = SM3_DIGEST_LEN;
+	unsigned int r_len = SM3_DIGEST_LEN;
+	unsigned int s_len = SM3_DIGEST_LEN;
 
-	unsigned long pubkey_xy_len = 2 * SM2_BYTES_LEN + 1;
+	unsigned int pubkey_xy_len = 2 * SM2_BYTES_LEN + 1;
 	unsigned char pubkey_xy_value[2 * SM2_BYTES_LEN + 1] = {0};
 
 	unsigned char info_value[BUFFER_LEN_1K * 4] = {0};
-	unsigned long info_len = BUFFER_LEN_1K * 4;
+	unsigned int info_len = BUFFER_LEN_1K * 4;
 	unsigned char *ptr_out = info_value;
 	const unsigned char * ptr_in = NULL;
 
@@ -509,16 +509,16 @@ err:
 	return rv;
 }
 
-unsigned long OpenSSL_SM2VerifyMSG(const unsigned char *pbMSG, unsigned long ulMSGLen, 
-	const unsigned char *pbSig, unsigned long ulSigLen,
-	const unsigned char *pbPublicKeyX, unsigned long ulPublicKeyXLen,
-	const unsigned char *pbPublicKeyY, unsigned long ulPublicKeyYLen)
+unsigned int OpenSSL_SM2VerifyMSG(const unsigned char *pbMSG, unsigned int ulMSGLen, 
+	const unsigned char *pbSig, unsigned int ulSigLen,
+	const unsigned char *pbPublicKeyX, unsigned int ulPublicKeyXLen,
+	const unsigned char *pbPublicKeyY, unsigned int ulPublicKeyYLen)
 {
-	unsigned long rv	= -1;
+	unsigned int rv	= -1;
 	unsigned char digest_value[SM3_DIGEST_LEN] = {0};
 	unsigned int digest_len = SM3_DIGEST_LEN;
 
-	unsigned long pubkey_xy_len = 2 * SM2_BYTES_LEN + 1;
+	unsigned int pubkey_xy_len = 2 * SM2_BYTES_LEN + 1;
 	unsigned char pubkey_xy_value[2 * SM2_BYTES_LEN + 1] = {0};
 
 	memcpy(pubkey_xy_value, "\x04", 1);
@@ -544,28 +544,28 @@ err:
 	return rv;
 }
 
-unsigned long OpenSSL_SM2VerifyCSR(
-	const unsigned char *pbCSR, unsigned long ulCSRLen,
-	unsigned long ulAlg
+unsigned int OpenSSL_SM2VerifyCSR(
+	const unsigned char *pbCSR, unsigned int ulCSRLen,
+	unsigned int ulAlg
 	)
 {
 	EVP_PKEY	*pktmp = NULL;			// req�еĹ�Կ
 	X509_REQ *req = NULL;
-	unsigned long rv = -1;
+	unsigned int rv = -1;
 	unsigned char digest_value[SM3_DIGEST_LEN] = {0};
 	unsigned int digest_len = SM3_DIGEST_LEN;
 	unsigned char pbPublicKeyX[SM2_BYTES_LEN] = {0};
 	unsigned char pbPublicKeyY[SM2_BYTES_LEN] = {0};
-	unsigned long pubkey_xy_len = 2 * SM2_BYTES_LEN + 1;
+	unsigned int pubkey_xy_len = 2 * SM2_BYTES_LEN + 1;
 	unsigned char pubkey_xy_value[2 * SM2_BYTES_LEN + 1] = {0};
 
 	unsigned char info_value[BUFFER_LEN_1K * 4] = {0};
-	unsigned long info_len = BUFFER_LEN_1K * 4;
+	unsigned int info_len = BUFFER_LEN_1K * 4;
 
-	unsigned long r_len = SM3_DIGEST_LEN;
-	unsigned long s_len = SM3_DIGEST_LEN;
+	unsigned int r_len = SM3_DIGEST_LEN;
+	unsigned int s_len = SM3_DIGEST_LEN;
 	unsigned char pbSig[BUFFER_LEN_1K] = {0};
-	unsigned long ulSigLen = BUFFER_LEN_1K;
+	unsigned int ulSigLen = BUFFER_LEN_1K;
 
 	const unsigned char * ptr_in = NULL;
 	unsigned char * ptr_out = NULL;
@@ -655,16 +655,16 @@ err:
 }
 
 
-unsigned long OpenSSL_GetX509Content(
-	const unsigned char *pbX509, unsigned long ulX509Len,
+unsigned int OpenSSL_GetX509Content(
+	const unsigned char *pbX509, unsigned int ulX509Len,
 	X509_TYPE ulX509Type,/*0,1,2分别代表CSR,CERT,CRL*/
-	unsigned char *pbX509Content, unsigned long *pulX509ContentLen
+	unsigned char *pbX509Content, unsigned int *puiX509ContentLen
 	)
 {
 	X509_REQ *req = NULL;
 	X509 *x509 = NULL;
 	X509_CRL *crl = NULL;
-	unsigned long rv = -1;
+	unsigned int rv = -1;
 	const unsigned char * ptr_in = NULL;
 	unsigned char * ptr_out = NULL;
 
@@ -680,7 +680,7 @@ unsigned long OpenSSL_GetX509Content(
 			{
 				goto err;
 			}
-			*pulX509ContentLen = i2d_X509_REQ_INFO(req->req_info, &ptr_out);
+			*puiX509ContentLen = i2d_X509_REQ_INFO(req->req_info, &ptr_out);
 		}
 		break;
 	case X509_TYPE_CERT:
@@ -691,7 +691,7 @@ unsigned long OpenSSL_GetX509Content(
 				goto err;
 			}
 
-			*pulX509ContentLen =i2d_X509_CINF(x509->cert_info,&ptr_out);
+			*puiX509ContentLen =i2d_X509_CINF(x509->cert_info,&ptr_out);
 		}
 		break;
 	case X509_TYPE_CRL:
@@ -701,7 +701,7 @@ unsigned long OpenSSL_GetX509Content(
 			{
 				goto err;
 			}
-			*pulX509ContentLen =i2d_X509_CRL_INFO(crl->crl,&ptr_out);
+			*puiX509ContentLen =i2d_X509_CRL_INFO(crl->crl,&ptr_out);
 		}
 		break;
 	default:
@@ -712,7 +712,7 @@ unsigned long OpenSSL_GetX509Content(
 	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__,"");
 	FILE_LOG_HEX(file_log_name, ptr_in, ulX509Len);
 	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__,"");
-	FILE_LOG_HEX(file_log_name, ptr_out, *pulX509ContentLen);
+	FILE_LOG_HEX(file_log_name, ptr_out, *puiX509ContentLen);
 
 	rv = 0;
 err:
@@ -737,11 +737,11 @@ err:
 
 
 
-unsigned long OpenSSL_SM2SignCSR(
-	const unsigned char *pbCSR, unsigned long ulCSRLen,
-	const unsigned char * pbPrivateKey,unsigned long ulPrivateKeyLen,
-	unsigned long ulAlg,
-	unsigned char *pbCSRSigned, unsigned long * pulCSRSignedLen
+unsigned int OpenSSL_SM2SignCSR(
+	const unsigned char *pbCSR, unsigned int ulCSRLen,
+	const unsigned char * pbPrivateKey,unsigned int ulPrivateKeyLen,
+	unsigned int ulAlg,
+	unsigned char *pbCSRSigned, unsigned int * puiCSRSignedLen
 	)
 {
 	EVP_PKEY	*pktmp = NULL;			// req�еĹ�Կ
@@ -751,24 +751,24 @@ unsigned long OpenSSL_SM2SignCSR(
 	const EC_POINT	* pubkey = NULL;
 	BIGNUM * pubkey_x = NULL;
 	BIGNUM * pubkey_y = NULL;
-	unsigned long rv = -1;
+	unsigned int rv = -1;
 	unsigned char digest_value[SM3_DIGEST_LEN] = {0};
 	unsigned int digest_len = SM3_DIGEST_LEN;
 	unsigned char pbPublicKeyX[SM2_BYTES_LEN] = {0};
 	unsigned char pbPublicKeyY[SM2_BYTES_LEN] = {0};
-	unsigned long pubkey_xy_len = 2 * SM2_BYTES_LEN + 1;
+	unsigned int pubkey_xy_len = 2 * SM2_BYTES_LEN + 1;
 	unsigned char pubkey_xy_value[2 * SM2_BYTES_LEN + 1] = {0};
 
 	unsigned char info_value[BUFFER_LEN_1K * 4] = {0};
-	unsigned long info_len = BUFFER_LEN_1K * 4;
+	unsigned int info_len = BUFFER_LEN_1K * 4;
 
-	unsigned long encode_len = BUFFER_LEN_1K;
+	unsigned int encode_len = BUFFER_LEN_1K;
 	unsigned char encode_value[BUFFER_LEN_1K] = {0};
 
-	unsigned long r_len = SM3_DIGEST_LEN;
-	unsigned long s_len = SM3_DIGEST_LEN;
+	unsigned int r_len = SM3_DIGEST_LEN;
+	unsigned int s_len = SM3_DIGEST_LEN;
 	unsigned char pbSig[BUFFER_LEN_1K] = {0};
-	unsigned long ulSigLen = BUFFER_LEN_1K;
+	unsigned int ulSigLen = BUFFER_LEN_1K;
 
 	const unsigned char * ptr_in = NULL;
 	unsigned char * ptr_out = NULL;
@@ -880,7 +880,7 @@ unsigned long OpenSSL_SM2SignCSR(
 	req->signature->flags|=ASN1_STRING_FLAG_BITS_LEFT;
 
 	ptr_out = pbCSRSigned;
-	*pulCSRSignedLen =  i2d_X509_REQ(req, &ptr_out);
+	*puiCSRSignedLen =  i2d_X509_REQ(req, &ptr_out);
 
 	rv = 0;
 
@@ -906,19 +906,19 @@ err:
 }
 
 
-unsigned long OpenSSL_SM2SetX509SignValue(
-	const unsigned char *pbX509, unsigned long ulX509Len,
+unsigned int OpenSSL_SM2SetX509SignValue(
+	const unsigned char *pbX509, unsigned int ulX509Len,
 	X509_TYPE ulX509Type,
-	const unsigned char *pbR, unsigned long ulRLen,
-	const unsigned char *pbS, unsigned long ulSLen,
-	unsigned char *pbX509Signed, unsigned long * pulX509SignedLen)
+	const unsigned char *pbR, unsigned int ulRLen,
+	const unsigned char *pbS, unsigned int ulSLen,
+	unsigned char *pbX509Signed, unsigned int * puiX509SignedLen)
 {
-	unsigned long encode_len = BUFFER_LEN_1K;
+	unsigned int encode_len = BUFFER_LEN_1K;
 	unsigned char encode_value[BUFFER_LEN_1K] = {0};
 	X509_REQ *req = NULL;
 	X509 *x509 = NULL;
 	X509_CRL *crl = NULL;
-	unsigned long rv = -1;
+	unsigned int rv = -1;
 	const unsigned char * ptr_in = NULL;
 	unsigned char * ptr_out = NULL;
 
@@ -948,7 +948,7 @@ unsigned long OpenSSL_SM2SetX509SignValue(
 			req->signature->flags&= ~(ASN1_STRING_FLAG_BITS_LEFT|0x07);
 			req->signature->flags|=ASN1_STRING_FLAG_BITS_LEFT;
 
-			*pulX509SignedLen =  i2d_X509_REQ(req, &ptr_out);
+			*puiX509SignedLen =  i2d_X509_REQ(req, &ptr_out);
 		}
 		break;
 	case X509_TYPE_CERT:
@@ -963,7 +963,7 @@ unsigned long OpenSSL_SM2SetX509SignValue(
 			x509->signature->flags&= ~(ASN1_STRING_FLAG_BITS_LEFT|0x07);
 			x509->signature->flags|=ASN1_STRING_FLAG_BITS_LEFT;
 
-			*pulX509SignedLen =  i2d_X509(x509, &ptr_out);
+			*puiX509SignedLen =  i2d_X509(x509, &ptr_out);
 		}
 		break;
 	case X509_TYPE_CRL:
@@ -978,7 +978,7 @@ unsigned long OpenSSL_SM2SetX509SignValue(
 			crl->signature->flags&= ~(ASN1_STRING_FLAG_BITS_LEFT|0x07);
 			crl->signature->flags|=ASN1_STRING_FLAG_BITS_LEFT;
 
-			*pulX509SignedLen =  i2d_X509_CRL(crl, &ptr_out);
+			*puiX509SignedLen =  i2d_X509_CRL(crl, &ptr_out);
 		}
 		break;
 	default:
@@ -989,7 +989,7 @@ unsigned long OpenSSL_SM2SetX509SignValue(
 	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__,"ptr_in");
 	FILE_LOG_HEX(file_log_name, ptr_in, ulX509Len);
 	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__,"ptr_out");
-	FILE_LOG_HEX(file_log_name, ptr_out, *pulX509SignedLen);
+	FILE_LOG_HEX(file_log_name, ptr_out, *puiX509SignedLen);
 
 	rv = 0;
 err:
@@ -1013,18 +1013,18 @@ err:
 }
 
 
-unsigned long OpenSSL_SM2SignMSG(const unsigned char *pbMSG, unsigned long ulMSGLen, 
-	const unsigned char *pbPublicKeyX, unsigned long ulPublicKeyXLen,
-	const unsigned char *pbPublicKeyY, unsigned long ulPublicKeyYLen,
-	const unsigned char * pbPrivateKey,unsigned long ulPrivateKeyLen,
-	unsigned long ulAlg,
-	unsigned char *pbSig, unsigned long * pulSigLen)
+unsigned int OpenSSL_SM2SignMSG(const unsigned char *pbMSG, unsigned int ulMSGLen, 
+	const unsigned char *pbPublicKeyX, unsigned int ulPublicKeyXLen,
+	const unsigned char *pbPublicKeyY, unsigned int ulPublicKeyYLen,
+	const unsigned char * pbPrivateKey,unsigned int ulPrivateKeyLen,
+	unsigned int ulAlg,
+	unsigned char *pbSig, unsigned int * puiSigLen)
 {
-	unsigned long rv	= -1;
+	unsigned int rv	= -1;
 	unsigned char digest_value[SM3_DIGEST_LEN] = {0};
 	unsigned int digest_len = SM3_DIGEST_LEN;
 
-	unsigned long pubkey_xy_len = 2 * SM2_BYTES_LEN + 1;
+	unsigned int pubkey_xy_len = 2 * SM2_BYTES_LEN + 1;
 	unsigned char pubkey_xy_value[2 * SM2_BYTES_LEN + 1] = {0};
 
 	memcpy(pubkey_xy_value, "\x04", 1);
@@ -1037,7 +1037,7 @@ unsigned long OpenSSL_SM2SignMSG(const unsigned char *pbMSG, unsigned long ulMSG
 		goto err;
 	}
 
-	rv = OpenSSL_SM2SignDigest(digest_value, digest_len, pbPrivateKey,ulPrivateKeyLen, pbSig,pulSigLen);
+	rv = OpenSSL_SM2SignDigest(digest_value, digest_len, pbPrivateKey,ulPrivateKeyLen, pbSig,puiSigLen);
 	if(rv)
 	{
 		goto err;
@@ -1048,35 +1048,35 @@ err:
 	return rv;
 }
 
-unsigned long OpenSSL_SM2SignCRL(
-	const unsigned char *pbCRL, unsigned long ulCRLLen,unsigned long ulAlg,
-	const unsigned char *pbPublicKeyX, unsigned long ulPublicKeyXLen,
-	const unsigned char *pbPublicKeyY, unsigned long ulPublicKeyYLen,
-	const unsigned char * pbPrivateKey,unsigned long ulPrivateKeyLen,
-	unsigned char *pbCRLSigned, unsigned long * pulCRLSignedLen
+unsigned int OpenSSL_SM2SignCRL(
+	const unsigned char *pbCRL, unsigned int ulCRLLen,unsigned int ulAlg,
+	const unsigned char *pbPublicKeyX, unsigned int ulPublicKeyXLen,
+	const unsigned char *pbPublicKeyY, unsigned int ulPublicKeyYLen,
+	const unsigned char * pbPrivateKey,unsigned int ulPrivateKeyLen,
+	unsigned char *pbCRLSigned, unsigned int * puiCRLSignedLen
 	)
 {
-	unsigned long rv = -1;
+	unsigned int rv = -1;
 	X509_CRL * crl =  NULL;
 	unsigned char pbSig[BUFFER_LEN_1K] = {0};
-	unsigned long ulSigLen = BUFFER_LEN_1K;
+	unsigned int ulSigLen = BUFFER_LEN_1K;
 	//EC_KEY      * ecPubkey = NULL;
 
 	unsigned char digest_value[SM3_DIGEST_LEN] = {0};
 	unsigned int digest_len = SM3_DIGEST_LEN;
 
-	unsigned long r_len = SM3_DIGEST_LEN;
-	unsigned long s_len = SM3_DIGEST_LEN;
+	unsigned int r_len = SM3_DIGEST_LEN;
+	unsigned int s_len = SM3_DIGEST_LEN;
 
-	unsigned long pubkey_xy_len = 2 * SM2_BYTES_LEN + 1;
+	unsigned int pubkey_xy_len = 2 * SM2_BYTES_LEN + 1;
 	unsigned char pubkey_xy_value[2 * SM2_BYTES_LEN + 1] = {0};
 
 	unsigned char info_value[BUFFER_LEN_1K * 4] = {0};
-	unsigned long info_len = BUFFER_LEN_1K * 4;
+	unsigned int info_len = BUFFER_LEN_1K * 4;
 	unsigned char *ptr_out = info_value;
 	const unsigned char * ptr_in = NULL;
 
-	unsigned long encode_len = BUFFER_LEN_1K;
+	unsigned int encode_len = BUFFER_LEN_1K;
 	unsigned char encode_value[BUFFER_LEN_1K] = {0};
 
 	ptr_in = pbCRL;
@@ -1124,7 +1124,7 @@ unsigned long OpenSSL_SM2SignCRL(
 	crl->signature->flags|=ASN1_STRING_FLAG_BITS_LEFT;
 
 	ptr_out = pbCRLSigned;
-	*pulCRLSignedLen =  i2d_X509_CRL(crl, &ptr_out);
+	*puiCRLSignedLen =  i2d_X509_CRL(crl, &ptr_out);
 
 	rv = 0;
 
@@ -1142,33 +1142,33 @@ err:
 }
 
 
-unsigned long OpenSSL_SM2SignCert(
-	const unsigned char *pbX509Cert,   unsigned long ulX509CertLen, 
-	const unsigned char *pbPublicKeyX, unsigned long ulPublicKeyXLen,
-	const unsigned char *pbPublicKeyY, unsigned long ulPublicKeyYLen,
-	const unsigned char *pbPrivateKey, unsigned long ulPrivateKeyLen,
-	unsigned char * pbX509CertSigned,  unsigned long *pulX509CertSignedLen
+unsigned int OpenSSL_SM2SignCert(
+	const unsigned char *pbX509Cert,   unsigned int ulX509CertLen, 
+	const unsigned char *pbPublicKeyX, unsigned int ulPublicKeyXLen,
+	const unsigned char *pbPublicKeyY, unsigned int ulPublicKeyYLen,
+	const unsigned char *pbPrivateKey, unsigned int ulPrivateKeyLen,
+	unsigned char * pbX509CertSigned,  unsigned int *puiX509CertSignedLen
 	)
 {
-	unsigned long rv = -1;
+	unsigned int rv = -1;
 	X509 * x509 =  NULL;
 	unsigned char pbSig[BUFFER_LEN_1K] = {0};
-	unsigned long ulSigLen = BUFFER_LEN_1K;
+	unsigned int ulSigLen = BUFFER_LEN_1K;
 
 	unsigned char digest_value[SM3_DIGEST_LEN] = {0};
 	unsigned int digest_len = SM3_DIGEST_LEN;
 
-	unsigned long r_len = SM3_DIGEST_LEN;
-	unsigned long s_len = SM3_DIGEST_LEN;
+	unsigned int r_len = SM3_DIGEST_LEN;
+	unsigned int s_len = SM3_DIGEST_LEN;
 
-	unsigned long encode_len = BUFFER_LEN_1K;
+	unsigned int encode_len = BUFFER_LEN_1K;
 	unsigned char encode_value[BUFFER_LEN_1K] = {0};
 
-	unsigned long pubkey_xy_len = 2 * SM2_BYTES_LEN + 1;
+	unsigned int pubkey_xy_len = 2 * SM2_BYTES_LEN + 1;
 	unsigned char pubkey_xy_value[2 * SM2_BYTES_LEN + 1] = {0};
 
 	unsigned char info_value[BUFFER_LEN_1K * 4] = {0};
-	unsigned long info_len = BUFFER_LEN_1K * 4;
+	unsigned int info_len = BUFFER_LEN_1K * 4;
 	unsigned char *ptr_out = info_value;
 	const unsigned char * ptr_in = NULL;
 
@@ -1213,7 +1213,7 @@ unsigned long OpenSSL_SM2SignCert(
 	x509->signature->flags|=ASN1_STRING_FLAG_BITS_LEFT;
 
 	ptr_out = pbX509CertSigned;
-	*pulX509CertSignedLen =  i2d_X509(x509, &ptr_out);
+	*puiX509CertSignedLen =  i2d_X509(x509, &ptr_out);
 
 	rv = 0;
 
@@ -1227,10 +1227,10 @@ err:
 	return rv;
 }
 
-unsigned long OpenSSL_SM2GenCSRWithPubkey(const OPST_USERINFO *pstUserInfo,
-	const unsigned char * pbPublicKeyX,  unsigned long ulPublicKeyXLen, 
-	const unsigned char * pbPublicKeyY,  unsigned long ulPublicKeyYLen,
-	unsigned char * pbCSR,  unsigned long * pulCSRLen)
+unsigned int OpenSSL_SM2GenCSRWithPubkey(const OPST_USERINFO *pstUserInfo,
+	const unsigned char * pbPublicKeyX,  unsigned int ulPublicKeyXLen, 
+	const unsigned char * pbPublicKeyY,  unsigned int ulPublicKeyYLen,
+	unsigned char * pbCSR,  unsigned int * puiCSRLen)
 {
 	unsigned long		rv	= -1;
 	X509_REQ	*req = NULL;
@@ -1302,7 +1302,7 @@ unsigned long OpenSSL_SM2GenCSRWithPubkey(const OPST_USERINFO *pstUserInfo,
 		OBJ_txt2obj("1.2.156.10197.1.501",0), 
 		V_ASN1_UNDEF, NULL);
 
-	*pulCSRLen = i2d_X509_REQ(req, &ptr_out);
+	*puiCSRLen = i2d_X509_REQ(req, &ptr_out);
 
 	rv = 0;
 err:
@@ -1321,12 +1321,12 @@ err:
 
 int X509_ALGOR_set0(X509_ALGOR *alg, ASN1_OBJECT *aobj, int ptype, void *pval);
 
-unsigned long OpenSSL_SM2GenRootCert(const unsigned char * pbCSR,unsigned long ulCSRLen,
-	unsigned char * pbSerialNumber,unsigned long ulSerialNumberLen,
-	unsigned long ulNotBefore, unsigned long ulNotAfter, 
-	unsigned char * pbX509Cert, unsigned long * pulX509CertLen)
+unsigned int OpenSSL_SM2GenRootCert(const unsigned char * pbCSR,unsigned int ulCSRLen,
+	unsigned char * pbSerialNumber,unsigned int ulSerialNumberLen,
+	unsigned int ulNotBefore, unsigned int ulNotAfter, 
+	unsigned char * pbX509Cert, unsigned int * puiX509CertLen)
 {
-	unsigned long       rv = -1;
+	unsigned int       rv = -1;
 	EVP_PKEY	*pktmp = NULL;			// req�еĹ�Կ
 	X509		*x509 = NULL;
 	X509_NAME	*name =NULL;
@@ -1431,7 +1431,7 @@ unsigned long OpenSSL_SM2GenRootCert(const unsigned char * pbCSR,unsigned long u
 	else
 	{
 		ptr_out = pbX509Cert;
-		* pulX509CertLen = i2d_X509(x509, &ptr_out);
+		* puiX509CertLen = i2d_X509(x509, &ptr_out);
 	}
 
 	rv = 0;
@@ -1452,11 +1452,11 @@ err:
 	return rv;
 }
 
-unsigned long OpenSSL_SM2GenCert(const unsigned char * pbCSR,unsigned long ulCSRLen,
-	const unsigned char * pbX509CACert, unsigned long ulX509CACertLen, 
-	unsigned char * pbSerialNumber,unsigned long ulSerialNumberLen,
-	unsigned long ulNotBefore, unsigned long ulNotAfter, unsigned long ulSignFlag,
-	unsigned char * pbX509Cert, unsigned long * pulX509CertLen)
+unsigned int OpenSSL_SM2GenCert(const unsigned char * pbCSR,unsigned int ulCSRLen,
+	const unsigned char * pbX509CACert, unsigned int ulX509CACertLen, 
+	unsigned char * pbSerialNumber,unsigned int ulSerialNumberLen,
+	unsigned int ulNotBefore, unsigned int ulNotAfter, unsigned int ulSignFlag,
+	unsigned char * pbX509Cert, unsigned int * puiX509CertLen)
 {
 	char * strBaseKeyUsage = NULL;
 	char * strExtKeyUsage = "";
@@ -1465,7 +1465,7 @@ unsigned long OpenSSL_SM2GenCert(const unsigned char * pbCSR,unsigned long ulCSR
 	X509_NAME	*name = NULL;
 	int isCACert = 0;
 	X509_REQ *req = NULL;
-	unsigned long rv = -1;
+	unsigned int rv = -1;
 	const unsigned char * ptr_in = NULL;
 	unsigned char * ptr_out = NULL;
 	BIGNUM * bnSN = NULL;
@@ -1596,7 +1596,7 @@ unsigned long OpenSSL_SM2GenCert(const unsigned char * pbCSR,unsigned long ulCSR
 
 	ptr_out = pbX509Cert;
 
-	* pulX509CertLen = i2d_X509(x509, &ptr_out);
+	* puiX509CertLen = i2d_X509(x509, &ptr_out);
 
 	rv = 0;
 
@@ -1631,13 +1631,13 @@ err:
 }
 
 
-unsigned long OpenSSL_SM2GenCertEX(const unsigned char * pbCSR,unsigned long ulCSRLen,
-	const unsigned char * pbPublicKeyX,  unsigned long ulPublicKeyXLen, 
-	const unsigned char * pbPublicKeyY,  unsigned long ulPublicKeyYLen,
-	const unsigned char * pbX509CACert, unsigned long ulX509CACertLen, 
-	unsigned char * pbSerialNumber,unsigned long ulSerialNumberLen,
-	unsigned long ulNotBefore, unsigned long ulNotAfter, unsigned long ulSignFlag,
-	unsigned char * pbX509Cert, unsigned long * pulX509CertLen)
+unsigned int OpenSSL_SM2GenCertEX(const unsigned char * pbCSR,unsigned int ulCSRLen,
+	const unsigned char * pbPublicKeyX,  unsigned int ulPublicKeyXLen, 
+	const unsigned char * pbPublicKeyY,  unsigned int ulPublicKeyYLen,
+	const unsigned char * pbX509CACert, unsigned int ulX509CACertLen, 
+	unsigned char * pbSerialNumber,unsigned int ulSerialNumberLen,
+	unsigned int ulNotBefore, unsigned int ulNotAfter, unsigned int ulSignFlag,
+	unsigned char * pbX509Cert, unsigned int * puiX509CertLen)
 {
 	char * strBaseKeyUsage = NULL;
 	char * strExtKeyUsage = "";
@@ -1646,7 +1646,7 @@ unsigned long OpenSSL_SM2GenCertEX(const unsigned char * pbCSR,unsigned long ulC
 	X509_NAME	*name = NULL;
 	int isCACert = 0;
 	X509_REQ *req = NULL;
-	unsigned long rv = -1;
+	unsigned int rv = -1;
 	const unsigned char * ptr_in = NULL;
 	unsigned char * ptr_out = NULL;
 	BIGNUM * bnSN = NULL;
@@ -1766,7 +1766,7 @@ unsigned long OpenSSL_SM2GenCertEX(const unsigned char * pbCSR,unsigned long ulC
 
 	ptr_out = pbX509Cert;
 
-	* pulX509CertLen = i2d_X509(x509, &ptr_out);
+	* puiX509CertLen = i2d_X509(x509, &ptr_out);
 
 	rv = 0;
 
@@ -1800,12 +1800,12 @@ err:
 	return rv;
 }
 
-unsigned long OpenSSL_CertGetSubject(const unsigned char * pbX509Cert, unsigned long ulX509CertLen,
-	unsigned char * pbSubject, unsigned long * pulSubjectLen)
+unsigned int OpenSSL_CertGetSubject(const unsigned char * pbX509Cert, unsigned int ulX509CertLen,
+	unsigned char * pbSubject, unsigned int * puiSubjectLen)
 {
 	X509 * x509 =  NULL;
 	X509_NAME * pX509_Name_Subject = NULL;
-	unsigned long rv = -1;
+	unsigned int rv = -1;
 
 	x509 = d2i_X509( NULL, (const unsigned char **)&pbX509Cert,ulX509CertLen);
 	if (!x509)
@@ -1819,7 +1819,7 @@ unsigned long OpenSSL_CertGetSubject(const unsigned char * pbX509Cert, unsigned 
 		goto err;
 	}
 
-	if (!pulSubjectLen)
+	if (!puiSubjectLen)
 	{
 		rv = OPE_ERR_INVALID_PARAM;
 		goto err;
@@ -1827,18 +1827,18 @@ unsigned long OpenSSL_CertGetSubject(const unsigned char * pbX509Cert, unsigned 
 
 	if (!pbSubject)
 	{
-		* pulSubjectLen = pX509_Name_Subject->bytes->length;
+		* puiSubjectLen = pX509_Name_Subject->bytes->length;
 	}
-	else if(* pulSubjectLen < pX509_Name_Subject->bytes->length)
+	else if(* puiSubjectLen < pX509_Name_Subject->bytes->length)
 	{
-		* pulSubjectLen = pX509_Name_Subject->bytes->length;
+		* puiSubjectLen = pX509_Name_Subject->bytes->length;
 		rv = OPE_ERR_BUFF_SMALL;
 		goto err;
 	}
 	else
 	{
-		* pulSubjectLen = pX509_Name_Subject->bytes->length;
-		memcpy(pbSubject, pX509_Name_Subject->bytes->data, * pulSubjectLen);
+		* puiSubjectLen = pX509_Name_Subject->bytes->length;
+		memcpy(pbSubject, pX509_Name_Subject->bytes->data, * puiSubjectLen);
 	}
 
 	rv = 0;
@@ -1852,12 +1852,12 @@ err:
 	return rv;
 }
 
-unsigned long OpenSSL_SM2SignDigest(const unsigned char *pbHash, unsigned long ulHashLen, 
-	const unsigned char *pbPrivateKey, unsigned long ulPrivateKeyLen,
-	unsigned char *pbSig, unsigned long * pulSigLen
+unsigned int OpenSSL_SM2SignDigest(const unsigned char *pbHash, unsigned int ulHashLen, 
+	const unsigned char *pbPrivateKey, unsigned int ulPrivateKeyLen,
+	unsigned char *pbSig, unsigned int * puiSigLen
 	)
 {
-	unsigned long rv = -1;
+	unsigned int rv = -1;
 	BN_CTX *ctx = NULL;
 	BIGNUM *k = NULL, *r = NULL, *order = NULL, *order2 = NULL, *x1 = NULL, *s = NULL;
 	BIGNUM *bnOne = NULL, *bnDigest = NULL, *bnPrikey = NULL , *bnTemp = NULL;
@@ -1871,7 +1871,7 @@ unsigned long OpenSSL_SM2SignDigest(const unsigned char *pbHash, unsigned long u
 		goto err;
 	}
 
-	if(!pbHash || 0==ulHashLen || !pbPrivateKey || 0==ulPrivateKeyLen || !pulSigLen)
+	if(!pbHash || 0==ulHashLen || !pbPrivateKey || 0==ulPrivateKeyLen || !puiSigLen)
 	{
 		rv = OPE_ERR_INVALID_PARAM;
 		goto err;
@@ -1879,13 +1879,13 @@ unsigned long OpenSSL_SM2SignDigest(const unsigned char *pbHash, unsigned long u
 
 	if(NULL == pbSig)
 	{
-		*pulSigLen = 2 * SM2_BYTES_LEN;
+		*puiSigLen = 2 * SM2_BYTES_LEN;
 		rv = 0;    // OK
 		goto err;
 	}
-	if(*pulSigLen < 2 * SM2_BYTES_LEN)
+	if(*puiSigLen < 2 * SM2_BYTES_LEN)
 	{
-		*pulSigLen = 2 * SM2_BYTES_LEN;
+		*puiSigLen = 2 * SM2_BYTES_LEN;
 		rv = OPE_ERR_NOT_ENOUGH_MEMORY;
 		goto err;
 	}
@@ -2016,7 +2016,7 @@ unsigned long OpenSSL_SM2SignDigest(const unsigned char *pbHash, unsigned long u
 	memset(pbSig, 0x00,  2 * SM2_BYTES_LEN);
 	memcpy(pbSig + SM2_BYTES_LEN - rLen, bR, rLen);
 	memcpy(pbSig + 2*SM2_BYTES_LEN - sLen, bS, sLen);
-	*pulSigLen = 2 * SM2_BYTES_LEN;
+	*puiSigLen = 2 * SM2_BYTES_LEN;
 
 	if (tmp_point)
 		EC_POINT_free(tmp_point);
@@ -2039,12 +2039,12 @@ err:
 }
 
 
-unsigned long OpenSSL_SM2VerifyDigest(const unsigned char *pbHash, unsigned long ulHashLen, 
-	const unsigned char *pbSig, unsigned long ulSigLen,
-	const unsigned char *aPubkeyValueX, unsigned long ulPublicKeyXLen,
-	const unsigned char *aPubkeyValueY, unsigned long ulPublicKeyYLen)
+unsigned int OpenSSL_SM2VerifyDigest(const unsigned char *pbHash, unsigned int ulHashLen, 
+	const unsigned char *pbSig, unsigned int ulSigLen,
+	const unsigned char *aPubkeyValueX, unsigned int ulPublicKeyXLen,
+	const unsigned char *aPubkeyValueY, unsigned int ulPublicKeyYLen)
 {
-	unsigned long rv = -1;
+	unsigned int rv = -1;
 	BN_CTX *ctx = NULL;
 	BIGNUM *t = NULL, *r = NULL, *r2 = NULL, *order = NULL, *x1 = NULL, *s = NULL;
 	BIGNUM *bnDigest = NULL;
@@ -2194,11 +2194,11 @@ err:
 typedef struct X509_name_st X509_NAME;
 #endif
 
-unsigned long OpenSSL_AddNameByID(X509_NAME * aX509Name,  unsigned long aType, unsigned char * aDataValue, unsigned long aDataLen, unsigned long aDataType)//��Ӣ�Ĵ���
+unsigned int OpenSSL_AddNameByID(X509_NAME * aX509Name,  unsigned int aType, unsigned char * aDataValue, unsigned int aDataLen, unsigned int aDataType)//��Ӣ�Ĵ���
 {
-	unsigned long rv = -1;
+	unsigned int rv = -1;
 	unsigned char * ptr = 0;
-	unsigned long i = 0;
+	unsigned int i = 0;
 
 	ptr = aDataValue;
 
@@ -2230,11 +2230,11 @@ unsigned long OpenSSL_AddNameByID(X509_NAME * aX509Name,  unsigned long aType, u
 }
 
 
-unsigned long OpenSSL_AddNameByName(X509_NAME * aX509Name, const char * aType, unsigned char * aDataValue, unsigned long aDataLen, unsigned long aDataType)//��Ӣ�Ĵ���
+unsigned int OpenSSL_AddNameByName(X509_NAME * aX509Name, const char * aType, unsigned char * aDataValue, unsigned int aDataLen, unsigned int aDataType)//��Ӣ�Ĵ���
 {
-	unsigned long rv = -1;
+	unsigned int rv = -1;
 	unsigned char * ptr = 0;
-	unsigned long i = 0;
+	unsigned int i = 0;
 
 	ptr = aDataValue;
 
@@ -2265,8 +2265,8 @@ unsigned long OpenSSL_AddNameByName(X509_NAME * aX509Name, const char * aType, u
 }
 
 
-unsigned long OpenSSL_CertGetPubkey(const unsigned char * pbX509Cert, unsigned long ulX509CertLen,
-	unsigned char * pbPublicKey, unsigned long * pulPublicKeyLen)
+unsigned int OpenSSL_CertGetPubkey(const unsigned char * pbX509Cert, unsigned int ulX509CertLen,
+	unsigned char * pbPublicKey, unsigned int * puiPublicKeyLen)
 {
 	X509 * x509 =  NULL;
 	int rv = -1;
@@ -2289,9 +2289,9 @@ unsigned long OpenSSL_CertGetPubkey(const unsigned char * pbX509Cert, unsigned l
 
 	if (!pbPublicKey)
 	{
-		* pulPublicKeyLen = pubkey->length;
+		* puiPublicKeyLen = pubkey->length;
 	}
-	else if(* pulPublicKeyLen < pubkey->length)
+	else if(* puiPublicKeyLen < pubkey->length)
 	{
 		rv = -4;
 		goto err;
@@ -2304,7 +2304,7 @@ unsigned long OpenSSL_CertGetPubkey(const unsigned char * pbX509Cert, unsigned l
 		FILE_LOG_NUMBER(file_log_name,pubkey->length);
 		FILE_LOG_HEX(file_log_name,pbPublicKey,pubkey->length);
 
-		* pulPublicKeyLen = pubkey->length;
+		* puiPublicKeyLen = pubkey->length;
 
 		FILE_LOG_STRING(file_log_name,"pubkey->data");
 		FILE_LOG_NUMBER(file_log_name,pubkey->length);
@@ -2389,11 +2389,11 @@ short Add_Ext(X509 *cert, X509 * root, int nid, char *value)
 	return 1;
 }
 
-unsigned long OpenSSL_SM2GenCRL(const OPST_CRL * pstCRLList, unsigned long ulCRLListSize, 
-	const unsigned char * pbX509Cert,unsigned long ulX509CertLen, 
-	unsigned char * pbCRL, unsigned long * pulCRLLen) 
+unsigned int OpenSSL_SM2GenCRL(const OPST_CRL * pstCRLList, unsigned int ulCRLListSize, 
+	const unsigned char * pbX509Cert,unsigned int ulX509CertLen, 
+	unsigned char * pbCRL, unsigned int * puiCRLLen) 
 {
-	unsigned long rv = -1;
+	unsigned int rv = -1;
 	long crldays = 10;
 	long crlhours = 0;
 	long crlsec = 0;
@@ -2403,7 +2403,7 @@ unsigned long OpenSSL_SM2GenCRL(const OPST_CRL * pstCRLList, unsigned long ulCRL
 	X509 * x509 =  NULL;
 	unsigned char * out_ptr = pbCRL;
 	const unsigned char * in_ptr = pbX509Cert;
-	unsigned long i = 0;
+	unsigned int i = 0;
 	ASN1_TIME * prevtm[COUNT_1K] = {NULL};
 	ASN1_ENUMERATED *rtmp[COUNT_1K] = {NULL};
 	ASN1_INTEGER * tmpser[COUNT_1K] = {NULL};
@@ -2509,7 +2509,7 @@ unsigned long OpenSSL_SM2GenCRL(const OPST_CRL * pstCRLList, unsigned long ulCRL
 		OBJ_txt2obj("1.2.156.10197.1.501",0), 
 		V_ASN1_UNDEF, 0);
 
-	*pulCRLLen = i2d_X509_CRL(crl, &out_ptr);
+	*puiCRLLen = i2d_X509_CRL(crl, &out_ptr);
 
 	rv = 0;
 err: 
@@ -2559,11 +2559,11 @@ static const struct entry nids[ENTRY_COUNT] = {
 	{NID_pkcs9_emailAddress, "emailAddress"},  
 };
 
-unsigned long OpenSSL_CertGetSubjectItem(const unsigned char * pbX509Cert, unsigned long ulX509CertLen,int ulIndex, unsigned char * pbSubjectItem, unsigned long * pulSubjectItemLen)
+unsigned int OpenSSL_CertGetSubjectItem(const unsigned char * pbX509Cert, unsigned int ulX509CertLen,int ulIndex, unsigned char * pbSubjectItem, unsigned int * puiSubjectItemLen)
 {
 	X509 * x509 =  NULL;
 	X509_NAME * pX509_Name_Subject = NULL;
-	unsigned long rv = -1;
+	unsigned int rv = -1;
 
 	int j = 0;  
 	int pos = -1;  
@@ -2625,7 +2625,7 @@ unsigned long OpenSSL_CertGetSubjectItem(const unsigned char * pbX509Cert, unsig
 	FILE_LOG_BYTE(file_log_name,d->data, d->length);
 
 
-	if (!pulSubjectItemLen)
+	if (!puiSubjectItemLen)
 	{
 		rv = OPE_ERR_INVALID_PARAM;
 		goto err;
@@ -2633,18 +2633,18 @@ unsigned long OpenSSL_CertGetSubjectItem(const unsigned char * pbX509Cert, unsig
 
 	if (!pbSubjectItem)
 	{
-		* pulSubjectItemLen = d->length;
+		* puiSubjectItemLen = d->length;
 	}
-	else if(* pulSubjectItemLen < d->length)
+	else if(* puiSubjectItemLen < d->length)
 	{
-		* pulSubjectItemLen = d->length;
+		* puiSubjectItemLen = d->length;
 		rv = OPE_ERR_BUFF_SMALL;
 		goto err;
 	}
 	else
 	{
-		* pulSubjectItemLen = d->length;
-		memcpy(pbSubjectItem, d->data, * pulSubjectItemLen);
+		* puiSubjectItemLen = d->length;
+		memcpy(pbSubjectItem, d->data, * puiSubjectItemLen);
 	}
 
 	rv = 0;
@@ -2653,11 +2653,11 @@ err:
 	return rv;
 }
 
-unsigned long OpenSSL_CertExtenItem(const unsigned char * pbX509Cert, unsigned long ulX509CertLen,int ulIndex, unsigned char * pbSubjectItem, unsigned long * pulSubjectItemLen)
+unsigned int OpenSSL_CertExtenItem(const unsigned char * pbX509Cert, unsigned int ulX509CertLen,int ulIndex, unsigned char * pbSubjectItem, unsigned int * puiSubjectItemLen)
 {
 	X509 * x509 =  NULL;
 	X509_EXTENSION * exten = NULL;
-	unsigned long rv = -1;
+	unsigned int rv = -1;
 
 	int j = 0;  
 	int pos = -1;  
@@ -2689,12 +2689,12 @@ err:
 	return rv;
 }
 
-unsigned long OpenSSL_SM2Decrypt(const unsigned char * pbPrivateKey, unsigned long ulPrivateKeyLen, const unsigned char * pbIN, unsigned long ulINLen,
-	unsigned char * pbOUT, unsigned long * pulOUTLen)
+unsigned int OpenSSL_SM2Decrypt(const unsigned char * pbPrivateKey, unsigned int ulPrivateKeyLen, const unsigned char * pbIN, unsigned int ulINLen,
+	unsigned char * pbOUT, unsigned int * puiOUTLen)
 {
 	unsigned char * szData = NULL;
 	unsigned int szLen = BUFFER_LEN_1K * BUFFER_LEN_1K;
-	unsigned long ulRet = -1;
+	unsigned int ulRet = -1;
 
 	if(!pbIN || !pbPrivateKey)
 	{
@@ -2719,9 +2719,9 @@ unsigned long OpenSSL_SM2Decrypt(const unsigned char * pbPrivateKey, unsigned lo
 		goto err;
 	}
 	
-	* pulOUTLen = szLen;
+	* puiOUTLen = szLen;
 
-	if (NULL == pbOUT || * pulOUTLen < szLen)
+	if (NULL == pbOUT || * puiOUTLen < szLen)
 	{
 
 	}
@@ -2741,16 +2741,16 @@ err:
 	return ulRet;
 }
 
-unsigned long OpenSSL_SM2Encrypt(const unsigned char * pbPublicKeyX, unsigned long ulPublicKeyXLen, 
-	const unsigned char * pbPublicKeyY, unsigned long ulPublicKeyYLen,
-	const unsigned char * pbIN, unsigned long ulINLen,
-	unsigned char * pbOUT, unsigned long * pulOUTLen)
+unsigned int OpenSSL_SM2Encrypt(const unsigned char * pbPublicKeyX, unsigned int ulPublicKeyXLen, 
+	const unsigned char * pbPublicKeyY, unsigned int ulPublicKeyYLen,
+	const unsigned char * pbIN, unsigned int ulINLen,
+	unsigned char * pbOUT, unsigned int * puiOUTLen)
 {
 	unsigned char * szData = NULL;
 	unsigned int szLen = BUFFER_LEN_1K * BUFFER_LEN_1K;
-	unsigned long ulRet = -1;
+	unsigned int ulRet = -1;
 
-	unsigned long pubkey_xy_len = 2 * SM2_BYTES_LEN + 1;
+	unsigned int pubkey_xy_len = 2 * SM2_BYTES_LEN + 1;
 	unsigned char pubkey_xy_value[2 * SM2_BYTES_LEN + 1] = {0};
 
 	if(!pbIN || !pbPublicKeyX || !pbPublicKeyY)
@@ -2781,9 +2781,9 @@ unsigned long OpenSSL_SM2Encrypt(const unsigned char * pbPublicKeyX, unsigned lo
 		goto err;
 	}
 
-	* pulOUTLen = szLen;
+	* puiOUTLen = szLen;
 
-	if (NULL == pbOUT || * pulOUTLen < szLen)
+	if (NULL == pbOUT || * puiOUTLen < szLen)
 	{
 
 	}
@@ -2805,11 +2805,11 @@ err:
 
 
 
-unsigned long OpenSSL_SM2Point(const unsigned char * pbPublicKeyX, unsigned long ulPublicKeyXLen, 
-	const unsigned char * pbPublicKeyY, unsigned long ulPublicKeyYLen
+unsigned int OpenSSL_SM2Point(const unsigned char * pbPublicKeyX, unsigned int ulPublicKeyXLen, 
+	const unsigned char * pbPublicKeyY, unsigned int ulPublicKeyYLen
 	)
 {
-	unsigned long ulRet = 0;
+	unsigned int ulRet = 0;
 	unsigned char data_value[SM2_BYTES_LEN * 2 +1] = {0};
 
 	data_value[0] = 0x04;
@@ -2830,11 +2830,11 @@ unsigned long OpenSSL_SM2Point(const unsigned char * pbPublicKeyX, unsigned long
 }
 
 
-unsigned long OpenSSL_SM2Write(const unsigned char * pbIN, unsigned long ulINLen, 
-	unsigned long ulType,char * szFileName,unsigned long fileEncode, char * szPassword
+unsigned int OpenSSL_SM2Write(const unsigned char * pbIN, unsigned int ulINLen, 
+	unsigned int ulType,char * szFileName,unsigned int fileEncode, char * szPassword
 	)
 {
-	unsigned long ulRet = -1;
+	unsigned int ulRet = -1;
 
 	FILE * file = fopen(szFileName, "w");
 
@@ -2852,7 +2852,7 @@ unsigned long OpenSSL_SM2Write(const unsigned char * pbIN, unsigned long ulINLen
 			BN_CTX *ctx=NULL;
 			BIGNUM *prvkey=NULL;
 			unsigned char data_value[BUFFER_LEN_1K * 4] = {0};
-			unsigned long data_len = BUFFER_LEN_1K *4;
+			unsigned int data_len = BUFFER_LEN_1K *4;
 			unsigned char * ptr_out = NULL;
 
 			if(ulINLen != SM2_BYTES_LEN)
@@ -2940,7 +2940,7 @@ unsigned long OpenSSL_SM2Write(const unsigned char * pbIN, unsigned long ulINLen
 			X509 * x509 = NULL;
 			const unsigned char * ptr_in = NULL;
 			unsigned char data_value[BUFFER_LEN_1K * 4] = {0};
-			unsigned long data_len = BUFFER_LEN_1K *4;
+			unsigned int data_len = BUFFER_LEN_1K *4;
 			unsigned char * ptr_out = NULL;
 
 			ptr_in = pbIN;
@@ -2971,7 +2971,7 @@ unsigned long OpenSSL_SM2Write(const unsigned char * pbIN, unsigned long ulINLen
 		{
 			const unsigned char * ptr_in = NULL;
 			unsigned char data_value[BUFFER_LEN_1K * 4] = {0};
-			unsigned long data_len = BUFFER_LEN_1K *4;
+			unsigned int data_len = BUFFER_LEN_1K *4;
 			unsigned char * ptr_out = NULL;
 			EVP_PKEY * pkey = NULL;
 			EC_KEY		*ec = NULL;
@@ -3078,13 +3078,13 @@ err:
 
 
 
-unsigned long OpenSSL_SM2DecryptInner(const unsigned char *pbIN, unsigned long ulINLen, 
-	const unsigned char *pbPrivateKey, unsigned long ulPrivateKeyLen, 
-	unsigned char *pbOUT, unsigned long * pulOUTLen)
+unsigned int OpenSSL_SM2DecryptInner(const unsigned char *pbIN, unsigned int ulINLen, 
+	const unsigned char *pbPrivateKey, unsigned int ulPrivateKeyLen, 
+	unsigned char *pbOUT, unsigned int * puiOUTLen)
 {
-	unsigned long ulRet = -1;
+	unsigned int ulRet = -1;
 
-	unsigned long ulPlainTextLen = 0;
+	unsigned int ulPlainTextLen = 0;
 
 	unsigned char * c1 = NULL; 
 	unsigned char * c2 = NULL;
@@ -3102,8 +3102,8 @@ unsigned long OpenSSL_SM2DecryptInner(const unsigned char *pbIN, unsigned long u
 	BIGNUM * h = NULL;
 	BIGNUM * privatekey = NULL;
 
-	unsigned long x2Len = 0;
-	unsigned long y2Len = 0;
+	unsigned int x2Len = 0;
+	unsigned int y2Len = 0;
 
 	EC_POINT * C1 = NULL;
 	EC_POINT * S = NULL;
@@ -3115,7 +3115,7 @@ unsigned long OpenSSL_SM2DecryptInner(const unsigned char *pbIN, unsigned long u
 
 	int i = 0;
 
-	if (!pbIN || ulINLen < (2*SM2_BYTES_LEN+1+SM3_DIGEST_LEN) || !pulOUTLen
+	if (!pbIN || ulINLen < (2*SM2_BYTES_LEN+1+SM3_DIGEST_LEN) || !puiOUTLen
 		|| !pbPrivateKey || ulPrivateKeyLen != SM2_BYTES_LEN)
 	{
 		ulRet = OPE_ERR_INVALID_PARAM;
@@ -3126,13 +3126,13 @@ unsigned long OpenSSL_SM2DecryptInner(const unsigned char *pbIN, unsigned long u
 
 	if(!pbOUT)
 	{
-		*pulOUTLen = ulPlainTextLen;
+		*puiOUTLen = ulPlainTextLen;
 		ulRet = 0;  // OK
 		goto err;
 	}
-	if(*pulOUTLen < ulPlainTextLen)
+	if(*puiOUTLen < ulPlainTextLen)
 	{
-		*pulOUTLen = ulPlainTextLen;
+		*puiOUTLen = ulPlainTextLen;
 		ulRet = OPE_ERR_NOT_ENOUGH_MEMORY;
 		goto err;
 	}
@@ -3293,7 +3293,7 @@ unsigned long OpenSSL_SM2DecryptInner(const unsigned char *pbIN, unsigned long u
 	if (0 == memcmp(c3,data_value_digest,SM3_DIGEST_LEN))
 	{
 		ulRet = 0;
-		*pulOUTLen = ulPlainTextLen;
+		*puiOUTLen = ulPlainTextLen;
 		memcpy(pbOUT,data_value_out,ulPlainTextLen);
 	}
 	else
@@ -3341,15 +3341,15 @@ err:
 
 
 
-unsigned long OpenSSL_SM2EncryptInner(
-	const unsigned char *pbIN, unsigned long ulINLen, 
-	const unsigned char *pbPublicKeyX, unsigned long ulPublicKeyXLen, 
-	const unsigned char *pbPublicKeyY, unsigned long ulPublicKeyYLen, 
-	unsigned char *pbOUT, unsigned long * pulOUTLen
+unsigned int OpenSSL_SM2EncryptInner(
+	const unsigned char *pbIN, unsigned int ulINLen, 
+	const unsigned char *pbPublicKeyX, unsigned int ulPublicKeyXLen, 
+	const unsigned char *pbPublicKeyY, unsigned int ulPublicKeyYLen, 
+	unsigned char *pbOUT, unsigned int * puiOUTLen
 	)
 {
-	unsigned long ulRet = -1;
-	unsigned long ulCiphertextLen = 0;
+	unsigned int ulRet = -1;
+	unsigned int ulCiphertextLen = 0;
 	BN_CTX * ctx = NULL;
 	EC_POINT * pubkey_xy = NULL;
 	EC_POINT * C1 = NULL;
@@ -3366,8 +3366,8 @@ unsigned long OpenSSL_SM2EncryptInner(
 	BIGNUM *x2 = NULL;
 	BIGNUM *y2 = NULL;
 
-	unsigned long x2Len = 0;
-	unsigned long y2Len = 0;
+	unsigned int x2Len = 0;
+	unsigned int y2Len = 0;
 
 	unsigned char * t = NULL;
 	unsigned char * zero_buffer = NULL;
@@ -3388,7 +3388,7 @@ unsigned long OpenSSL_SM2EncryptInner(
 	// 判断参数是否正确
 	if(NULL == pbIN || 0 == ulINLen || NULL == pbPublicKeyX
 		|| NULL == pbPublicKeyY || SM2_BYTES_LEN != ulPublicKeyXLen || SM2_BYTES_LEN != ulPublicKeyYLen
-		|| NULL == pulOUTLen)
+		|| NULL == puiOUTLen)
 	{
 		ulRet=OPE_ERR_INVALID_PARAM;
 		goto err;
@@ -3398,13 +3398,13 @@ unsigned long OpenSSL_SM2EncryptInner(
 	ulCiphertextLen =  2*SM2_BYTES_LEN + 1 + ulINLen + SM3_DIGEST_LEN;
 	if(NULL == pbOUT)
 	{
-		*pulOUTLen = ulCiphertextLen;
+		*puiOUTLen = ulCiphertextLen;
 		ulRet = 0;  // OK
 		goto err;
 	}
-	if(*pulOUTLen < ulCiphertextLen)
+	if(*puiOUTLen < ulCiphertextLen)
 	{
-		*pulOUTLen  = ulCiphertextLen;
+		*puiOUTLen  = ulCiphertextLen;
 		ulRet = OPE_ERR_NOT_ENOUGH_MEMORY;
 		goto err;
 	}
@@ -3612,7 +3612,7 @@ unsigned long OpenSSL_SM2EncryptInner(
 	memcpy(pbOUT + SM2_BYTES_LEN*2+1 , c2, ulINLen);
 	memcpy(pbOUT + SM2_BYTES_LEN*2+1 + ulINLen,c3,SM3_DIGEST_LEN);
 
-	*pulOUTLen = SM2_BYTES_LEN*2+1 + ulINLen + SM3_DIGEST_LEN;
+	*puiOUTLen = SM2_BYTES_LEN*2+1 + ulINLen + SM3_DIGEST_LEN;
 
 err:
 
@@ -3660,13 +3660,13 @@ err:
 
 
 
-unsigned long OpenSSL_CertGetPublicKeyAlgor(const unsigned char * pbX509Cert, unsigned long ulX509CertLen,
-	unsigned char *pbPublicKeyAlgor, unsigned long *pulPublicKeyAlgorLen
+unsigned int OpenSSL_CertGetPublicKeyAlgor(const unsigned char * pbX509Cert, unsigned int ulX509CertLen,
+	unsigned char *pbPublicKeyAlgor, unsigned int *puiPublicKeyAlgorLen
 	)
 {
 	X509 * x509 =  NULL;
 	X509_NAME * pX509_Name_Subject = NULL;
-	unsigned long rv = -1;
+	unsigned int rv = -1;
 	unsigned char * ptr_out = NULL;
 	unsigned int lenPublicKeyAlgor = 0;
 
@@ -3678,7 +3678,7 @@ unsigned long OpenSSL_CertGetPublicKeyAlgor(const unsigned char * pbX509Cert, un
 
 	lenPublicKeyAlgor = x509->cert_info->key->algor->algorithm->length;
 
-	if (!pulPublicKeyAlgorLen)
+	if (!puiPublicKeyAlgorLen)
 	{
 		rv = OPE_ERR_INVALID_PARAM;
 		goto err;
@@ -3686,19 +3686,19 @@ unsigned long OpenSSL_CertGetPublicKeyAlgor(const unsigned char * pbX509Cert, un
 
 	if (!pbPublicKeyAlgor)
 	{
-		* pulPublicKeyAlgorLen = lenPublicKeyAlgor;
+		* puiPublicKeyAlgorLen = lenPublicKeyAlgor;
 	}
-	else if(* pulPublicKeyAlgorLen < lenPublicKeyAlgor)
+	else if(* puiPublicKeyAlgorLen < lenPublicKeyAlgor)
 	{
-		* pulPublicKeyAlgorLen = lenPublicKeyAlgor;
+		* puiPublicKeyAlgorLen = lenPublicKeyAlgor;
 		rv = OPE_ERR_BUFF_SMALL;
 		goto err;
 	}
 	else
 	{
 		ptr_out = pbPublicKeyAlgor;
-		*pulPublicKeyAlgorLen = lenPublicKeyAlgor;
-		memcpy( ptr_out,x509->cert_info->key->algor->algorithm->data, * pulPublicKeyAlgorLen);
+		*puiPublicKeyAlgorLen = lenPublicKeyAlgor;
+		memcpy( ptr_out,x509->cert_info->key->algor->algorithm->data, * puiPublicKeyAlgorLen);
 	}
 
 	rv = 0;
@@ -3713,14 +3713,14 @@ err:
 }
 
 
-unsigned long OpenSSL_CertSubjectCompareIssuer(const unsigned char * pbX509Cert, unsigned long ulX509CertLen,
-	unsigned long * bEqual
+unsigned int OpenSSL_CertSubjectCompareIssuer(const unsigned char * pbX509Cert, unsigned int ulX509CertLen,
+	unsigned int * bEqual
 	)
 {
 	X509 * x509 =  NULL;
 	X509_NAME * pX509_Name_Subject = NULL;
 	X509_NAME * pX509_Name_Issuer = NULL;
-	unsigned long rv = -1;
+	unsigned int rv = -1;
 
 	unsigned lenCmp = 0;
 
@@ -3756,3 +3756,5 @@ err:
 
 	return rv;
 }
+
+

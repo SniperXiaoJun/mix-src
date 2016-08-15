@@ -33,13 +33,13 @@ extern EC_GROUP *g_group512;
 int copy_extensions(X509 *x, X509_REQ *req, int copy_type);
 short Add_Ext(X509 *cert, X509 * root, int nid, char *value);
 
-unsigned long OpenSSL_AddNameByID(X509_NAME * aX509Name,  unsigned long aType, unsigned char * aDataValue, unsigned long aDataLen, unsigned long aDataType);//��Ӣ�Ĵ���
-unsigned long OpenSSL_AddNameByName(X509_NAME * aX509Name, const char * aType, unsigned char * aDataValue, unsigned long aDataLen, unsigned long aDataType);//��Ӣ�Ĵ���
+unsigned int OpenSSL_AddNameByID(X509_NAME * aX509Name,  unsigned int aType, unsigned char * aDataValue, unsigned int aDataLen, unsigned int aDataType);//��Ӣ�Ĵ���
+unsigned int OpenSSL_AddNameByName(X509_NAME * aX509Name, const char * aType, unsigned char * aDataValue, unsigned int aDataLen, unsigned int aDataType);//��Ӣ�Ĵ���
 
 
 EVP_PKEY * OpenSSL_NewEVP_PKEY_OF_GMECC512_PublicKey(
-	const unsigned char * pbPublicKeyX, unsigned long ulPublicKeyXLen, 
-	const unsigned char * pbPublicKeyY, unsigned long ulPublicKeyYLen
+	const unsigned char * pbPublicKeyX, unsigned int ulPublicKeyXLen, 
+	const unsigned char * pbPublicKeyY, unsigned int ulPublicKeyYLen
 	)
 {
 	EVP_PKEY	*pkey = NULL;
@@ -135,10 +135,10 @@ ASN1_SEQUENCE_END(GMECC512SIGN_DATA)
 	IMPLEMENT_ASN1_FUNCTIONS(GMECC512SIGN_DATA)
 
 
-unsigned long GMECC512SignAsn1Convert(
-	unsigned char *pbR, unsigned long nRLen,
-	unsigned char *pbS, unsigned long nSLen,
-	unsigned char *pbOutDer, unsigned long *pOutDerLen) 
+unsigned int GMECC512SignAsn1Convert(
+	unsigned char *pbR, unsigned int nRLen,
+	unsigned char *pbS, unsigned int nSLen,
+	unsigned char *pbOutDer, unsigned int *pOutDerLen) 
 {	
 	unsigned long			nOutLen = 0;
 	unsigned long			nRet = 0;
@@ -204,12 +204,12 @@ ErrExit:
 	return nRet;
 }
 
-unsigned long GMECC512SignAsn1DeConvert(
-	unsigned char *pbR, unsigned long *nRLen,
-	unsigned char *pbS, unsigned long *nSLen,
-	unsigned char *pbDer, unsigned long nDerLen) 
+unsigned int GMECC512SignAsn1DeConvert(
+	unsigned char *pbR, unsigned int *nRLen,
+	unsigned char *pbS, unsigned int *nSLen,
+	unsigned char *pbDer, unsigned int nDerLen) 
 {	
-	unsigned long 		nOutLen = 0;
+	unsigned int 		nOutLen = 0;
 	unsigned long		nRet = 0;
 
 	unsigned char * pPtr = pbDer;
@@ -255,9 +255,9 @@ ErrExit:
 	return nRet;
 }
 
-unsigned long OpenSSL_GMECC512GenKeys(unsigned char * pbPublicKeyX,  unsigned long * pulPublicKeyXLen, 
-	unsigned char * pbPublicKeyY,  unsigned long * pulPublicKeyYLen,
-	unsigned char * pbPrivateKey,  unsigned long * pulPrivateKeyLen)
+unsigned int OpenSSL_GMECC512GenKeys(unsigned char * pbPublicKeyX,  unsigned int * puiPublicKeyXLen, 
+	unsigned char * pbPublicKeyY,  unsigned int * puiPublicKeyYLen,
+	unsigned char * pbPrivateKey,  unsigned int * puiPrivateKeyLen)
 {
 	EC_KEY		*ec = NULL;
 	unsigned long		rv	= -1;
@@ -269,9 +269,9 @@ unsigned long OpenSSL_GMECC512GenKeys(unsigned char * pbPublicKeyX,  unsigned lo
 	unsigned char data_value_x[GM_ECC_512_BYTES_LEN]= {0};
 	unsigned char data_value_y[GM_ECC_512_BYTES_LEN]= {0};
 	unsigned char data_value_prv[GM_ECC_512_BYTES_LEN]= {0};
-	unsigned long data_len_x = GM_ECC_512_BYTES_LEN;
-	unsigned long data_len_y = GM_ECC_512_BYTES_LEN;
-	unsigned long data_len_prv = GM_ECC_512_BYTES_LEN;
+	unsigned int data_len_x = GM_ECC_512_BYTES_LEN;
+	unsigned int data_len_y = GM_ECC_512_BYTES_LEN;
+	unsigned int data_len_prv = GM_ECC_512_BYTES_LEN;
 
 	if ( !(ctx = BN_CTX_new()) )
 	{
@@ -310,16 +310,16 @@ unsigned long OpenSSL_GMECC512GenKeys(unsigned char * pbPublicKeyX,  unsigned lo
 	data_len_y = BN_bn2bin(pubkey_y,data_value_y);
 	data_len_prv = BN_bn2bin(prvkey,data_value_prv);
 
-	if(* pulPublicKeyYLen < GM_ECC_512_BYTES_LEN || * pulPublicKeyXLen <GM_ECC_512_BYTES_LEN || *pulPrivateKeyLen < GM_ECC_512_BYTES_LEN)
+	if(* puiPublicKeyYLen < GM_ECC_512_BYTES_LEN || * puiPublicKeyXLen <GM_ECC_512_BYTES_LEN || *puiPrivateKeyLen < GM_ECC_512_BYTES_LEN)
 	{
 		rv = -1;
 		goto err;
 	}
 	else
 	{
-		*pulPublicKeyYLen = GM_ECC_512_BYTES_LEN;
-		*pulPublicKeyXLen = GM_ECC_512_BYTES_LEN;
-		*pulPrivateKeyLen = GM_ECC_512_BYTES_LEN;
+		*puiPublicKeyYLen = GM_ECC_512_BYTES_LEN;
+		*puiPublicKeyXLen = GM_ECC_512_BYTES_LEN;
+		*puiPrivateKeyLen = GM_ECC_512_BYTES_LEN;
 
 		memcpy(pbPublicKeyX,data_value_x,data_len_x);
 		memcpy(pbPublicKeyY,data_value_y,data_len_y);
@@ -341,26 +341,26 @@ err:
 	return rv;
 }
 
-unsigned long OpenSSL_GMECC512VerifyCert(const unsigned char *pbX509Cert, unsigned long ulX509CertLen,unsigned long ulAlg,
-	const unsigned char *pbPublicKeyX, unsigned long ulPublicKeyXLen,
-	const unsigned char *pbPublicKeyY, unsigned long ulPublicKeyYLen)
+unsigned int OpenSSL_GMECC512VerifyCert(const unsigned char *pbX509Cert, unsigned int ulX509CertLen,unsigned int ulAlg,
+	const unsigned char *pbPublicKeyX, unsigned int ulPublicKeyXLen,
+	const unsigned char *pbPublicKeyY, unsigned int ulPublicKeyYLen)
 {
-	unsigned long rv = -1;
+	unsigned int rv = -1;
 	X509 * x509 =  NULL;
 	unsigned char pbSig[BUFFER_LEN_1K] = {0};
-	unsigned long ulSigLen = BUFFER_LEN_1K;
+	unsigned int ulSigLen = BUFFER_LEN_1K;
 
 	unsigned char digest_value[(SM3_DIGEST_LEN*2)] = {0};
 	unsigned int digest_len = (SM3_DIGEST_LEN*2);
 
-	unsigned long r_len = GM_ECC_512_BYTES_LEN;
-	unsigned long s_len = GM_ECC_512_BYTES_LEN;
+	unsigned int r_len = GM_ECC_512_BYTES_LEN;
+	unsigned int s_len = GM_ECC_512_BYTES_LEN;
 
-	unsigned long pubkey_xy_len = 2 * GM_ECC_512_BYTES_LEN + 1;
+	unsigned int pubkey_xy_len = 2 * GM_ECC_512_BYTES_LEN + 1;
 	unsigned char pubkey_xy_value[2 * GM_ECC_512_BYTES_LEN + 1] = {0};
 
 	unsigned char info_value[BUFFER_LEN_1K * 4] = {0};
-	unsigned long info_len = BUFFER_LEN_1K * 4;
+	unsigned int info_len = BUFFER_LEN_1K * 4;
 	unsigned char *ptr_out = info_value;
 	const unsigned char * ptr_in = NULL;
 
@@ -410,27 +410,27 @@ err:
 }
 
 
-unsigned long OpenSSL_GMECC512VerifyCRL(const unsigned char *pbCRL, unsigned long ulCRLLen,unsigned long ulAlg,
-	const unsigned char *pbPublicKeyX, unsigned long ulPublicKeyXLen,
-	const unsigned char *pbPublicKeyY, unsigned long ulPublicKeyYLen)
+unsigned int OpenSSL_GMECC512VerifyCRL(const unsigned char *pbCRL, unsigned int ulCRLLen,unsigned int ulAlg,
+	const unsigned char *pbPublicKeyX, unsigned int ulPublicKeyXLen,
+	const unsigned char *pbPublicKeyY, unsigned int ulPublicKeyYLen)
 {
-	unsigned long rv = -1;
+	unsigned int rv = -1;
 	X509_CRL * crl =  NULL;
 	unsigned char pbSig[BUFFER_LEN_1K] = {0};
-	unsigned long ulSigLen = BUFFER_LEN_1K;
+	unsigned int ulSigLen = BUFFER_LEN_1K;
 	EC_KEY      * ecPubkey = NULL;
 
 	unsigned char digest_value[(SM3_DIGEST_LEN*2)] = {0};
 	unsigned int digest_len = (SM3_DIGEST_LEN*2);
 
-	unsigned long r_len = GM_ECC_512_BYTES_LEN;
-	unsigned long s_len = GM_ECC_512_BYTES_LEN;
+	unsigned int r_len = GM_ECC_512_BYTES_LEN;
+	unsigned int s_len = GM_ECC_512_BYTES_LEN;
 
-	unsigned long pubkey_xy_len = 2 * GM_ECC_512_BYTES_LEN + 1;
+	unsigned int pubkey_xy_len = 2 * GM_ECC_512_BYTES_LEN + 1;
 	unsigned char pubkey_xy_value[2 * GM_ECC_512_BYTES_LEN + 1] = {0};
 
 	unsigned char info_value[BUFFER_LEN_1K * 4] = {0};
-	unsigned long info_len = BUFFER_LEN_1K * 4;
+	unsigned int info_len = BUFFER_LEN_1K * 4;
 	unsigned char *ptr_out = info_value;
 	const unsigned char * ptr_in = NULL;
 
@@ -475,16 +475,16 @@ err:
 	return rv;
 }
 
-unsigned long OpenSSL_GMECC512VerifyMSG(const unsigned char *pbMSG, unsigned long ulMSGLen, 
-	const unsigned char *pbSig, unsigned long ulSigLen,
-	const unsigned char *pbPublicKeyX, unsigned long ulPublicKeyXLen,
-	const unsigned char *pbPublicKeyY, unsigned long ulPublicKeyYLen)
+unsigned int OpenSSL_GMECC512VerifyMSG(const unsigned char *pbMSG, unsigned int ulMSGLen, 
+	const unsigned char *pbSig, unsigned int ulSigLen,
+	const unsigned char *pbPublicKeyX, unsigned int ulPublicKeyXLen,
+	const unsigned char *pbPublicKeyY, unsigned int ulPublicKeyYLen)
 {
-	unsigned long rv	= -1;
+	unsigned int rv	= -1;
 	unsigned char digest_value[(SM3_DIGEST_LEN*2)] = {0};
 	unsigned int digest_len = (SM3_DIGEST_LEN*2);
 
-	unsigned long pubkey_xy_len = 2 * GM_ECC_512_BYTES_LEN + 1;
+	unsigned int pubkey_xy_len = 2 * GM_ECC_512_BYTES_LEN + 1;
 	unsigned char pubkey_xy_value[2 * GM_ECC_512_BYTES_LEN + 1] = {0};
 
 	memcpy(pubkey_xy_value, "\x04", 1);
@@ -510,28 +510,28 @@ err:
 	return rv;
 }
 
-unsigned long OpenSSL_GMECC512VerifyCSR(
-	const unsigned char *pbCSR, unsigned long ulCSRLen,
-	unsigned long ulAlg
+unsigned int OpenSSL_GMECC512VerifyCSR(
+	const unsigned char *pbCSR, unsigned int ulCSRLen,
+	unsigned int ulAlg
 	)
 {
 	EVP_PKEY	*pktmp = NULL;
 	X509_REQ *req = NULL;
-	unsigned long rv = -1;
+	unsigned int rv = -1;
 	unsigned char digest_value[(SM3_DIGEST_LEN*2)] = {0};
 	unsigned int digest_len = (SM3_DIGEST_LEN*2);
 	unsigned char pbPublicKeyX[GM_ECC_512_BYTES_LEN] = {0};
 	unsigned char pbPublicKeyY[GM_ECC_512_BYTES_LEN] = {0};
-	unsigned long pubkey_xy_len = 2 * GM_ECC_512_BYTES_LEN + 1;
+	unsigned int pubkey_xy_len = 2 * GM_ECC_512_BYTES_LEN + 1;
 	unsigned char pubkey_xy_value[2 * GM_ECC_512_BYTES_LEN + 1] = {0};
 
 	unsigned char info_value[BUFFER_LEN_1K * 4] = {0};
-	unsigned long info_len = BUFFER_LEN_1K * 4;
+	unsigned int info_len = BUFFER_LEN_1K * 4;
 
-	unsigned long r_len = GM_ECC_512_BYTES_LEN;
-	unsigned long s_len = GM_ECC_512_BYTES_LEN;
+	unsigned int r_len = GM_ECC_512_BYTES_LEN;
+	unsigned int s_len = GM_ECC_512_BYTES_LEN;
 	unsigned char pbSig[BUFFER_LEN_1K] = {0};
-	unsigned long ulSigLen = BUFFER_LEN_1K;
+	unsigned int ulSigLen = BUFFER_LEN_1K;
 
 	const unsigned char * ptr_in = NULL;
 	unsigned char * ptr_out = NULL;
@@ -618,11 +618,11 @@ err:
 	return rv;
 }
 
-unsigned long OpenSSL_GMECC512SignCSR(
-	const unsigned char *pbCSR, unsigned long ulCSRLen,
-	const unsigned char * pbPrivateKey,unsigned long ulPrivateKeyLen,
-	unsigned long ulAlg,
-	unsigned char *pbCSRSigned, unsigned long * pulCSRSignedLen
+unsigned int OpenSSL_GMECC512SignCSR(
+	const unsigned char *pbCSR, unsigned int ulCSRLen,
+	const unsigned char * pbPrivateKey,unsigned int ulPrivateKeyLen,
+	unsigned int ulAlg,
+	unsigned char *pbCSRSigned, unsigned int * puiCSRSignedLen
 	)
 {
 	EVP_PKEY	*pktmp = NULL;			//
@@ -632,24 +632,24 @@ unsigned long OpenSSL_GMECC512SignCSR(
 	const EC_POINT	* pubkey = NULL;
 	BIGNUM * pubkey_x = NULL;
 	BIGNUM * pubkey_y = NULL;
-	unsigned long rv = -1;
+	unsigned int rv = -1;
 	unsigned char digest_value[(SM3_DIGEST_LEN*2)] = {0};
 	unsigned int digest_len = (SM3_DIGEST_LEN*2);
 	unsigned char pbPublicKeyX[GM_ECC_512_BYTES_LEN] = {0};
 	unsigned char pbPublicKeyY[GM_ECC_512_BYTES_LEN] = {0};
-	unsigned long pubkey_xy_len = 2 * GM_ECC_512_BYTES_LEN + 1;
+	unsigned int pubkey_xy_len = 2 * GM_ECC_512_BYTES_LEN + 1;
 	unsigned char pubkey_xy_value[2 * GM_ECC_512_BYTES_LEN + 1] = {0};
 
 	unsigned char info_value[BUFFER_LEN_1K * 4] = {0};
-	unsigned long info_len = BUFFER_LEN_1K * 4;
+	unsigned int info_len = BUFFER_LEN_1K * 4;
 
-	unsigned long encode_len = BUFFER_LEN_1K;
+	unsigned int encode_len = BUFFER_LEN_1K;
 	unsigned char encode_value[BUFFER_LEN_1K] = {0};
 
-	unsigned long r_len = GM_ECC_512_BYTES_LEN;
-	unsigned long s_len = GM_ECC_512_BYTES_LEN;
+	unsigned int r_len = GM_ECC_512_BYTES_LEN;
+	unsigned int s_len = GM_ECC_512_BYTES_LEN;
 	unsigned char pbSig[BUFFER_LEN_1K] = {0};
-	unsigned long ulSigLen = BUFFER_LEN_1K;
+	unsigned int ulSigLen = BUFFER_LEN_1K;
 
 	const unsigned char * ptr_in = NULL;
 	unsigned char * ptr_out = NULL;
@@ -761,7 +761,7 @@ unsigned long OpenSSL_GMECC512SignCSR(
 	req->signature->flags|=ASN1_STRING_FLAG_BITS_LEFT;
 
 	ptr_out = pbCSRSigned;
-	*pulCSRSignedLen =  i2d_X509_REQ(req, &ptr_out);
+	*puiCSRSignedLen =  i2d_X509_REQ(req, &ptr_out);
 
 	rv = 0;
 
@@ -787,19 +787,19 @@ err:
 }
 
 
-unsigned long OpenSSL_GMECC512SetX509SignValue(
-	const unsigned char *pbX509, unsigned long ulX509Len,
+unsigned int OpenSSL_GMECC512SetX509SignValue(
+	const unsigned char *pbX509, unsigned int ulX509Len,
 	X509_TYPE ulX509Type,
-	const unsigned char *pbR, unsigned long ulRLen,
-	const unsigned char *pbS, unsigned long ulSLen,
-	unsigned char *pbX509Signed, unsigned long * pulX509SignedLen)
+	const unsigned char *pbR, unsigned int ulRLen,
+	const unsigned char *pbS, unsigned int ulSLen,
+	unsigned char *pbX509Signed, unsigned int * puiX509SignedLen)
 {
-	unsigned long encode_len = BUFFER_LEN_1K;
+	unsigned int encode_len = BUFFER_LEN_1K;
 	unsigned char encode_value[BUFFER_LEN_1K] = {0};
 	X509_REQ *req = NULL;
 	X509 *x509 = NULL;
 	X509_CRL *crl = NULL;
-	unsigned long rv = -1;
+	unsigned int rv = -1;
 	const unsigned char * ptr_in = NULL;
 	unsigned char * ptr_out = NULL;
 
@@ -829,7 +829,7 @@ unsigned long OpenSSL_GMECC512SetX509SignValue(
 			req->signature->flags&= ~(ASN1_STRING_FLAG_BITS_LEFT|0x07);
 			req->signature->flags|=ASN1_STRING_FLAG_BITS_LEFT;
 
-			*pulX509SignedLen =  i2d_X509_REQ(req, &ptr_out);
+			*puiX509SignedLen =  i2d_X509_REQ(req, &ptr_out);
 		}
 		break;
 	case X509_TYPE_CERT:
@@ -844,7 +844,7 @@ unsigned long OpenSSL_GMECC512SetX509SignValue(
 			x509->signature->flags&= ~(ASN1_STRING_FLAG_BITS_LEFT|0x07);
 			x509->signature->flags|=ASN1_STRING_FLAG_BITS_LEFT;
 
-			*pulX509SignedLen =  i2d_X509(x509, &ptr_out);
+			*puiX509SignedLen =  i2d_X509(x509, &ptr_out);
 		}
 		break;
 	case X509_TYPE_CRL:
@@ -859,7 +859,7 @@ unsigned long OpenSSL_GMECC512SetX509SignValue(
 			crl->signature->flags&= ~(ASN1_STRING_FLAG_BITS_LEFT|0x07);
 			crl->signature->flags|=ASN1_STRING_FLAG_BITS_LEFT;
 
-			*pulX509SignedLen =  i2d_X509_CRL(crl, &ptr_out);
+			*puiX509SignedLen =  i2d_X509_CRL(crl, &ptr_out);
 		}
 		break;
 	default:
@@ -870,7 +870,7 @@ unsigned long OpenSSL_GMECC512SetX509SignValue(
 	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__,"ptr_in");
 	FILE_LOG_HEX(file_log_name, ptr_in, ulX509Len);
 	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__,"ptr_out");
-	FILE_LOG_HEX(file_log_name, ptr_out, *pulX509SignedLen);
+	FILE_LOG_HEX(file_log_name, ptr_out, *puiX509SignedLen);
 
 	rv = 0;
 err:
@@ -894,18 +894,18 @@ err:
 }
 
 
-unsigned long OpenSSL_GMECC512SignMSG(const unsigned char *pbMSG, unsigned long ulMSGLen, 
-	const unsigned char *pbPublicKeyX, unsigned long ulPublicKeyXLen,
-	const unsigned char *pbPublicKeyY, unsigned long ulPublicKeyYLen,
-	const unsigned char * pbPrivateKey,unsigned long ulPrivateKeyLen,
-	unsigned long ulAlg,
-	unsigned char *pbSig, unsigned long * pulSigLen)
+unsigned int OpenSSL_GMECC512SignMSG(const unsigned char *pbMSG, unsigned int ulMSGLen, 
+	const unsigned char *pbPublicKeyX, unsigned int ulPublicKeyXLen,
+	const unsigned char *pbPublicKeyY, unsigned int ulPublicKeyYLen,
+	const unsigned char * pbPrivateKey,unsigned int ulPrivateKeyLen,
+	unsigned int ulAlg,
+	unsigned char *pbSig, unsigned int * puiSigLen)
 {
-	unsigned long rv	= -1;
+	unsigned int rv	= -1;
 	unsigned char digest_value[(SM3_DIGEST_LEN*2)] = {0};
 	unsigned int digest_len = (SM3_DIGEST_LEN*2);
 
-	unsigned long pubkey_xy_len = 2 * GM_ECC_512_BYTES_LEN + 1;
+	unsigned int pubkey_xy_len = 2 * GM_ECC_512_BYTES_LEN + 1;
 	unsigned char pubkey_xy_value[2 * GM_ECC_512_BYTES_LEN + 1] = {0};
 
 	memcpy(pubkey_xy_value, "\x04", 1);
@@ -918,7 +918,7 @@ unsigned long OpenSSL_GMECC512SignMSG(const unsigned char *pbMSG, unsigned long 
 		goto err;
 	}
 
-	rv = OpenSSL_GMECC512SignDigest(digest_value, digest_len, pbPrivateKey,ulPrivateKeyLen, pbSig,pulSigLen);
+	rv = OpenSSL_GMECC512SignDigest(digest_value, digest_len, pbPrivateKey,ulPrivateKeyLen, pbSig,puiSigLen);
 	if(rv)
 	{
 		goto err;
@@ -929,35 +929,35 @@ err:
 	return rv;
 }
 
-unsigned long OpenSSL_GMECC512SignCRL(
-	const unsigned char *pbCRL, unsigned long ulCRLLen,unsigned long ulAlg,
-	const unsigned char *pbPublicKeyX, unsigned long ulPublicKeyXLen,
-	const unsigned char *pbPublicKeyY, unsigned long ulPublicKeyYLen,
-	const unsigned char * pbPrivateKey,unsigned long ulPrivateKeyLen,
-	unsigned char *pbCRLSigned, unsigned long * pulCRLSignedLen
+unsigned int OpenSSL_GMECC512SignCRL(
+	const unsigned char *pbCRL, unsigned int ulCRLLen,unsigned int ulAlg,
+	const unsigned char *pbPublicKeyX, unsigned int ulPublicKeyXLen,
+	const unsigned char *pbPublicKeyY, unsigned int ulPublicKeyYLen,
+	const unsigned char * pbPrivateKey,unsigned int ulPrivateKeyLen,
+	unsigned char *pbCRLSigned, unsigned int * puiCRLSignedLen
 	)
 {
-	unsigned long rv = -1;
+	unsigned int rv = -1;
 	X509_CRL * crl =  NULL;
 	unsigned char pbSig[BUFFER_LEN_1K] = {0};
-	unsigned long ulSigLen = BUFFER_LEN_1K;
+	unsigned int ulSigLen = BUFFER_LEN_1K;
 	//EC_KEY      * ecPubkey = NULL;
 
 	unsigned char digest_value[(SM3_DIGEST_LEN*2)] = {0};
 	unsigned int digest_len = (SM3_DIGEST_LEN*2);
 
-	unsigned long r_len = GM_ECC_512_BYTES_LEN;
-	unsigned long s_len = GM_ECC_512_BYTES_LEN;
+	unsigned int r_len = GM_ECC_512_BYTES_LEN;
+	unsigned int s_len = GM_ECC_512_BYTES_LEN;
 
-	unsigned long pubkey_xy_len = 2 * GM_ECC_512_BYTES_LEN + 1;
+	unsigned int pubkey_xy_len = 2 * GM_ECC_512_BYTES_LEN + 1;
 	unsigned char pubkey_xy_value[2 * GM_ECC_512_BYTES_LEN + 1] = {0};
 
 	unsigned char info_value[BUFFER_LEN_1K * 4] = {0};
-	unsigned long info_len = BUFFER_LEN_1K * 4;
+	unsigned int info_len = BUFFER_LEN_1K * 4;
 	unsigned char *ptr_out = info_value;
 	const unsigned char * ptr_in = NULL;
 
-	unsigned long encode_len = BUFFER_LEN_1K;
+	unsigned int encode_len = BUFFER_LEN_1K;
 	unsigned char encode_value[BUFFER_LEN_1K] = {0};
 
 	ptr_in = pbCRL;
@@ -1005,7 +1005,7 @@ unsigned long OpenSSL_GMECC512SignCRL(
 	crl->signature->flags|=ASN1_STRING_FLAG_BITS_LEFT;
 
 	ptr_out = pbCRLSigned;
-	*pulCRLSignedLen =  i2d_X509_CRL(crl, &ptr_out);
+	*puiCRLSignedLen =  i2d_X509_CRL(crl, &ptr_out);
 
 	rv = 0;
 
@@ -1023,33 +1023,33 @@ err:
 }
 
 
-unsigned long OpenSSL_GMECC512SignCert(
-	const unsigned char *pbX509Cert,   unsigned long ulX509CertLen, 
-	const unsigned char *pbPublicKeyX, unsigned long ulPublicKeyXLen,
-	const unsigned char *pbPublicKeyY, unsigned long ulPublicKeyYLen,
-	const unsigned char *pbPrivateKey, unsigned long ulPrivateKeyLen,
-	unsigned char * pbX509CertSigned,  unsigned long *pulX509CertSignedLen
+unsigned int OpenSSL_GMECC512SignCert(
+	const unsigned char *pbX509Cert,   unsigned int ulX509CertLen, 
+	const unsigned char *pbPublicKeyX, unsigned int ulPublicKeyXLen,
+	const unsigned char *pbPublicKeyY, unsigned int ulPublicKeyYLen,
+	const unsigned char *pbPrivateKey, unsigned int ulPrivateKeyLen,
+	unsigned char * pbX509CertSigned,  unsigned int *puiX509CertSignedLen
 	)
 {
-	unsigned long rv = -1;
+	unsigned int rv = -1;
 	X509 * x509 =  NULL;
 	unsigned char pbSig[BUFFER_LEN_1K] = {0};
-	unsigned long ulSigLen = BUFFER_LEN_1K;
+	unsigned int ulSigLen = BUFFER_LEN_1K;
 
 	unsigned char digest_value[(SM3_DIGEST_LEN*2)] = {0};
 	unsigned int digest_len = (SM3_DIGEST_LEN*2);
 
-	unsigned long r_len = GM_ECC_512_BYTES_LEN;
-	unsigned long s_len = GM_ECC_512_BYTES_LEN;
+	unsigned int r_len = GM_ECC_512_BYTES_LEN;
+	unsigned int s_len = GM_ECC_512_BYTES_LEN;
 
-	unsigned long encode_len = BUFFER_LEN_1K;
+	unsigned int encode_len = BUFFER_LEN_1K;
 	unsigned char encode_value[BUFFER_LEN_1K] = {0};
 
-	unsigned long pubkey_xy_len = 2 * GM_ECC_512_BYTES_LEN + 1;
+	unsigned int pubkey_xy_len = 2 * GM_ECC_512_BYTES_LEN + 1;
 	unsigned char pubkey_xy_value[2 * GM_ECC_512_BYTES_LEN + 1] = {0};
 
 	unsigned char info_value[BUFFER_LEN_1K * 4] = {0};
-	unsigned long info_len = BUFFER_LEN_1K * 4;
+	unsigned int info_len = BUFFER_LEN_1K * 4;
 	unsigned char *ptr_out = info_value;
 	const unsigned char * ptr_in = NULL;
 
@@ -1094,7 +1094,7 @@ unsigned long OpenSSL_GMECC512SignCert(
 	x509->signature->flags|=ASN1_STRING_FLAG_BITS_LEFT;
 
 	ptr_out = pbX509CertSigned;
-	*pulX509CertSignedLen =  i2d_X509(x509, &ptr_out);
+	*puiX509CertSignedLen =  i2d_X509(x509, &ptr_out);
 
 	rv = 0;
 
@@ -1108,10 +1108,10 @@ err:
 	return rv;
 }
 
-unsigned long OpenSSL_GMECC512GenCSRWithPubkey(const OPST_USERINFO *pstUserInfo,
-	const unsigned char * pbPublicKeyX,  unsigned long ulPublicKeyXLen, 
-	const unsigned char * pbPublicKeyY,  unsigned long ulPublicKeyYLen,
-	unsigned char * pbCSR,  unsigned long * pulCSRLen)
+unsigned int OpenSSL_GMECC512GenCSRWithPubkey(const OPST_USERINFO *pstUserInfo,
+	const unsigned char * pbPublicKeyX,  unsigned int ulPublicKeyXLen, 
+	const unsigned char * pbPublicKeyY,  unsigned int ulPublicKeyYLen,
+	unsigned char * pbCSR,  unsigned int * puiCSRLen)
 {
 	unsigned long		rv	= -1;
 	X509_REQ	*req = NULL;
@@ -1176,7 +1176,7 @@ unsigned long OpenSSL_GMECC512GenCSRWithPubkey(const OPST_USERINFO *pstUserInfo,
 		OBJ_txt2obj("1.2.156.10197.1.501",0), 
 		V_ASN1_UNDEF, NULL);
 
-	*pulCSRLen = i2d_X509_REQ(req, &ptr_out);
+	*puiCSRLen = i2d_X509_REQ(req, &ptr_out);
 
 	rv = 0;
 err:
@@ -1195,12 +1195,12 @@ err:
 
 int X509_ALGOR_set0(X509_ALGOR *alg, ASN1_OBJECT *aobj, int ptype, void *pval);
 
-unsigned long OpenSSL_GMECC512GenRootCert(const unsigned char * pbCSR,unsigned long ulCSRLen,
-	unsigned char * pbSerialNumber,unsigned long ulSerialNumberLen,
-	unsigned long ulNotBefore, unsigned long ulNotAfter, 
-	unsigned char * pbX509Cert, unsigned long * pulX509CertLen)
+unsigned int OpenSSL_GMECC512GenRootCert(const unsigned char * pbCSR,unsigned int ulCSRLen,
+	unsigned char * pbSerialNumber,unsigned int ulSerialNumberLen,
+	unsigned int ulNotBefore, unsigned int ulNotAfter, 
+	unsigned char * pbX509Cert, unsigned int * puiX509CertLen)
 {
-	unsigned long       rv = -1;
+	unsigned int       rv = -1;
 	EVP_PKEY	*pktmp = NULL;			//
 	X509		*x509 = NULL;
 	X509_NAME	*name =NULL;
@@ -1305,7 +1305,7 @@ unsigned long OpenSSL_GMECC512GenRootCert(const unsigned char * pbCSR,unsigned l
 	else
 	{
 		ptr_out = pbX509Cert;
-		* pulX509CertLen = i2d_X509(x509, &ptr_out);
+		* puiX509CertLen = i2d_X509(x509, &ptr_out);
 	}
 
 	rv = 0;
@@ -1326,11 +1326,11 @@ err:
 	return rv;
 }
 
-unsigned long OpenSSL_GMECC512GenCert(const unsigned char * pbCSR,unsigned long ulCSRLen,
-	const unsigned char * pbX509CACert, unsigned long ulX509CACertLen, 
-	unsigned char * pbSerialNumber,unsigned long ulSerialNumberLen,
-	unsigned long ulNotBefore, unsigned long ulNotAfter, unsigned long ulSignFlag,
-	unsigned char * pbX509Cert, unsigned long * pulX509CertLen)
+unsigned int OpenSSL_GMECC512GenCert(const unsigned char * pbCSR,unsigned int ulCSRLen,
+	const unsigned char * pbX509CACert, unsigned int ulX509CACertLen, 
+	unsigned char * pbSerialNumber,unsigned int ulSerialNumberLen,
+	unsigned int ulNotBefore, unsigned int ulNotAfter, unsigned int ulSignFlag,
+	unsigned char * pbX509Cert, unsigned int * puiX509CertLen)
 {
 	char * strBaseKeyUsage = NULL;
 	char * strExtKeyUsage = "";
@@ -1339,7 +1339,7 @@ unsigned long OpenSSL_GMECC512GenCert(const unsigned char * pbCSR,unsigned long 
 	X509_NAME	*name = NULL;
 	int isCACert = 0;
 	X509_REQ *req = NULL;
-	unsigned long rv = -1;
+	unsigned int rv = -1;
 	const unsigned char * ptr_in = NULL;
 	unsigned char * ptr_out = NULL;
 	BIGNUM * bnSN = NULL;
@@ -1470,7 +1470,7 @@ unsigned long OpenSSL_GMECC512GenCert(const unsigned char * pbCSR,unsigned long 
 
 	ptr_out = pbX509Cert;
 
-	* pulX509CertLen = i2d_X509(x509, &ptr_out);
+	* puiX509CertLen = i2d_X509(x509, &ptr_out);
 
 	rv = 0;
 
@@ -1505,13 +1505,13 @@ err:
 }
 
 
-unsigned long OpenSSL_GMECC512GenCertEX(const unsigned char * pbCSR,unsigned long ulCSRLen,
-	const unsigned char * pbPublicKeyX,  unsigned long ulPublicKeyXLen, 
-	const unsigned char * pbPublicKeyY,  unsigned long ulPublicKeyYLen,
-	const unsigned char * pbX509CACert, unsigned long ulX509CACertLen, 
-	unsigned char * pbSerialNumber,unsigned long ulSerialNumberLen,
-	unsigned long ulNotBefore, unsigned long ulNotAfter, unsigned long ulSignFlag,
-	unsigned char * pbX509Cert, unsigned long * pulX509CertLen)
+unsigned int OpenSSL_GMECC512GenCertEX(const unsigned char * pbCSR,unsigned int ulCSRLen,
+	const unsigned char * pbPublicKeyX,  unsigned int ulPublicKeyXLen, 
+	const unsigned char * pbPublicKeyY,  unsigned int ulPublicKeyYLen,
+	const unsigned char * pbX509CACert, unsigned int ulX509CACertLen, 
+	unsigned char * pbSerialNumber,unsigned int ulSerialNumberLen,
+	unsigned int ulNotBefore, unsigned int ulNotAfter, unsigned int ulSignFlag,
+	unsigned char * pbX509Cert, unsigned int * puiX509CertLen)
 {
 	char * strBaseKeyUsage = NULL;
 	char * strExtKeyUsage = "";
@@ -1520,7 +1520,7 @@ unsigned long OpenSSL_GMECC512GenCertEX(const unsigned char * pbCSR,unsigned lon
 	X509_NAME	*name = NULL;
 	int isCACert = 0;
 	X509_REQ *req = NULL;
-	unsigned long rv = -1;
+	unsigned int rv = -1;
 	const unsigned char * ptr_in = NULL;
 	unsigned char * ptr_out = NULL;
 	BIGNUM * bnSN = NULL;
@@ -1640,7 +1640,7 @@ unsigned long OpenSSL_GMECC512GenCertEX(const unsigned char * pbCSR,unsigned lon
 
 	ptr_out = pbX509Cert;
 
-	* pulX509CertLen = i2d_X509(x509, &ptr_out);
+	* puiX509CertLen = i2d_X509(x509, &ptr_out);
 
 	rv = 0;
 
@@ -1674,12 +1674,12 @@ err:
 	return rv;
 }
 
-unsigned long OpenSSL_GMECC512SignDigest(const unsigned char *pbHash, unsigned long ulHashLen, 
-	const unsigned char *pbPrivateKey, unsigned long ulPrivateKeyLen,
-	unsigned char *pbSig, unsigned long * pulSigLen
+unsigned int OpenSSL_GMECC512SignDigest(const unsigned char *pbHash, unsigned int ulHashLen, 
+	const unsigned char *pbPrivateKey, unsigned int ulPrivateKeyLen,
+	unsigned char *pbSig, unsigned int * puiSigLen
 	)
 {
-	unsigned long rv = -1;
+	unsigned int rv = -1;
 	BN_CTX *ctx = NULL;
 	BIGNUM *k = NULL, *r = NULL, *order = NULL, *order2 = NULL, *x1 = NULL, *s = NULL;
 	BIGNUM *bnOne = NULL, *bnDigest = NULL, *bnPrikey = NULL , *bnTemp = NULL;
@@ -1693,7 +1693,7 @@ unsigned long OpenSSL_GMECC512SignDigest(const unsigned char *pbHash, unsigned l
 		goto err;
 	}
 
-	if(!pbHash || 0==ulHashLen || !pbPrivateKey || 0==ulPrivateKeyLen || !pulSigLen)
+	if(!pbHash || 0==ulHashLen || !pbPrivateKey || 0==ulPrivateKeyLen || !puiSigLen)
 	{
 		rv = OPE_ERR_INVALID_PARAM;
 		goto err;
@@ -1701,13 +1701,13 @@ unsigned long OpenSSL_GMECC512SignDigest(const unsigned char *pbHash, unsigned l
 
 	if(NULL == pbSig)
 	{
-		*pulSigLen = 2 * GM_ECC_512_BYTES_LEN;
+		*puiSigLen = 2 * GM_ECC_512_BYTES_LEN;
 		rv = 0;    // OK
 		goto err;
 	}
-	if(*pulSigLen < 2 * GM_ECC_512_BYTES_LEN)
+	if(*puiSigLen < 2 * GM_ECC_512_BYTES_LEN)
 	{
-		*pulSigLen = 2 * GM_ECC_512_BYTES_LEN;
+		*puiSigLen = 2 * GM_ECC_512_BYTES_LEN;
 		rv = OPE_ERR_NOT_ENOUGH_MEMORY;
 		goto err;
 	}
@@ -1838,7 +1838,7 @@ unsigned long OpenSSL_GMECC512SignDigest(const unsigned char *pbHash, unsigned l
 	memset(pbSig, 0x00,  2 * GM_ECC_512_BYTES_LEN);
 	memcpy(pbSig + GM_ECC_512_BYTES_LEN - rLen, bR, rLen);
 	memcpy(pbSig + 2*GM_ECC_512_BYTES_LEN - sLen, bS, sLen);
-	*pulSigLen = 2 * GM_ECC_512_BYTES_LEN;
+	*puiSigLen = 2 * GM_ECC_512_BYTES_LEN;
 
 	if (tmp_point)
 		EC_POINT_free(tmp_point);
@@ -1861,12 +1861,12 @@ err:
 }
 
 
-unsigned long OpenSSL_GMECC512VerifyDigest(const unsigned char *pbHash, unsigned long ulHashLen, 
-	const unsigned char *pbSig, unsigned long ulSigLen,
-	const unsigned char *aPubkeyValueX, unsigned long ulPublicKeyXLen,
-	const unsigned char *aPubkeyValueY, unsigned long ulPublicKeyYLen)
+unsigned int OpenSSL_GMECC512VerifyDigest(const unsigned char *pbHash, unsigned int ulHashLen, 
+	const unsigned char *pbSig, unsigned int ulSigLen,
+	const unsigned char *aPubkeyValueX, unsigned int ulPublicKeyXLen,
+	const unsigned char *aPubkeyValueY, unsigned int ulPublicKeyYLen)
 {
-	unsigned long rv = -1;
+	unsigned int rv = -1;
 	BN_CTX *ctx = NULL;
 	BIGNUM *t = NULL, *r = NULL, *r2 = NULL, *order = NULL, *x1 = NULL, *s = NULL;
 	BIGNUM *bnDigest = NULL;
@@ -2016,11 +2016,11 @@ err:
 typedef struct X509_name_st X509_NAME;
 #endif
 
-unsigned long OpenSSL_GMECC512GenCRL(const OPST_CRL * pstCRLList, unsigned long ulCRLListSize, 
-	const unsigned char * pbX509Cert,unsigned long ulX509CertLen, 
-	unsigned char * pbCRL, unsigned long * pulCRLLen) 
+unsigned int OpenSSL_GMECC512GenCRL(const OPST_CRL * pstCRLList, unsigned int ulCRLListSize, 
+	const unsigned char * pbX509Cert,unsigned int ulX509CertLen, 
+	unsigned char * pbCRL, unsigned int * puiCRLLen) 
 {
-	unsigned long rv = -1;
+	unsigned int rv = -1;
 	long crldays = 10;
 	long crlhours = 0;
 	long crlsec = 0;
@@ -2030,7 +2030,7 @@ unsigned long OpenSSL_GMECC512GenCRL(const OPST_CRL * pstCRLList, unsigned long 
 	X509 * x509 =  NULL;
 	unsigned char * out_ptr = pbCRL;
 	const unsigned char * in_ptr = pbX509Cert;
-	unsigned long i = 0;
+	unsigned int i = 0;
 	ASN1_TIME * prevtm[COUNT_1K] = {NULL};
 	ASN1_ENUMERATED *rtmp[COUNT_1K] = {NULL};
 	ASN1_INTEGER * tmpser[COUNT_1K] = {NULL};
@@ -2136,7 +2136,7 @@ unsigned long OpenSSL_GMECC512GenCRL(const OPST_CRL * pstCRLList, unsigned long 
 		OBJ_txt2obj("1.2.156.10197.1.501",0), 
 		V_ASN1_UNDEF, 0);
 
-	*pulCRLLen = i2d_X509_CRL(crl, &out_ptr);
+	*puiCRLLen = i2d_X509_CRL(crl, &out_ptr);
 
 	rv = 0;
 err: 
@@ -2169,12 +2169,12 @@ err:
 	return rv;
 }
 
-unsigned long OpenSSL_GMECC512Decrypt(const unsigned char * pbPrivateKey, unsigned long ulPrivateKeyLen, const unsigned char * pbIN, unsigned long ulINLen,
-	unsigned char * pbOUT, unsigned long * pulOUTLen)
+unsigned int OpenSSL_GMECC512Decrypt(const unsigned char * pbPrivateKey, unsigned int ulPrivateKeyLen, const unsigned char * pbIN, unsigned int ulINLen,
+	unsigned char * pbOUT, unsigned int * puiOUTLen)
 {
 	unsigned char * szData = NULL;
 	unsigned int szLen = BUFFER_LEN_1K * BUFFER_LEN_1K;
-	unsigned long ulRet = -1;
+	unsigned int ulRet = -1;
 
 	if(!pbIN || !pbPrivateKey)
 	{
@@ -2199,9 +2199,9 @@ unsigned long OpenSSL_GMECC512Decrypt(const unsigned char * pbPrivateKey, unsign
 		goto err;
 	}
 	
-	* pulOUTLen = szLen;
+	* puiOUTLen = szLen;
 
-	if (NULL == pbOUT || * pulOUTLen < szLen)
+	if (NULL == pbOUT || * puiOUTLen < szLen)
 	{
 
 	}
@@ -2221,16 +2221,16 @@ err:
 	return ulRet;
 }
 
-unsigned long OpenSSL_GMECC512Encrypt(const unsigned char * pbPublicKeyX, unsigned long ulPublicKeyXLen, 
-	const unsigned char * pbPublicKeyY, unsigned long ulPublicKeyYLen,
-	const unsigned char * pbIN, unsigned long ulINLen,
-	unsigned char * pbOUT, unsigned long * pulOUTLen)
+unsigned int OpenSSL_GMECC512Encrypt(const unsigned char * pbPublicKeyX, unsigned int ulPublicKeyXLen, 
+	const unsigned char * pbPublicKeyY, unsigned int ulPublicKeyYLen,
+	const unsigned char * pbIN, unsigned int ulINLen,
+	unsigned char * pbOUT, unsigned int * puiOUTLen)
 {
 	unsigned char * szData = NULL;
 	unsigned int szLen = BUFFER_LEN_1K * BUFFER_LEN_1K;
-	unsigned long ulRet = -1;
+	unsigned int ulRet = -1;
 
-	unsigned long pubkey_xy_len = 2 * GM_ECC_512_BYTES_LEN + 1;
+	unsigned int pubkey_xy_len = 2 * GM_ECC_512_BYTES_LEN + 1;
 	unsigned char pubkey_xy_value[2 * GM_ECC_512_BYTES_LEN + 1] = {0};
 
 	if(!pbIN || !pbPublicKeyX || !pbPublicKeyY)
@@ -2261,9 +2261,9 @@ unsigned long OpenSSL_GMECC512Encrypt(const unsigned char * pbPublicKeyX, unsign
 		goto err;
 	}
 
-	* pulOUTLen = szLen;
+	* puiOUTLen = szLen;
 
-	if (NULL == pbOUT || * pulOUTLen < szLen)
+	if (NULL == pbOUT || * puiOUTLen < szLen)
 	{
 
 	}
@@ -2285,11 +2285,11 @@ err:
 
 
 
-unsigned long OpenSSL_GMECC512Point(const unsigned char * pbPublicKeyX, unsigned long ulPublicKeyXLen, 
-	const unsigned char * pbPublicKeyY, unsigned long ulPublicKeyYLen
+unsigned int OpenSSL_GMECC512Point(const unsigned char * pbPublicKeyX, unsigned int ulPublicKeyXLen, 
+	const unsigned char * pbPublicKeyY, unsigned int ulPublicKeyYLen
 	)
 {
-	unsigned long ulRet = 0;
+	unsigned int ulRet = 0;
 	unsigned char data_value[GM_ECC_512_BYTES_LEN * 2 +1] = {0};
 
 	data_value[0] = 0x04;
@@ -2310,11 +2310,11 @@ unsigned long OpenSSL_GMECC512Point(const unsigned char * pbPublicKeyX, unsigned
 }
 
 
-unsigned long OpenSSL_GMECC512Write(const unsigned char * pbIN, unsigned long ulINLen, 
-	unsigned long ulType,char * szFileName,unsigned long fileEncode, char * szPassword
+unsigned int OpenSSL_GMECC512Write(const unsigned char * pbIN, unsigned int ulINLen, 
+	unsigned int ulType,char * szFileName,unsigned int fileEncode, char * szPassword
 	)
 {
-	unsigned long ulRet = -1;
+	unsigned int ulRet = -1;
 
 	FILE * file = fopen(szFileName, "w");
 
@@ -2332,7 +2332,7 @@ unsigned long OpenSSL_GMECC512Write(const unsigned char * pbIN, unsigned long ul
 			BN_CTX *ctx=NULL;
 			BIGNUM *prvkey=NULL;
 			unsigned char data_value[BUFFER_LEN_1K * 4] = {0};
-			unsigned long data_len = BUFFER_LEN_1K *4;
+			unsigned int data_len = BUFFER_LEN_1K *4;
 			unsigned char * ptr_out = NULL;
 
 			if(ulINLen != GM_ECC_512_BYTES_LEN)
@@ -2420,7 +2420,7 @@ unsigned long OpenSSL_GMECC512Write(const unsigned char * pbIN, unsigned long ul
 			X509 * x509 = NULL;
 			const unsigned char * ptr_in = NULL;
 			unsigned char data_value[BUFFER_LEN_1K * 4] = {0};
-			unsigned long data_len = BUFFER_LEN_1K *4;
+			unsigned int data_len = BUFFER_LEN_1K *4;
 			unsigned char * ptr_out = NULL;
 
 			ptr_in = pbIN;
@@ -2451,7 +2451,7 @@ unsigned long OpenSSL_GMECC512Write(const unsigned char * pbIN, unsigned long ul
 		{
 			const unsigned char * ptr_in = NULL;
 			unsigned char data_value[BUFFER_LEN_1K * 4] = {0};
-			unsigned long data_len = BUFFER_LEN_1K *4;
+			unsigned int data_len = BUFFER_LEN_1K *4;
 			unsigned char * ptr_out = NULL;
 			EVP_PKEY * pkey = NULL;
 			EC_KEY		*ec = NULL;
@@ -2558,13 +2558,13 @@ err:
 
 
 
-unsigned long OpenSSL_GMECC512DecryptInner(const unsigned char *pbIN, unsigned long ulINLen, 
-	const unsigned char *pbPrivateKey, unsigned long ulPrivateKeyLen, 
-	unsigned char *pbOUT, unsigned long * pulOUTLen)
+unsigned int OpenSSL_GMECC512DecryptInner(const unsigned char *pbIN, unsigned int ulINLen, 
+	const unsigned char *pbPrivateKey, unsigned int ulPrivateKeyLen, 
+	unsigned char *pbOUT, unsigned int * puiOUTLen)
 {
-	unsigned long ulRet = -1;
+	unsigned int ulRet = -1;
 
-	unsigned long ulPlainTextLen = 0;
+	unsigned int ulPlainTextLen = 0;
 
 	unsigned char * c1 = NULL; 
 	unsigned char * c2 = NULL;
@@ -2582,8 +2582,8 @@ unsigned long OpenSSL_GMECC512DecryptInner(const unsigned char *pbIN, unsigned l
 	BIGNUM * h = NULL;
 	BIGNUM * privatekey = NULL;
 
-	unsigned long x2Len = 0;
-	unsigned long y2Len = 0;
+	unsigned int x2Len = 0;
+	unsigned int y2Len = 0;
 
 	EC_POINT * C1 = NULL;
 	EC_POINT * S = NULL;
@@ -2595,7 +2595,7 @@ unsigned long OpenSSL_GMECC512DecryptInner(const unsigned char *pbIN, unsigned l
 
 	int i = 0;
 
-	if (!pbIN || ulINLen < (2*GM_ECC_512_BYTES_LEN+1+(SM3_DIGEST_LEN)) || !pulOUTLen
+	if (!pbIN || ulINLen < (2*GM_ECC_512_BYTES_LEN+1+(SM3_DIGEST_LEN)) || !puiOUTLen
 		|| !pbPrivateKey || ulPrivateKeyLen != GM_ECC_512_BYTES_LEN)
 	{
 		ulRet = OPE_ERR_INVALID_PARAM;
@@ -2606,13 +2606,13 @@ unsigned long OpenSSL_GMECC512DecryptInner(const unsigned char *pbIN, unsigned l
 
 	if(!pbOUT)
 	{
-		*pulOUTLen = ulPlainTextLen;
+		*puiOUTLen = ulPlainTextLen;
 		ulRet = 0;  // OK
 		goto err;
 	}
-	if(*pulOUTLen < ulPlainTextLen)
+	if(*puiOUTLen < ulPlainTextLen)
 	{
-		*pulOUTLen = ulPlainTextLen;
+		*puiOUTLen = ulPlainTextLen;
 		ulRet = OPE_ERR_NOT_ENOUGH_MEMORY;
 		goto err;
 	}
@@ -2773,7 +2773,7 @@ unsigned long OpenSSL_GMECC512DecryptInner(const unsigned char *pbIN, unsigned l
 	if (0 == memcmp(c3,data_value_digest,(SM3_DIGEST_LEN)))
 	{
 		ulRet = 0;
-		*pulOUTLen = ulPlainTextLen;
+		*puiOUTLen = ulPlainTextLen;
 		memcpy(pbOUT,data_value_out,ulPlainTextLen);
 	}
 	else
@@ -2821,15 +2821,15 @@ err:
 
 
 
-unsigned long OpenSSL_GMECC512EncryptInner(
-	const unsigned char *pbIN, unsigned long ulINLen, 
-	const unsigned char *pbPublicKeyX, unsigned long ulPublicKeyXLen, 
-	const unsigned char *pbPublicKeyY, unsigned long ulPublicKeyYLen, 
-	unsigned char *pbOUT, unsigned long * pulOUTLen
+unsigned int OpenSSL_GMECC512EncryptInner(
+	const unsigned char *pbIN, unsigned int ulINLen, 
+	const unsigned char *pbPublicKeyX, unsigned int ulPublicKeyXLen, 
+	const unsigned char *pbPublicKeyY, unsigned int ulPublicKeyYLen, 
+	unsigned char *pbOUT, unsigned int * puiOUTLen
 	)
 {
-	unsigned long ulRet = -1;
-	unsigned long ulCiphertextLen = 0;
+	unsigned int ulRet = -1;
+	unsigned int ulCiphertextLen = 0;
 	BN_CTX * ctx = NULL;
 	EC_POINT * pubkey_xy = NULL;
 	EC_POINT * C1 = NULL;
@@ -2846,8 +2846,8 @@ unsigned long OpenSSL_GMECC512EncryptInner(
 	BIGNUM *x2 = NULL;
 	BIGNUM *y2 = NULL;
 
-	unsigned long x2Len = 0;
-	unsigned long y2Len = 0;
+	unsigned int x2Len = 0;
+	unsigned int y2Len = 0;
 
 	unsigned char * t = NULL;
 	unsigned char * zero_buffer = NULL;
@@ -2868,7 +2868,7 @@ unsigned long OpenSSL_GMECC512EncryptInner(
 	// 判断参数是否正确
 	if(NULL == pbIN || 0 == ulINLen || NULL == pbPublicKeyX
 		|| NULL == pbPublicKeyY || GM_ECC_512_BYTES_LEN != ulPublicKeyXLen || GM_ECC_512_BYTES_LEN != ulPublicKeyYLen
-		|| NULL == pulOUTLen)
+		|| NULL == puiOUTLen)
 	{
 		ulRet=OPE_ERR_INVALID_PARAM;
 		goto err;
@@ -2878,13 +2878,13 @@ unsigned long OpenSSL_GMECC512EncryptInner(
 	ulCiphertextLen =  2*GM_ECC_512_BYTES_LEN + 1 + ulINLen + (SM3_DIGEST_LEN);
 	if(NULL == pbOUT)
 	{
-		*pulOUTLen = ulCiphertextLen;
+		*puiOUTLen = ulCiphertextLen;
 		ulRet = 0;  // OK
 		goto err;
 	}
-	if(*pulOUTLen < ulCiphertextLen)
+	if(*puiOUTLen < ulCiphertextLen)
 	{
-		*pulOUTLen  = ulCiphertextLen;
+		*puiOUTLen  = ulCiphertextLen;
 		ulRet = OPE_ERR_NOT_ENOUGH_MEMORY;
 		goto err;
 	}
@@ -3092,7 +3092,7 @@ unsigned long OpenSSL_GMECC512EncryptInner(
 	memcpy(pbOUT + GM_ECC_512_BYTES_LEN*2+1 , c2, ulINLen);
 	memcpy(pbOUT + GM_ECC_512_BYTES_LEN*2+1 + ulINLen,c3,(SM3_DIGEST_LEN));
 
-	*pulOUTLen = GM_ECC_512_BYTES_LEN*2+1 + ulINLen + (SM3_DIGEST_LEN);
+	*puiOUTLen = GM_ECC_512_BYTES_LEN*2+1 + ulINLen + (SM3_DIGEST_LEN);
 
 err:
 
