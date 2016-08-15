@@ -921,7 +921,15 @@ extern "C" {
 		unsigned char *pbOUT, unsigned int * puiOUTLen
 		);
 
-	COMMON_API unsigned int OpenSSL_SM2GenPKCS11();
+	COMMON_API unsigned int OpenSSL_SM2GenPFX(char *password, char *nickname, 
+		const unsigned char *pbPrivateKey, unsigned int uiPrivateKeyLen, 
+		const unsigned char * pbPublicKeyX, unsigned int uiPublicKeyXLen, 
+		const unsigned char * pbPublicKeyY, unsigned int uiPublicKeyYLen,
+		const unsigned char * pbX509Cert, unsigned int uiX509CertLen,
+		const unsigned char * pbX509CA, unsigned int uiX509CALen,
+		int nid_key, int nid_cert, int iter, int mac_iter, int keytype,
+		unsigned char *pbPFX, unsigned int * puiPFXLen
+		);
 
 
 	// GM_ECC_512 end 

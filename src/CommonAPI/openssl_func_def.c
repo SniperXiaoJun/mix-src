@@ -3818,8 +3818,8 @@ PKCS12 *PKCS12_create(char *pass, char *name, EVP_PKEY *pkey, X509 *cert,
 
 	if (pkey && cert)
 	{
-		if(!X509_check_private_key(cert, pkey))
-			return NULL;
+		//if(!X509_check_private_key(cert, pkey))
+		//	return NULL;
 		X509_digest(cert, EVP_sha1(), keyid, &keyidlen);
 	}
 
@@ -4175,13 +4175,20 @@ unsigned int OpenSSL_SM2GenPFX(char *password, char *nickname,
 	const unsigned char * pbPublicKeyY, unsigned int uiPublicKeyYLen,
 	const unsigned char * pbX509Cert, unsigned int uiX509CertLen,
 	const unsigned char * pbX509CA, unsigned int uiX509CALen,
-	int nid_key, int nid_cert, int iter, int mac_iter, int keytype
+	int nid_key, int nid_cert, int iter, int mac_iter, int keytype,
+	unsigned char *pbPFX, unsigned int * puiPFXLen
 	)
 {
 	X509 * x509 =  NULL;
 	unsigned int rv = -1;
 	PKCS12 * p12 = NULL;
 	EVP_PKEY	*pkey = NULL;
+	unsigned char *ptr_out = NULL;
+
+	unsigned char value[BUFFER_LEN_1K * 4] = {0};
+	unsigned int len = BUFFER_LEN_1K * 4;
+
+	ptr_out = value;
 
 
 	x509 = d2i_X509( NULL, (const unsigned char **)&pbX509Cert,uiX509CertLen);
@@ -4195,7 +4202,7 @@ unsigned int OpenSSL_SM2GenPFX(char *password, char *nickname,
 		pbPublicKeyX, uiPublicKeyXLen, 
 		pbPublicKeyY, uiPublicKeyYLen);
 
-	if (pkey)
+	if (!pkey)
 	{
 		goto err;
 	}
@@ -4203,6 +4210,19 @@ unsigned int OpenSSL_SM2GenPFX(char *password, char *nickname,
 	p12 = PKCS12_create(password, nickname, pkey, x509,
 		NULL, nid_key, nid_cert, iter, mac_iter, keytype
 		);
+
+	len = i2d_PKCS12(p12, NULL);
+
+	if (len > *puiPFXLen)
+	{
+		*puiPFXLen = len;
+	}
+	else
+	{
+		len = i2d_PKCS12(p12, &ptr_out);
+		*puiPFXLen = len;
+		memcpy(pbPFX,value, len);
+	}
 
 	rv = 0;
 err:
