@@ -27,34 +27,34 @@
 
 extern EC_GROUP *g_group;
 
-unsigned long SM2SignAsn1Convert(
-	unsigned char *pbR, unsigned long nRLen,
-	unsigned char *pbS, unsigned long nSLen,
-	unsigned char *pbOutDer, unsigned long *pOutDerLen);
+unsigned int SM2SignAsn1Convert(
+	unsigned char *pbR, unsigned int nRLen,
+	unsigned char *pbS, unsigned int nSLen,
+	unsigned char *pbOutDer, unsigned int *pOutDerLen);
 
-unsigned long OPF_SM2SignCert(void * hSessionHandle,
-	const unsigned char *pbX509Cert, unsigned long ulX509CertLen,unsigned long ulAlg,
-	unsigned char * pbX509CertSigned, unsigned long * pulX509CertSignedLen)
+unsigned int OPF_SM2SignCert(void * hSessionHandle,
+	const unsigned char *pbX509Cert, unsigned int uiX509CertLen,unsigned int uiAlg,
+	unsigned char * pbX509CertSigned, unsigned int * puiX509CertSignedLen)
 {
-	unsigned long rv = -1;
+	unsigned int rv = -1;
 
 	X509 * x509 =  NULL;
 	unsigned char sig_value[BUFFER_LEN_1K] = {0};
-	unsigned long sig_len = BUFFER_LEN_1K;
+	unsigned int sig_len = BUFFER_LEN_1K;
 
-	unsigned long ulPublicKeyXlen = SM2_BYTES_LEN;
-	unsigned long ulPublicKeyYlen = SM2_BYTES_LEN;
+	unsigned int uiPublicKeyXlen = SM2_BYTES_LEN;
+	unsigned int uiPublicKeyYlen = SM2_BYTES_LEN;
 
 	unsigned char digest_value[SM3_DIGEST_LEN] = {0};
 	unsigned int digest_len = SM3_DIGEST_LEN;
 
-	unsigned long pubkey_xy_len = 2 * SM2_BYTES_LEN + 1;
+	unsigned int pubkey_xy_len = 2 * SM2_BYTES_LEN + 1;
 	unsigned char pubkey_xy_value[2 * SM2_BYTES_LEN + 1] = {0};
 
-	unsigned long encode_len = BUFFER_LEN_1K;
+	unsigned int encode_len = BUFFER_LEN_1K;
 	unsigned char encode_value[BUFFER_LEN_1K] = {0};
 
-	unsigned long cert_buffer_len = BUFFER_LEN_1K * 4;
+	unsigned int cert_buffer_len = BUFFER_LEN_1K * 4;
 	unsigned char cert_buffer_data[BUFFER_LEN_1K * 4] = {0};
 
 	const unsigned char * ptr_in = NULL;
@@ -63,13 +63,13 @@ unsigned long OPF_SM2SignCert(void * hSessionHandle,
 	ptr_out = cert_buffer_data;
 	ptr_in = pbX509Cert;
 
-	x509 = d2i_X509(NULL, &ptr_in, ulX509CertLen);
+	x509 = d2i_X509(NULL, &ptr_in, uiX509CertLen);
 
 	memcpy(pubkey_xy_value, "\x04", 1);
 
 	cert_buffer_len =i2d_X509_CINF(x509->cert_info,&ptr_out);
 
-	rv = PCI_ExportRootSM2Keys(hSessionHandle,pubkey_xy_value + 1,&ulPublicKeyXlen,pubkey_xy_value + 1 + SM2_BYTES_LEN,&ulPublicKeyYlen);
+	rv = PCI_ExportRootSM2Keys(hSessionHandle,pubkey_xy_value + 1,&uiPublicKeyXlen,pubkey_xy_value + 1 + SM2_BYTES_LEN,&uiPublicKeyYlen);
 	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__,"pubkey_xy_value");
 	FILE_LOG_HEX(file_log_name, pubkey_xy_value, SM2_BYTES_LEN * 2 + 1);
 	if (rv)
@@ -100,7 +100,7 @@ unsigned long OPF_SM2SignCert(void * hSessionHandle,
 	x509->signature->flags|=ASN1_STRING_FLAG_BITS_LEFT;
 
 	ptr_out = pbX509CertSigned;
-	* pulX509CertSignedLen =  i2d_X509(x509, &ptr_out);
+	* puiX509CertSignedLen =  i2d_X509(x509, &ptr_out);
 
 	rv = 0;
 err:
@@ -115,24 +115,24 @@ err:
 
 
 
-unsigned long OPF_SM2SignCRL(void * hSessionHandle,
-	const unsigned char *pbX509Cert, unsigned long ulX509CertLen,
-	const unsigned char *pbCRL, unsigned long ulCRL,unsigned long ulAlg,
-	unsigned char * pbCRLSigned, unsigned long * pulCRLSigned)
+unsigned int OPF_SM2SignCRL(void * hSessionHandle,
+	const unsigned char *pbX509Cert, unsigned int uiX509CertLen,
+	const unsigned char *pbCRL, unsigned int uiCRL,unsigned int uiAlg,
+	unsigned char * pbCRLSigned, unsigned int * puiCRLSigned)
 {
-	unsigned long rv = -1;
+	unsigned int rv = -1;
 	X509_CRL * crl =  NULL;
 	X509 * x509 =  NULL;
 	unsigned char sig_value[BUFFER_LEN_1K] = {0};
-	unsigned long sig_len = BUFFER_LEN_1K;
+	unsigned int sig_len = BUFFER_LEN_1K;
 
 	unsigned char digest_value[SM3_DIGEST_LEN] = {0};
 	unsigned int digest_len = SM3_DIGEST_LEN;
 
-	unsigned long encode_len = BUFFER_LEN_1K;
+	unsigned int encode_len = BUFFER_LEN_1K;
 	unsigned char encode_value[BUFFER_LEN_1K] = {0};
 
-	unsigned long crl_buffer_len = BUFFER_LEN_1K * 4;
+	unsigned int crl_buffer_len = BUFFER_LEN_1K * 4;
 	unsigned char crl_buffer_value[BUFFER_LEN_1K * 4] = {0};
 	unsigned char *pcrl = crl_buffer_value;
 
@@ -142,7 +142,7 @@ unsigned long OPF_SM2SignCRL(void * hSessionHandle,
 	ptr_out = pbCRLSigned;
 	
 	ptr_in = pbCRL;
-	crl = d2i_X509_CRL(NULL, (const unsigned char **)&ptr_in,ulCRL);
+	crl = d2i_X509_CRL(NULL, (const unsigned char **)&ptr_in,uiCRL);
 
 	if (NULL == crl)
 	{
@@ -150,7 +150,7 @@ unsigned long OPF_SM2SignCRL(void * hSessionHandle,
 	}
 
 	ptr_in = pbX509Cert;
-	x509 = d2i_X509(NULL, (const unsigned char **)&ptr_in,ulX509CertLen);
+	x509 = d2i_X509(NULL, (const unsigned char **)&ptr_in,uiX509CertLen);
 
 	if (NULL == x509)
 	{
@@ -199,7 +199,7 @@ unsigned long OPF_SM2SignCRL(void * hSessionHandle,
 	crl->signature->flags&= ~(ASN1_STRING_FLAG_BITS_LEFT|0x07);
 	crl->signature->flags|=ASN1_STRING_FLAG_BITS_LEFT;
 
-	*pulCRLSigned = i2d_X509_CRL(crl, &ptr_out);
+	*puiCRLSigned = i2d_X509_CRL(crl, &ptr_out);
 
 	rv = 0;
 err:
