@@ -3947,6 +3947,13 @@ PKCS12_SAFEBAG *PKCS12_add_key(STACK_OF(PKCS12_SAFEBAG) **pbags, EVP_PKEY *key,
 	/* Make a PKCS#8 structure */
 	if(!(p8 = EVP_PKEY2PKCS8(key)))
 		goto err;
+
+
+	X509_ALGOR_set0(p8->pkeyalg,
+		OBJ_txt2obj("1.2.840.10045.2.1",OBJ_NAME_TYPE_PKEY_METH)
+		,V_ASN1_OBJECT,OBJ_txt2obj("1.2.156.10197.1.301",OBJ_NAME_TYPE_PKEY_METH)
+		);
+
 	if(key_usage && !PKCS8_add_keyusage(p8, key_usage))
 		goto err;
 	if (nid_key != -1)
@@ -4139,6 +4146,7 @@ EVP_PKEY * OpenSSL_NewEVP_PKEY_OF_SM2Keys(
 		goto err;
 	} 
 
+
 	if ( !EC_KEY_set_public_key(ec, pubkey) )
 	{
 		goto err;
@@ -4210,6 +4218,19 @@ unsigned int OpenSSL_SM2GenPFX(char *password, char *nickname,
 	p12 = PKCS12_create(password, nickname, pkey, x509,
 		NULL, nid_key, nid_cert, iter, mac_iter, keytype
 		);
+
+
+	//X509_ALGOR_set0(req->req_info->pubkey->algor,
+	//	OBJ_txt2obj("1.2.840.10045.2.1",OBJ_NAME_TYPE_PKEY_METH)
+	//	,V_ASN1_OBJECT,OBJ_txt2obj("1.2.156.10197.1.301",OBJ_NAME_TYPE_PKEY_METH)
+	//	);
+
+	//X509_ALGOR_set0(ec algor,
+	//	OBJ_txt2obj("1.2.840.10045.2.1",OBJ_NAME_TYPE_PKEY_METH)
+	//	,V_ASN1_OBJECT,OBJ_txt2obj("1.2.156.10197.1.301",OBJ_NAME_TYPE_PKEY_METH)
+	//	);
+
+
 
 	len = i2d_PKCS12(p12, NULL);
 
