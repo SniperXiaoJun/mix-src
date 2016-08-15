@@ -51,97 +51,97 @@ extern "C" {
 	功能名称:	生成证书请求
 	函数名称:	OpenSSL_SM2GenCSRWithPubkey
 	输入参数:	pbPublicKeyX     公钥X值
-				ulPublicKeyXLen		公钥X长度
+				uiPublicKeyXLen		公钥X长度
 				pbPublicKeyY     公钥Y值
-				ulPublicKeyYLen		公钥Y长度
+				uiPublicKeyYLen		公钥Y长度
 	输出参数:	pbCSR		证书请求内容
-				pulCSRLen		证书请求长度
+				puiCSRLen		证书请求长度
 	返回值:   
 	失败：
 	功能描述:	生成证书请求
 	*/
 	COMMON_API unsigned int OpenSSL_SM2GenCSRWithPubkey(const OPST_USERINFO *pstUserInfo,
-		const unsigned char * pbPublicKeyX,  unsigned int ulPublicKeyXLen, 
-		const unsigned char * pbPublicKeyY,  unsigned int ulPublicKeyYLen,
+		const unsigned char * pbPublicKeyX,  unsigned int uiPublicKeyXLen, 
+		const unsigned char * pbPublicKeyY,  unsigned int uiPublicKeyYLen,
 		unsigned char * pbCSR,  unsigned int * puiCSRLen);
 
 	/*
 	功能名称:	生成根证书
 	函数名称:	OpenSSL_SM2GenRootCert
 	输入参数:	pbCSR		请求信息
-				ulCSRLen			请求长度
-				ulSerialNumber	序列号
-				ulNotBefore		开始时间
-				ulNotAfter		结束时间
+				uiCSRLen			请求长度
+				uiSerialNumber	序列号
+				uiNotBefore		开始时间
+				uiNotAfter		结束时间
 	输出参数:	pbX509Cert		证书内容
-				pulX509CertLen		证书长度
+				puiX509CertLen		证书长度
 	返回值:   
 	失败：
 	功能描述:	生成根证书
 	*/
-	COMMON_API unsigned int OpenSSL_SM2GenRootCert(const unsigned char * pbCSR,unsigned int ulCSRLen, 
-		unsigned char * pbSerialNumber,unsigned int ulSerialNumberLen,
-		unsigned int ulNotBefore, unsigned int ulNotAfter, 
+	COMMON_API unsigned int OpenSSL_SM2GenRootCert(const unsigned char * pbCSR,unsigned int uiCSRLen, 
+		unsigned char * pbSerialNumber,unsigned int uiSerialNumberLen,
+		unsigned int uiNotBefore, unsigned int uiNotAfter, 
 		unsigned char * pbX509Cert, unsigned int * puiX509CertLen);
 
 	/*
 	功能名称:	生成SM2证书
 	函数名称:	OpenSSL_SM2GenCert
 	输入参数:	pbCSR		请求内容
-				ulCSRLen			请求长度
-				ulSerialNumber	序列号
-				ulNotBefore		开始时间
-				ulNotAfter		结束时间
+				uiCSRLen			请求长度
+				uiSerialNumber	序列号
+				uiNotBefore		开始时间
+				uiNotAfter		结束时间
 	输出参数:	pbX509Cert		证书内容
-				pulX509CertLen		证书长度
+				puiX509CertLen		证书长度
 	返回值:   
 	失败：
 	功能描述:	生成SM2证书
 	*/
-	COMMON_API unsigned int OpenSSL_SM2GenCert(const unsigned char * pbCSR,unsigned int ulCSRLen, 
-		const unsigned char * pbX509CACert, unsigned int ulX509CACertLen, 
-		unsigned char * pbSerialNumber,unsigned int ulSerialNumberLen,
-		unsigned int ulNotBefore, unsigned int ulNotAfter, unsigned int ulSignFlag,
+	COMMON_API unsigned int OpenSSL_SM2GenCert(const unsigned char * pbCSR,unsigned int uiCSRLen, 
+		const unsigned char * pbX509CACert, unsigned int uiX509CACertLen, 
+		unsigned char * pbSerialNumber,unsigned int uiSerialNumberLen,
+		unsigned int uiNotBefore, unsigned int uiNotAfter, unsigned int uiSignFlag,
 		unsigned char * pbX509Cert, unsigned int * puiX509CertLen);
 	
 	/*
 	功能名称:	生成SM2证书(扩展，验证并替换证书请求的公钥之后生成证书)
 	函数名称:	OpenSSL_SM2GenCert
 	输入参数:	pbCSR		请求内容
-				ulCSRLen			请求长度
-				ulSerialNumber	序列号
-				ulNotBefore		开始时间
-				ulNotAfter		结束时间
+				uiCSRLen			请求长度
+				uiSerialNumber	序列号
+				uiNotBefore		开始时间
+				uiNotAfter		结束时间
 	输出参数:	pbX509Cert		证书内容
-				pulX509CertLen		证书长度
+				puiX509CertLen		证书长度
 	返回值:   
 	失败：
 	功能描述:	生成SM2证书
 	*/
-	COMMON_API unsigned int OpenSSL_SM2GenCertEX(const unsigned char * pbCSR,unsigned int ulCSRLen, 
-		const unsigned char * pbPublicKeyX, unsigned int ulPublicKeyXLen, 
-		const unsigned char * pbPublicKeyY, unsigned int ulPublicKeyYLen,
-		const unsigned char * pbX509CACert, unsigned int ulX509CACertLen, 
-		unsigned char * pbSerialNumber,unsigned int ulSerialNumberLen,
-		unsigned int ulNotBefore, unsigned int ulNotAfter, unsigned int ulSignFlag,
+	COMMON_API unsigned int OpenSSL_SM2GenCertEX(const unsigned char * pbCSR,unsigned int uiCSRLen, 
+		const unsigned char * pbPublicKeyX, unsigned int uiPublicKeyXLen, 
+		const unsigned char * pbPublicKeyY, unsigned int uiPublicKeyYLen,
+		const unsigned char * pbX509CACert, unsigned int uiX509CACertLen, 
+		unsigned char * pbSerialNumber,unsigned int uiSerialNumberLen,
+		unsigned int uiNotBefore, unsigned int uiNotAfter, unsigned int uiSignFlag,
 		unsigned char * pbX509Cert, unsigned int * puiX509CertLen);
 
 	/*
 	功能名称:	证书吊销列表
 	函数名称:	OpenSSL_SM2GenCRL
 	输入参数:	pstCRLList				证书吊销内容
-				ulCRLListSize			证书个数
+				uiCRLListSize			证书个数
 				pbX509Cert			证书内容
-				ulX509CertLen				证书长度
+				uiX509CertLen				证书长度
 	输出参数:   
 				pbCRL				证书吊销列表内容
-				pulCRLLen				证书吊销列表长度
+				puiCRLLen				证书吊销列表长度
 	返回值:   
 	失败：
 	功能描述:	证书吊销列表
 	*/
-	COMMON_API unsigned int OpenSSL_SM2GenCRL(const OPST_CRL * pstCRLList, unsigned int ulCRLListSize, 
-		const unsigned char * pbX509Cert,unsigned int ulX509CertLen, 
+	COMMON_API unsigned int OpenSSL_SM2GenCRL(const OPST_CRL * pstCRLList, unsigned int uiCRLListSize, 
+		const unsigned char * pbX509Cert,unsigned int uiX509CertLen, 
 		unsigned char * pbCRL, unsigned int * puiCRLLen);
 
 	
@@ -149,22 +149,22 @@ extern "C" {
 	功能名称:	对证书进行签名
 	函数名称:	OpenSSL_SM2SignCertWithKeys
 	输入参数:	pbX509Cert					待签名证书内容
-				ulX509CertLen				待签名证书长度
+				uiX509CertLen				待签名证书长度
 				pbPublicKeyX				签名者公钥X
 				pbPublicKeyY				签名者公钥Y
 				pbPrivateKey				私钥内容
-				ulPrivateKeyLen				私钥长度
+				uiPrivateKeyLen				私钥长度
 	输出参数:   pbX509CertSigned				签名证书内容
-				pulX509CertSignedLen			签名证书长度
+				puiX509CertSignedLen			签名证书长度
 	返回值:   
 	失败：
 	功能描述:	对证书进行签名
 	*/
 	COMMON_API unsigned int OpenSSL_SM2SignCert(
-		const unsigned char *pbX509Cert,  unsigned int ulX509CertLen, 
-		const unsigned char *pbPublicKeyX, unsigned int ulPublicKeyXLen,
-		const unsigned char *pbPublicKeyY, unsigned int ulPublicKeyYLen,
-		const unsigned char *pbPrivateKey,  unsigned int ulPrivateKeyLen,
+		const unsigned char *pbX509Cert,  unsigned int uiX509CertLen, 
+		const unsigned char *pbPublicKeyX, unsigned int uiPublicKeyXLen,
+		const unsigned char *pbPublicKeyY, unsigned int uiPublicKeyYLen,
+		const unsigned char *pbPrivateKey,  unsigned int uiPrivateKeyLen,
 		unsigned char * pbX509CertSigned,  unsigned int * puiX509CertSignedLen
 		);
 
@@ -172,41 +172,41 @@ extern "C" {
 	功能名称:	对证书请求进行签名
 	函数名称:	OpenSSL_SM2SignCSR
 	输入参数:	pbCSR					待签名证书请求内容
-				ulCSRLen					待签名证书请求长度
+				uiCSRLen					待签名证书请求长度
 				pbPrivateKey				私钥内容
-				ulPrivateKeyLen				私钥长度
+				uiPrivateKeyLen				私钥长度
 	输出参数:   pbCSRSigned				签名证书请求内容
-				pulCSRSignedLen			签名证书请求长度
+				puiCSRSignedLen			签名证书请求长度
 	返回值:   
 	失败：
 	功能描述:	对证书请求进行签名
 	*/
 	COMMON_API unsigned int OpenSSL_SM2SignCSR(
-		const unsigned char *pbCSR, unsigned int ulCSRLen,
-		const unsigned char * pbPrivateKey,unsigned int ulPrivateKeyLen,
-		unsigned int ulAlg,
+		const unsigned char *pbCSR, unsigned int uiCSRLen,
+		const unsigned char * pbPrivateKey,unsigned int uiPrivateKeyLen,
+		unsigned int uiAlg,
 		unsigned char *pbCSRSigned, unsigned int * puiCSRSignedLen);
 
 	/*
 	功能名称:	对CRL进行签名
 	函数名称:	OpenSSL_SM2SignCRL
 	输入参数:	pbCRL					待签名CRL内容
-				ulCRLLen					待签名CRL长度
+				uiCRLLen					待签名CRL长度
 				pbPublicKeyX				签名者公钥X
 				pbPublicKeyY				签名者公钥Y
 				pbPrivateKey				私钥内容
-				ulPrivateKeyLen				私钥长度
+				uiPrivateKeyLen				私钥长度
 	输出参数:   pbCRLSigned				签名CRL内容
-				pulCRLSignedLen			签名CRL长度
+				puiCRLSignedLen			签名CRL长度
 	返回值:   
 	失败：
 	功能描述:	对CRL进行签名
 	*/
 	COMMON_API unsigned int OpenSSL_SM2SignCRL(
-		const unsigned char *pbCRL, unsigned int ulCRLLen,unsigned int ulAlg,
-		const unsigned char *pbPublicKeyX, unsigned int ulPublicKeyXLen,
-		const unsigned char *pbPublicKeyY, unsigned int ulPublicKeyYLen,
-		const unsigned char * pbPrivateKey,unsigned int ulPrivateKeyLen,
+		const unsigned char *pbCRL, unsigned int uiCRLLen,unsigned int uiAlg,
+		const unsigned char *pbPublicKeyX, unsigned int uiPublicKeyXLen,
+		const unsigned char *pbPublicKeyY, unsigned int uiPublicKeyYLen,
+		const unsigned char * pbPrivateKey,unsigned int uiPrivateKeyLen,
 		unsigned char *pbCRLSigned, unsigned int * puiCRLSignedLen
 		);
 
@@ -214,40 +214,40 @@ extern "C" {
 	功能名称:	对消息进行签名
 	函数名称:	OpenSSL_SM2SignMSG
 	输入参数:	pbMSG						待签名内容
-				ulMSGLen					待签名长度
+				uiMSGLen					待签名长度
 				pbPublicKeyX				签名者公钥X
 				pbPublicKeyY				签名者公钥Y
 				pbPrivateKey				私钥内容
-				ulPrivateKeyLen				私钥长度
+				uiPrivateKeyLen				私钥长度
 	输出参数:   pbCRLSigned				签名CRL内容
-				pulCRLSignedLen			签名CRL长度
+				puiCRLSignedLen			签名CRL长度
 	返回值:   
 	失败：
 	功能描述:	对消息进行签名
 	*/
-	COMMON_API unsigned int OpenSSL_SM2SignMSG(const unsigned char *pbMSG, unsigned int ulMSGLen, 
-		const unsigned char *pbPublicKeyX, unsigned int ulPublicKeyXLen,
-		const unsigned char *pbPublicKeyY, unsigned int ulPublicKeyYLen,
-		const unsigned char * pbPrivateKey,unsigned int ulPrivateKeyLen,
-		unsigned int ulAlg,
+	COMMON_API unsigned int OpenSSL_SM2SignMSG(const unsigned char *pbMSG, unsigned int uiMSGLen, 
+		const unsigned char *pbPublicKeyX, unsigned int uiPublicKeyXLen,
+		const unsigned char *pbPublicKeyY, unsigned int uiPublicKeyYLen,
+		const unsigned char * pbPrivateKey,unsigned int uiPrivateKeyLen,
+		unsigned int uiAlg,
 		unsigned char *pbSig, unsigned int * puiSigLen);
 	/*
 	功能名称:	对HASH进行签名
 	函数名称:	OpenSSL_SM2SignMSG
 	输入参数:	pbHash						待签名hash内容
-				ulHashLen					待签名hash长度
+				uiHashLen					待签名hash长度
 				pbPublicKeyX				签名者公钥X
 				pbPublicKeyY				签名者公钥Y
 				pbPrivateKey				私钥内容
-				ulPrivateKeyLen				私钥长度
+				uiPrivateKeyLen				私钥长度
 	输出参数:   pbCRLSigned				签名CRL内容
-				pulCRLSignedLen			签名CRL长度
+				puiCRLSignedLen			签名CRL长度
 	返回值:   
 	失败：
 	功能描述:	对HASH进行签名
 	*/
-	COMMON_API unsigned int OpenSSL_SM2SignDigest(const unsigned char *pbHash, unsigned int ulHashLen, 
-		const unsigned char *pbPrivateKey, unsigned int ulPrivateKeyLen,
+	COMMON_API unsigned int OpenSSL_SM2SignDigest(const unsigned char *pbHash, unsigned int uiHashLen, 
+		const unsigned char *pbPrivateKey, unsigned int uiPrivateKeyLen,
 		unsigned char *pbSig, unsigned int * puiSigLen
 		);
 
@@ -269,10 +269,10 @@ extern "C" {
 	功能描述:	设置X509内容的签名值
 	*/
 	COMMON_API unsigned int OpenSSL_SM2SetX509SignValue(
-		const unsigned char *pbX509, unsigned int ulX509Len,
-		X509_TYPE ulX509Type,
-		const unsigned char *pbR, unsigned int ulRLen,
-		const unsigned char *pbS, unsigned int ulSLen,
+		const unsigned char *pbX509, unsigned int uiX509Len,
+		X509_TYPE uiX509Type,
+		const unsigned char *pbR, unsigned int uiRLen,
+		const unsigned char *pbS, unsigned int uiSLen,
 		unsigned char *pbX509Signed, unsigned int * puiX509SignedLen);
 	
 	/*
@@ -285,123 +285,123 @@ extern "C" {
 	功能描述:	获取X509内容（不包含签名值）
 	*/
 	COMMON_API unsigned int OpenSSL_GetX509Content(
-		const unsigned char *pbX509, unsigned int ulX509Len,
-		X509_TYPE ulX509Type,
-		unsigned char *pbX509Content, unsigned int *pulX509ContentLen
+		const unsigned char *pbX509, unsigned int uiX509Len,
+		X509_TYPE uiX509Type,
+		unsigned char *pbX509Content, unsigned int *puiX509ContentLen
 		);
 
 	/*
 	功能名称:	验证SM2签名
 	函数名称:	OpenSSL_SM2VerifyDigest
 	输入参数:	pbHash		HASH内容
-				ulHashLen			HASH长度
+				uiHashLen			HASH长度
 				pbSig			签名内容
-				ulSigLen				签名长度
+				uiSigLen				签名长度
 				pbPublicKeyX		公钥X内容
-				ulPublicKeyXLen			公钥X长度
+				uiPublicKeyXLen			公钥X长度
 				pbPublicKeyY		公钥Y内容
-				ulPublicKeyYLen			公钥Y长度
+				uiPublicKeyYLen			公钥Y长度
 	输出参数:
 	返回值:   
 	失败：
 	功能描述:	验证SM2签名
 	*/
-	COMMON_API unsigned int OpenSSL_SM2VerifyDigest(const unsigned char *pbHash, unsigned int ulHashLen, 
-		const unsigned char *pbSig, unsigned int ulSigLen,
-		const unsigned char *pbPublicKeyX, unsigned int ulPublicKeyXLen,
-		const unsigned char *pbPublicKeyY, unsigned int ulPublicKeyYLen);
+	COMMON_API unsigned int OpenSSL_SM2VerifyDigest(const unsigned char *pbHash, unsigned int uiHashLen, 
+		const unsigned char *pbSig, unsigned int uiSigLen,
+		const unsigned char *pbPublicKeyX, unsigned int uiPublicKeyXLen,
+		const unsigned char *pbPublicKeyY, unsigned int uiPublicKeyYLen);
 
 	/*
 	功能名称:	验证签名
 	函数名称:	OpenSSL_SM2VerifyMSG
 	输入参数:	pbMSG				原文内容
-				ulMSGLen					原文长度
+				uiMSGLen					原文长度
 				pbSig				签名值内容
-				ulSigLen					签名值长度
+				uiSigLen					签名值长度
 				pbPublicKeyX			公钥X内容
-				ulPublicKeyXLen				公钥X长度
+				uiPublicKeyXLen				公钥X长度
 				pbPublicKeyY			公钥Y内容
-				ulPublicKeyYLen				公钥Y长度
+				uiPublicKeyYLen				公钥Y长度
 	输出参数:   
 	返回值:   
 	失败：
 	功能描述:	验证签名
 	*/
-	COMMON_API unsigned int OpenSSL_SM2VerifyMSG(const unsigned char *pbMSG, unsigned int ulMSGLen, 
-		const unsigned char *pbSig, unsigned int ulSigLen,
-		const unsigned char *pbPublicKeyX, unsigned int ulPublicKeyXLen,
-		const unsigned char *pbPublicKeyY, unsigned int ulPublicKeyYLen);
+	COMMON_API unsigned int OpenSSL_SM2VerifyMSG(const unsigned char *pbMSG, unsigned int uiMSGLen, 
+		const unsigned char *pbSig, unsigned int uiSigLen,
+		const unsigned char *pbPublicKeyX, unsigned int uiPublicKeyXLen,
+		const unsigned char *pbPublicKeyY, unsigned int uiPublicKeyYLen);
 
 	/*
 	功能名称:	验证请求
 	函数名称:	OpenSSL_SM2VerifyCSR
 	输入参数:	pbIN				请求内容
-				ulINLen					请求长度
+				uiINLen					请求长度
 				pbSig				签名值内容
-				ulSigLen					签名值长度
+				uiSigLen					签名值长度
 	输出参数:   
 	返回值:   
 	失败：
 	功能描述:	验证请求
 	*/
 	COMMON_API unsigned int OpenSSL_SM2VerifyCSR(
-		const unsigned char *pbCSR, unsigned int ulCSRLen,
-		unsigned int ulAlg
+		const unsigned char *pbCSR, unsigned int uiCSRLen,
+		unsigned int uiAlg
 		);
 
 	/*
 	功能名称:	验证证书
 	函数名称:	OpenSSL_SM2VerifyCert
 	输入参数:	pbX509Cert			证书内容
-				ulX509CertLen				证书长度
+				uiX509CertLen				证书长度
 				pbPublicKeyX			公钥X内容
-				ulPublicKeyXLen				公钥X长度
+				uiPublicKeyXLen				公钥X长度
 				pbPublicKeyY			公钥Y内容
-				ulPublicKeyYLen				公钥Y长度
+				uiPublicKeyYLen				公钥Y长度
 	输出参数:   
 	返回值:   
 	失败：
 	功能描述:	验证证书
 	*/
 	COMMON_API unsigned int OpenSSL_SM2VerifyCert(
-		const unsigned char *pbX509Cert, unsigned int ulX509CertLen,unsigned int ulAlg,
-		const unsigned char *pbPublicKeyX, unsigned int ulPublicKeyXLen,
-		const unsigned char *pbPublicKeyY, unsigned int ulPublicKeyYLen
+		const unsigned char *pbX509Cert, unsigned int uiX509CertLen,unsigned int uiAlg,
+		const unsigned char *pbPublicKeyX, unsigned int uiPublicKeyXLen,
+		const unsigned char *pbPublicKeyY, unsigned int uiPublicKeyYLen
 		);
 
 	/*
 	功能名称:	验证CRL
 	函数名称:	OpenSSL_SM2VerifyCRL
 	输入参数:	pbCRL					CRL内容
-				ulCRLLen				CRL长度
+				uiCRLLen				CRL长度
 				pbPublicKeyX			公钥X内容
-				ulPublicKeyXLen			公钥X长度
+				uiPublicKeyXLen			公钥X长度
 				pbPublicKeyY			公钥Y内容
-				ulPublicKeyYLen			公钥Y长度
+				uiPublicKeyYLen			公钥Y长度
 	输出参数:   
 	返回值:   
 	失败：
 	功能描述:	验证证书
 	*/
 	COMMON_API unsigned int OpenSSL_SM2VerifyCRL(
-		const unsigned char *pbCRL, unsigned int ulCRLLen,unsigned int ulAlg,
-		const unsigned char *pbPublicKeyX, unsigned int ulPublicKeyXLen,
-		const unsigned char *pbPublicKeyY, unsigned int ulPublicKeyYLen
+		const unsigned char *pbCRL, unsigned int uiCRLLen,unsigned int uiAlg,
+		const unsigned char *pbPublicKeyX, unsigned int uiPublicKeyXLen,
+		const unsigned char *pbPublicKeyY, unsigned int uiPublicKeyYLen
 		);
 
 	/*
 	功能名称:	获取证书主题
 	函数名称:	OpenSSL_CertGetSubject
 	输入参数:	pbX509Cert		证书内容
-				ulX509CertLen		证书长度
+				uiX509CertLen		证书长度
 	输出参数:	pbSubject	主题内容
-				pulSubjectLen		主题长度
+				puiSubjectLen		主题长度
 	返回值:   
 	失败：
 	功能描述:	获取证书主题
 	*/
 	COMMON_API unsigned int OpenSSL_CertGetSubject(
-		const unsigned char * pbX509Cert, unsigned int ulX509CertLen,
+		const unsigned char * pbX509Cert, unsigned int uiX509CertLen,
 		unsigned char * pbSubject, unsigned int * puiSubjectLen
 		);
 
@@ -409,15 +409,15 @@ extern "C" {
 	功能名称:	获取证书公钥
 	函数名称:	OpenSSL_CertGetPubkey
 	输入参数:	pbX509Cert		证书内容
-				ulX509CertLen		证书长度
+				uiX509CertLen		证书长度
 	输出参数:	pbPublicKey	公钥内容
-				pulPublicKeyLen		公钥长度
+				puiPublicKeyLen		公钥长度
 	返回值:   
 	失败：
 	功能描述:	获取证书公钥
 	*/
 	COMMON_API unsigned int OpenSSL_CertGetPubkey(
-		const unsigned char * pbX509Cert, unsigned int ulX509CertLen,
+		const unsigned char * pbX509Cert, unsigned int uiX509CertLen,
 		unsigned char * pbPublicKey, unsigned int * puiPublicKeyLen);
 
 
@@ -425,7 +425,7 @@ extern "C" {
 	获取证书序列号
 	*/
 	COMMON_API unsigned int OpenSSL_CertGetSN(
-		const unsigned char * pbX509Cert, unsigned int ulX509CertLen,
+		const unsigned char * pbX509Cert, unsigned int uiX509CertLen,
 		unsigned char * pbSN, unsigned int * puiSNLen);
 
 	/*
@@ -433,18 +433,18 @@ extern "C" {
 	函数名称:	OpenSSL_CertGetSubjectItem
 	输入参数:	
 				pbX509Cert				证书内容
-				ulX509CertLen			证书长度
-				ulIndex					项标示
+				uiX509CertLen			证书长度
+				uiIndex					项标示
 	输出参数:   
 				pbSubjectItem			项值
-				pulSubjectItemLen		项长度
+				puiSubjectItemLen		项长度
 	返回值:   
 	失败：
 	功能描述:	获取证书主题项
 	*/
 	COMMON_API unsigned int OpenSSL_CertGetSubjectItem(
-		const unsigned char * pbX509Cert, unsigned int ulX509CertLen,
-		int ulIndex, 
+		const unsigned char * pbX509Cert, unsigned int uiX509CertLen,
+		int uiIndex, 
 		unsigned char * pbSubjectItem, unsigned int * puiSubjectItemLen
 		);
 
@@ -452,33 +452,33 @@ extern "C" {
 	功能名称:	SM2解密
 	*/
 	COMMON_API unsigned int OpenSSL_SM2Decrypt(
-		const unsigned char * pbPrivateKey, unsigned int ulPrivateKeyLen, 
-		const unsigned char * pbIN, unsigned int ulINLen,
+		const unsigned char * pbPrivateKey, unsigned int uiPrivateKeyLen, 
+		const unsigned char * pbIN, unsigned int uiINLen,
 		unsigned char * pbOUT, unsigned int * puiOUTLen
 		);
 	/*
 	功能名称:	SM2加密
 	*/
 	COMMON_API unsigned int OpenSSL_SM2Encrypt(
-		const unsigned char * pbPublicKeyX, unsigned int ulPublicKeyXLen, 
-		const unsigned char * pbPublicKeyY, unsigned int ulPublicKeyYLen,
-		const unsigned char * pbIN, unsigned int ulINLen,
+		const unsigned char * pbPublicKeyX, unsigned int uiPublicKeyXLen, 
+		const unsigned char * pbPublicKeyY, unsigned int uiPublicKeyYLen,
+		const unsigned char * pbIN, unsigned int uiINLen,
 		unsigned char * pbOUT, unsigned int * puiOUTLen);
 
 	/*
 	功能名称:	验证SM2点
 	*/
 	COMMON_API unsigned int OpenSSL_SM2Point(
-		const unsigned char * pbPublicKeyX, unsigned int ulPublicKeyXLen, 
-		const unsigned char * pbPublicKeyY, unsigned int ulPublicKeyYLen
+		const unsigned char * pbPublicKeyX, unsigned int uiPublicKeyXLen, 
+		const unsigned char * pbPublicKeyY, unsigned int uiPublicKeyYLen
 		);
 
 	/*
 	功能名称:	加密内容输出文件
 	*/
 	COMMON_API unsigned int OpenSSL_SM2Write(
-		const unsigned char * pbIN, unsigned int ulINLen, 
-		unsigned int ulType,
+		const unsigned char * pbIN, unsigned int uiINLen, 
+		unsigned int uiType,
 		char * szFileName,
 		unsigned int fileEncode, char * szPassword
 		);
@@ -487,8 +487,8 @@ extern "C" {
 	功能名称:	SM2解密
 	*/
 	COMMON_API unsigned int OpenSSL_SM2DecryptInner(
-		const unsigned char *pbIN, unsigned int ulINLen, 
-		const unsigned char *pbPrivateKey, unsigned int ulPrivateKeyLen, 
+		const unsigned char *pbIN, unsigned int uiINLen, 
+		const unsigned char *pbPrivateKey, unsigned int uiPrivateKeyLen, 
 		unsigned char *pbOUT, unsigned int * puiOUTLen
 		);
 
@@ -496,9 +496,9 @@ extern "C" {
 	功能名称:	SM2加密
 	*/
 	COMMON_API unsigned int OpenSSL_SM2EncryptInner(
-		const unsigned char *pbIN, unsigned int ulINLen, 
-		const unsigned char *pbPublicKeyX, unsigned int ulPublicKeyXLen, 
-		const unsigned char *pbPublicKeyY, unsigned int ulPublicKeyYLen, 
+		const unsigned char *pbIN, unsigned int uiINLen, 
+		const unsigned char *pbPublicKeyX, unsigned int uiPublicKeyXLen, 
+		const unsigned char *pbPublicKeyY, unsigned int uiPublicKeyYLen, 
 		unsigned char *pbOUT, unsigned int * puiOUTLen
 		);
 
@@ -506,18 +506,18 @@ extern "C" {
 	功能名称:	获取证书公钥算法
 	*/
 	COMMON_API unsigned int OpenSSL_CertGetPublicKeyAlgor(
-		const unsigned char * pbX509Cert, unsigned int ulX509CertLen,
-		unsigned char *pbPublicKeyAlgor, unsigned int *pulPublicKeyAlgorLen
+		const unsigned char * pbX509Cert, unsigned int uiX509CertLen,
+		unsigned char *pbPublicKeyAlgor, unsigned int *puiPublicKeyAlgorLen
 		);
 
 	/*
 	功能名称:	比较证书的颁发者和使用者
 	*/
-	COMMON_API unsigned int OpenSSL_CertSubjectCompareIssuer(const unsigned char * pbX509Cert, unsigned int ulX509CertLen,
+	COMMON_API unsigned int OpenSSL_CertSubjectCompareIssuer(const unsigned char * pbX509Cert, unsigned int uiX509CertLen,
 		unsigned int * bEqual
 		);
 
-	COMMON_API unsigned int OpenSSL_CertExtenItem(const unsigned char * pbX509Cert, unsigned int ulX509CertLen,int ulIndex, unsigned char * pbSubjectItem, unsigned int * puiSubjectItemLen);
+	COMMON_API unsigned int OpenSSL_CertExtenItem(const unsigned char * pbX509Cert, unsigned int uiX509CertLen,int uiIndex, unsigned char * pbSubjectItem, unsigned int * puiSubjectItemLen);
 
 	/////////////////////////////////////////
 	/////////////////////////////////////////
@@ -546,97 +546,97 @@ extern "C" {
 	功能名称:	生成证书请求
 	函数名称:	OpenSSL_GMECC512GenCSRWithPubkey
 	输入参数:	pbPublicKeyX     公钥X值
-				ulPublicKeyXLen		公钥X长度
+				uiPublicKeyXLen		公钥X长度
 				pbPublicKeyY     公钥Y值
-				ulPublicKeyYLen		公钥Y长度
+				uiPublicKeyYLen		公钥Y长度
 	输出参数:	pbCSR		证书请求内容
-				pulCSRLen		证书请求长度
+				puiCSRLen		证书请求长度
 	返回值:   
 	失败：
 	功能描述:	生成证书请求
 	*/
 	COMMON_API unsigned int OpenSSL_GMECC512GenCSRWithPubkey(const OPST_USERINFO *pstUserInfo,
-		const unsigned char * pbPublicKeyX,  unsigned int ulPublicKeyXLen, 
-		const unsigned char * pbPublicKeyY,  unsigned int ulPublicKeyYLen,
+		const unsigned char * pbPublicKeyX,  unsigned int uiPublicKeyXLen, 
+		const unsigned char * pbPublicKeyY,  unsigned int uiPublicKeyYLen,
 		unsigned char * pbCSR,  unsigned int * puiCSRLen);
 
 	/*
 	功能名称:	生成根证书
 	函数名称:	OpenSSL_GMECC512GenRootCert
 	输入参数:	pbCSR		请求信息
-				ulCSRLen			请求长度
-				ulSerialNumber	序列号
-				ulNotBefore		开始时间
-				ulNotAfter		结束时间
+				uiCSRLen			请求长度
+				uiSerialNumber	序列号
+				uiNotBefore		开始时间
+				uiNotAfter		结束时间
 	输出参数:	pbX509Cert		证书内容
-				pulX509CertLen		证书长度
+				puiX509CertLen		证书长度
 	返回值:   
 	失败：
 	功能描述:	生成根证书
 	*/
-	COMMON_API unsigned int OpenSSL_GMECC512GenRootCert(const unsigned char * pbCSR,unsigned int ulCSRLen, 
-		unsigned char * pbSerialNumber,unsigned int ulSerialNumberLen,
-		unsigned int ulNotBefore, unsigned int ulNotAfter, 
+	COMMON_API unsigned int OpenSSL_GMECC512GenRootCert(const unsigned char * pbCSR,unsigned int uiCSRLen, 
+		unsigned char * pbSerialNumber,unsigned int uiSerialNumberLen,
+		unsigned int uiNotBefore, unsigned int uiNotAfter, 
 		unsigned char * pbX509Cert, unsigned int * puiX509CertLen);
 
 	/*
 	功能名称:	生成GMECC512证书
 	函数名称:	OpenSSL_GMECC512GenCert
 	输入参数:	pbCSR		请求内容
-				ulCSRLen			请求长度
-				ulSerialNumber	序列号
-				ulNotBefore		开始时间
-				ulNotAfter		结束时间
+				uiCSRLen			请求长度
+				uiSerialNumber	序列号
+				uiNotBefore		开始时间
+				uiNotAfter		结束时间
 	输出参数:	pbX509Cert		证书内容
-				pulX509CertLen		证书长度
+				puiX509CertLen		证书长度
 	返回值:   
 	失败：
 	功能描述:	生成GMECC512证书
 	*/
-	COMMON_API unsigned int OpenSSL_GMECC512GenCert(const unsigned char * pbCSR,unsigned int ulCSRLen, 
-		const unsigned char * pbX509CACert, unsigned int ulX509CACertLen, 
-		unsigned char * pbSerialNumber,unsigned int ulSerialNumberLen,
-		unsigned int ulNotBefore, unsigned int ulNotAfter, unsigned int ulSignFlag,
+	COMMON_API unsigned int OpenSSL_GMECC512GenCert(const unsigned char * pbCSR,unsigned int uiCSRLen, 
+		const unsigned char * pbX509CACert, unsigned int uiX509CACertLen, 
+		unsigned char * pbSerialNumber,unsigned int uiSerialNumberLen,
+		unsigned int uiNotBefore, unsigned int uiNotAfter, unsigned int uiSignFlag,
 		unsigned char * pbX509Cert, unsigned int * puiX509CertLen);
 	
 	/*
 	功能名称:	生成GMECC512证书(扩展，验证并替换证书请求的公钥之后生成证书)
 	函数名称:	OpenSSL_GMECC512GenCert
 	输入参数:	pbCSR		请求内容
-				ulCSRLen			请求长度
-				ulSerialNumber	序列号
-				ulNotBefore		开始时间
-				ulNotAfter		结束时间
+				uiCSRLen			请求长度
+				uiSerialNumber	序列号
+				uiNotBefore		开始时间
+				uiNotAfter		结束时间
 	输出参数:	pbX509Cert		证书内容
-				pulX509CertLen		证书长度
+				puiX509CertLen		证书长度
 	返回值:   
 	失败：
 	功能描述:	生成GMECC512证书
 	*/
-	COMMON_API unsigned int OpenSSL_GMECC512GenCertEX(const unsigned char * pbCSR,unsigned int ulCSRLen, 
-		const unsigned char * pbPublicKeyX, unsigned int ulPublicKeyXLen, 
-		const unsigned char * pbPublicKeyY, unsigned int ulPublicKeyYLen,
-		const unsigned char * pbX509CACert, unsigned int ulX509CACertLen, 
-		unsigned char * pbSerialNumber,unsigned int ulSerialNumberLen,
-		unsigned int ulNotBefore, unsigned int ulNotAfter, unsigned int ulSignFlag,
+	COMMON_API unsigned int OpenSSL_GMECC512GenCertEX(const unsigned char * pbCSR,unsigned int uiCSRLen, 
+		const unsigned char * pbPublicKeyX, unsigned int uiPublicKeyXLen, 
+		const unsigned char * pbPublicKeyY, unsigned int uiPublicKeyYLen,
+		const unsigned char * pbX509CACert, unsigned int uiX509CACertLen, 
+		unsigned char * pbSerialNumber,unsigned int uiSerialNumberLen,
+		unsigned int uiNotBefore, unsigned int uiNotAfter, unsigned int uiSignFlag,
 		unsigned char * pbX509Cert, unsigned int * puiX509CertLen);
 
 	/*
 	功能名称:	证书吊销列表
 	函数名称:	OpenSSL_GMECC512GenCRL
 	输入参数:	pstCRLList				证书吊销内容
-				ulCRLListSize			证书个数
+				uiCRLListSize			证书个数
 				pbX509Cert			证书内容
-				ulX509CertLen				证书长度
+				uiX509CertLen				证书长度
 	输出参数:   
 				pbCRL				证书吊销列表内容
-				pulCRLLen				证书吊销列表长度
+				puiCRLLen				证书吊销列表长度
 	返回值:   
 	失败：
 	功能描述:	证书吊销列表
 	*/
-	COMMON_API unsigned int OpenSSL_GMECC512GenCRL(const OPST_CRL * pstCRLList, unsigned int ulCRLListSize, 
-		const unsigned char * pbX509Cert,unsigned int ulX509CertLen, 
+	COMMON_API unsigned int OpenSSL_GMECC512GenCRL(const OPST_CRL * pstCRLList, unsigned int uiCRLListSize, 
+		const unsigned char * pbX509Cert,unsigned int uiX509CertLen, 
 		unsigned char * pbCRL, unsigned int * puiCRLLen);
 
 	
@@ -644,22 +644,22 @@ extern "C" {
 	功能名称:	对证书进行签名
 	函数名称:	OpenSSL_GMECC512SignCertWithKeys
 	输入参数:	pbX509Cert					待签名证书内容
-				ulX509CertLen				待签名证书长度
+				uiX509CertLen				待签名证书长度
 				pbPublicKeyX				签名者公钥X
 				pbPublicKeyY				签名者公钥Y
 				pbPrivateKey				私钥内容
-				ulPrivateKeyLen				私钥长度
+				uiPrivateKeyLen				私钥长度
 	输出参数:   pbX509CertSigned				签名证书内容
-				pulX509CertSignedLen			签名证书长度
+				puiX509CertSignedLen			签名证书长度
 	返回值:   
 	失败：
 	功能描述:	对证书进行签名
 	*/
 	COMMON_API unsigned int OpenSSL_GMECC512SignCert(
-		const unsigned char *pbX509Cert,  unsigned int ulX509CertLen, 
-		const unsigned char *pbPublicKeyX, unsigned int ulPublicKeyXLen,
-		const unsigned char *pbPublicKeyY, unsigned int ulPublicKeyYLen,
-		const unsigned char *pbPrivateKey,  unsigned int ulPrivateKeyLen,
+		const unsigned char *pbX509Cert,  unsigned int uiX509CertLen, 
+		const unsigned char *pbPublicKeyX, unsigned int uiPublicKeyXLen,
+		const unsigned char *pbPublicKeyY, unsigned int uiPublicKeyYLen,
+		const unsigned char *pbPrivateKey,  unsigned int uiPrivateKeyLen,
 		unsigned char * pbX509CertSigned,  unsigned int * puiX509CertSignedLen
 		);
 
@@ -667,41 +667,41 @@ extern "C" {
 	功能名称:	对证书请求进行签名
 	函数名称:	OpenSSL_GMECC512SignCSR
 	输入参数:	pbCSR					待签名证书请求内容
-				ulCSRLen					待签名证书请求长度
+				uiCSRLen					待签名证书请求长度
 				pbPrivateKey				私钥内容
-				ulPrivateKeyLen				私钥长度
+				uiPrivateKeyLen				私钥长度
 	输出参数:   pbCSRSigned				签名证书请求内容
-				pulCSRSignedLen			签名证书请求长度
+				puiCSRSignedLen			签名证书请求长度
 	返回值:   
 	失败：
 	功能描述:	对证书请求进行签名
 	*/
 	COMMON_API unsigned int OpenSSL_GMECC512SignCSR(
-		const unsigned char *pbCSR, unsigned int ulCSRLen,
-		const unsigned char * pbPrivateKey,unsigned int ulPrivateKeyLen,
-		unsigned int ulAlg,
+		const unsigned char *pbCSR, unsigned int uiCSRLen,
+		const unsigned char * pbPrivateKey,unsigned int uiPrivateKeyLen,
+		unsigned int uiAlg,
 		unsigned char *pbCSRSigned, unsigned int * puiCSRSignedLen);
 
 	/*
 	功能名称:	对CRL进行签名
 	函数名称:	OpenSSL_GMECC512SignCRL
 	输入参数:	pbCRL					待签名CRL内容
-				ulCRLLen					待签名CRL长度
+				uiCRLLen					待签名CRL长度
 				pbPublicKeyX				签名者公钥X
 				pbPublicKeyY				签名者公钥Y
 				pbPrivateKey				私钥内容
-				ulPrivateKeyLen				私钥长度
+				uiPrivateKeyLen				私钥长度
 	输出参数:   pbCRLSigned				签名CRL内容
-				pulCRLSignedLen			签名CRL长度
+				puiCRLSignedLen			签名CRL长度
 	返回值:   
 	失败：
 	功能描述:	对CRL进行签名
 	*/
 	COMMON_API unsigned int OpenSSL_GMECC512SignCRL(
-		const unsigned char *pbCRL, unsigned int ulCRLLen,unsigned int ulAlg,
-		const unsigned char *pbPublicKeyX, unsigned int ulPublicKeyXLen,
-		const unsigned char *pbPublicKeyY, unsigned int ulPublicKeyYLen,
-		const unsigned char * pbPrivateKey,unsigned int ulPrivateKeyLen,
+		const unsigned char *pbCRL, unsigned int uiCRLLen,unsigned int uiAlg,
+		const unsigned char *pbPublicKeyX, unsigned int uiPublicKeyXLen,
+		const unsigned char *pbPublicKeyY, unsigned int uiPublicKeyYLen,
+		const unsigned char * pbPrivateKey,unsigned int uiPrivateKeyLen,
 		unsigned char *pbCRLSigned, unsigned int * puiCRLSignedLen
 		);
 
@@ -709,40 +709,40 @@ extern "C" {
 	功能名称:	对消息进行签名
 	函数名称:	OpenSSL_GMECC512SignMSG
 	输入参数:	pbMSG						待签名内容
-				ulMSGLen					待签名长度
+				uiMSGLen					待签名长度
 				pbPublicKeyX				签名者公钥X
 				pbPublicKeyY				签名者公钥Y
 				pbPrivateKey				私钥内容
-				ulPrivateKeyLen				私钥长度
+				uiPrivateKeyLen				私钥长度
 	输出参数:   pbCRLSigned				签名CRL内容
-				pulCRLSignedLen			签名CRL长度
+				puiCRLSignedLen			签名CRL长度
 	返回值:   
 	失败：
 	功能描述:	对消息进行签名
 	*/
-	COMMON_API unsigned int OpenSSL_GMECC512SignMSG(const unsigned char *pbMSG, unsigned int ulMSGLen, 
-		const unsigned char *pbPublicKeyX, unsigned int ulPublicKeyXLen,
-		const unsigned char *pbPublicKeyY, unsigned int ulPublicKeyYLen,
-		const unsigned char * pbPrivateKey,unsigned int ulPrivateKeyLen,
-		unsigned int ulAlg,
+	COMMON_API unsigned int OpenSSL_GMECC512SignMSG(const unsigned char *pbMSG, unsigned int uiMSGLen, 
+		const unsigned char *pbPublicKeyX, unsigned int uiPublicKeyXLen,
+		const unsigned char *pbPublicKeyY, unsigned int uiPublicKeyYLen,
+		const unsigned char * pbPrivateKey,unsigned int uiPrivateKeyLen,
+		unsigned int uiAlg,
 		unsigned char *pbSig, unsigned int * puiSigLen);
 	/*
 	功能名称:	对HASH进行签名
 	函数名称:	OpenSSL_GMECC512SignMSG
 	输入参数:	pbHash						待签名hash内容
-				ulHashLen					待签名hash长度
+				uiHashLen					待签名hash长度
 				pbPublicKeyX				签名者公钥X
 				pbPublicKeyY				签名者公钥Y
 				pbPrivateKey				私钥内容
-				ulPrivateKeyLen				私钥长度
+				uiPrivateKeyLen				私钥长度
 	输出参数:   pbCRLSigned				签名CRL内容
-				pulCRLSignedLen			签名CRL长度
+				puiCRLSignedLen			签名CRL长度
 	返回值:   
 	失败：
 	功能描述:	对HASH进行签名
 	*/
-	COMMON_API unsigned int OpenSSL_GMECC512SignDigest(const unsigned char *pbHash, unsigned int ulHashLen, 
-		const unsigned char *pbPrivateKey, unsigned int ulPrivateKeyLen,
+	COMMON_API unsigned int OpenSSL_GMECC512SignDigest(const unsigned char *pbHash, unsigned int uiHashLen, 
+		const unsigned char *pbPrivateKey, unsigned int uiPrivateKeyLen,
 		unsigned char *pbSig, unsigned int * puiSigLen
 		);
 
@@ -756,10 +756,10 @@ extern "C" {
 	功能描述:	设置X509内容的签名值
 	*/
 	COMMON_API unsigned int OpenSSL_GMECC512SetX509SignValue(
-		const unsigned char *pbX509, unsigned int ulX509Len,
-		X509_TYPE ulX509Type,
-		const unsigned char *pbR, unsigned int ulRLen,
-		const unsigned char *pbS, unsigned int ulSLen,
+		const unsigned char *pbX509, unsigned int uiX509Len,
+		X509_TYPE uiX509Type,
+		const unsigned char *pbR, unsigned int uiRLen,
+		const unsigned char *pbS, unsigned int uiSLen,
 		unsigned char *pbX509Signed, unsigned int * puiX509SignedLen);
 	
 	/*
@@ -772,133 +772,133 @@ extern "C" {
 	功能描述:	获取X509内容（不包含签名值）
 	*/
 	COMMON_API unsigned int OpenSSL_GetX509Content(
-		const unsigned char *pbX509, unsigned int ulX509Len,
-		X509_TYPE ulX509Type,
-		unsigned char *pbX509Content, unsigned int *pulX509ContentLen
+		const unsigned char *pbX509, unsigned int uiX509Len,
+		X509_TYPE uiX509Type,
+		unsigned char *pbX509Content, unsigned int *puiX509ContentLen
 		);
 
 	/*
 	功能名称:	验证GMECC512签名
 	函数名称:	OpenSSL_GMECC512VerifyDigest
 	输入参数:	pbHash		HASH内容
-				ulHashLen			HASH长度
+				uiHashLen			HASH长度
 				pbSig			签名内容
-				ulSigLen				签名长度
+				uiSigLen				签名长度
 				pbPublicKeyX		公钥X内容
-				ulPublicKeyXLen			公钥X长度
+				uiPublicKeyXLen			公钥X长度
 				pbPublicKeyY		公钥Y内容
-				ulPublicKeyYLen			公钥Y长度
+				uiPublicKeyYLen			公钥Y长度
 	输出参数:
 	返回值:   
 	失败：
 	功能描述:	验证GMECC512签名
 	*/
-	COMMON_API unsigned int OpenSSL_GMECC512VerifyDigest(const unsigned char *pbHash, unsigned int ulHashLen, 
-		const unsigned char *pbSig, unsigned int ulSigLen,
-		const unsigned char *pbPublicKeyX, unsigned int ulPublicKeyXLen,
-		const unsigned char *pbPublicKeyY, unsigned int ulPublicKeyYLen);
+	COMMON_API unsigned int OpenSSL_GMECC512VerifyDigest(const unsigned char *pbHash, unsigned int uiHashLen, 
+		const unsigned char *pbSig, unsigned int uiSigLen,
+		const unsigned char *pbPublicKeyX, unsigned int uiPublicKeyXLen,
+		const unsigned char *pbPublicKeyY, unsigned int uiPublicKeyYLen);
 
 	/*
 	功能名称:	验证签名
 	函数名称:	OpenSSL_GMECC512VerifyMSG
 	输入参数:	pbMSG				原文内容
-				ulMSGLen					原文长度
+				uiMSGLen					原文长度
 				pbSig				签名值内容
-				ulSigLen					签名值长度
+				uiSigLen					签名值长度
 				pbPublicKeyX			公钥X内容
-				ulPublicKeyXLen				公钥X长度
+				uiPublicKeyXLen				公钥X长度
 				pbPublicKeyY			公钥Y内容
-				ulPublicKeyYLen				公钥Y长度
+				uiPublicKeyYLen				公钥Y长度
 	输出参数:   
 	返回值:   
 	失败：
 	功能描述:	验证签名
 	*/
-	COMMON_API unsigned int OpenSSL_GMECC512VerifyMSG(const unsigned char *pbMSG, unsigned int ulMSGLen, 
-		const unsigned char *pbSig, unsigned int ulSigLen,
-		const unsigned char *pbPublicKeyX, unsigned int ulPublicKeyXLen,
-		const unsigned char *pbPublicKeyY, unsigned int ulPublicKeyYLen);
+	COMMON_API unsigned int OpenSSL_GMECC512VerifyMSG(const unsigned char *pbMSG, unsigned int uiMSGLen, 
+		const unsigned char *pbSig, unsigned int uiSigLen,
+		const unsigned char *pbPublicKeyX, unsigned int uiPublicKeyXLen,
+		const unsigned char *pbPublicKeyY, unsigned int uiPublicKeyYLen);
 
 	/*
 	功能名称:	验证请求
 	函数名称:	OpenSSL_GMECC512VerifyCSR
 	输入参数:	pbIN				请求内容
-				ulINLen					请求长度
+				uiINLen					请求长度
 				pbSig				签名值内容
-				ulSigLen					签名值长度
+				uiSigLen					签名值长度
 	输出参数:   
 	返回值:   
 	失败：
 	功能描述:	验证请求
 	*/
 	COMMON_API unsigned int OpenSSL_GMECC512VerifyCSR(
-		const unsigned char *pbCSR, unsigned int ulCSRLen,
-		unsigned int ulAlg
+		const unsigned char *pbCSR, unsigned int uiCSRLen,
+		unsigned int uiAlg
 		);
 
 	/*
 	功能名称:	验证证书
 	函数名称:	OpenSSL_GMECC512VerifyCert
 	输入参数:	pbX509Cert			证书内容
-				ulX509CertLen				证书长度
+				uiX509CertLen				证书长度
 				pbPublicKeyX			公钥X内容
-				ulPublicKeyXLen				公钥X长度
+				uiPublicKeyXLen				公钥X长度
 				pbPublicKeyY			公钥Y内容
-				ulPublicKeyYLen				公钥Y长度
+				uiPublicKeyYLen				公钥Y长度
 	输出参数:   
 	返回值:   
 	失败：
 	功能描述:	验证证书
 	*/
 	COMMON_API unsigned int OpenSSL_GMECC512VerifyCert(
-		const unsigned char *pbX509Cert, unsigned int ulX509CertLen,unsigned int ulAlg,
-		const unsigned char *pbPublicKeyX, unsigned int ulPublicKeyXLen,
-		const unsigned char *pbPublicKeyY, unsigned int ulPublicKeyYLen
+		const unsigned char *pbX509Cert, unsigned int uiX509CertLen,unsigned int uiAlg,
+		const unsigned char *pbPublicKeyX, unsigned int uiPublicKeyXLen,
+		const unsigned char *pbPublicKeyY, unsigned int uiPublicKeyYLen
 		);
 
 	/*
 	功能名称:	验证CRL
 	函数名称:	OpenSSL_GMECC512VerifyCRL
 	输入参数:	pbCRL					CRL内容
-				ulCRLLen				CRL长度
+				uiCRLLen				CRL长度
 				pbPublicKeyX			公钥X内容
-				ulPublicKeyXLen			公钥X长度
+				uiPublicKeyXLen			公钥X长度
 				pbPublicKeyY			公钥Y内容
-				ulPublicKeyYLen			公钥Y长度
+				uiPublicKeyYLen			公钥Y长度
 	输出参数:   
 	返回值:   
 	失败：
 	功能描述:	验证证书
 	*/
 	COMMON_API unsigned int OpenSSL_GMECC512VerifyCRL(
-		const unsigned char *pbCRL, unsigned int ulCRLLen,unsigned int ulAlg,
-		const unsigned char *pbPublicKeyX, unsigned int ulPublicKeyXLen,
-		const unsigned char *pbPublicKeyY, unsigned int ulPublicKeyYLen
+		const unsigned char *pbCRL, unsigned int uiCRLLen,unsigned int uiAlg,
+		const unsigned char *pbPublicKeyX, unsigned int uiPublicKeyXLen,
+		const unsigned char *pbPublicKeyY, unsigned int uiPublicKeyYLen
 		);
 
 	/*
 	功能名称:	GMECC512解密
 	*/
 	COMMON_API unsigned int OpenSSL_GMECC512Decrypt(
-		const unsigned char * pbPrivateKey, unsigned int ulPrivateKeyLen, 
-		const unsigned char * pbIN, unsigned int ulINLen,
+		const unsigned char * pbPrivateKey, unsigned int uiPrivateKeyLen, 
+		const unsigned char * pbIN, unsigned int uiINLen,
 		unsigned char * pbOUT, unsigned int * puiOUTLen
 		);
 	/*
 	功能名称:	GMECC512加密
 	*/
 	COMMON_API unsigned int OpenSSL_GMECC512Encrypt(
-		const unsigned char * pbPublicKeyX, unsigned int ulPublicKeyXLen, 
-		const unsigned char * pbPublicKeyY, unsigned int ulPublicKeyYLen,
-		const unsigned char * pbIN, unsigned int ulINLen,
+		const unsigned char * pbPublicKeyX, unsigned int uiPublicKeyXLen, 
+		const unsigned char * pbPublicKeyY, unsigned int uiPublicKeyYLen,
+		const unsigned char * pbIN, unsigned int uiINLen,
 		unsigned char * pbOUT, unsigned int * puiOUTLen);
 
 	/*
 	功能名称:	验证GMECC512点
 	*/
 	COMMON_API unsigned int OpenSSL_GMECC512Point(
-		const unsigned char * pbPublicKeyX, unsigned int ulPublicKeyXLen, 
-		const unsigned char * pbPublicKeyY, unsigned int ulPublicKeyYLen
+		const unsigned char * pbPublicKeyX, unsigned int uiPublicKeyXLen, 
+		const unsigned char * pbPublicKeyY, unsigned int uiPublicKeyYLen
 		);
 
 
@@ -906,8 +906,8 @@ extern "C" {
 	功能名称:	GMECC512解密
 	*/
 	COMMON_API unsigned int OpenSSL_GMECC512DecryptInner(
-		const unsigned char *pbIN, unsigned int ulINLen, 
-		const unsigned char *pbPrivateKey, unsigned int ulPrivateKeyLen, 
+		const unsigned char *pbIN, unsigned int uiINLen, 
+		const unsigned char *pbPrivateKey, unsigned int uiPrivateKeyLen, 
 		unsigned char *pbOUT, unsigned int * puiOUTLen
 		);
 
@@ -915,9 +915,9 @@ extern "C" {
 	功能名称:	GMECC512加密
 	*/
 	COMMON_API unsigned int OpenSSL_GMECC512EncryptInner(
-		const unsigned char *pbIN, unsigned int ulINLen, 
-		const unsigned char *pbPublicKeyX, unsigned int ulPublicKeyXLen, 
-		const unsigned char *pbPublicKeyY, unsigned int ulPublicKeyYLen, 
+		const unsigned char *pbIN, unsigned int uiINLen, 
+		const unsigned char *pbPublicKeyX, unsigned int uiPublicKeyXLen, 
+		const unsigned char *pbPublicKeyY, unsigned int uiPublicKeyYLen, 
 		unsigned char *pbOUT, unsigned int * puiOUTLen
 		);
 

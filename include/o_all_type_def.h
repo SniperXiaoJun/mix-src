@@ -249,25 +249,25 @@ extern "C" {
 	typedef struct _OPST_USERINFO
 	{
 		char countryName[32];
-		unsigned int ulLenC;
+		unsigned int uiLenC;
 		char stateOrProvinceName[32];
-		unsigned int ulLenST;
+		unsigned int uiLenST;
 		char localityName[128];
-		unsigned int ulLenL;
+		unsigned int uiLenL;
 		char organizationName[128];
-		unsigned int ulLenO;
+		unsigned int uiLenO;
 		char organizationalUnitName[128];
-		unsigned int ulLenOU;
+		unsigned int uiLenOU;
 		char commonName[128];
-		unsigned int ulLenCN;
+		unsigned int uiLenCN;
 		char emailAddress[128];
-		unsigned int ulLenEA;
+		unsigned int uiLenEA;
 		char challengePassword[64];
-		unsigned int ulLenCP;
+		unsigned int uiLenCP;
 		char unstructuredName[128];
-		unsigned int ulLenUN;
+		unsigned int uiLenUN;
 		char idCardNumber[32];
-		unsigned int ulLenID;
+		unsigned int uiLenID;
 	}OPST_USERINFO;
 
 	typedef struct _OPST_CRL
@@ -296,7 +296,7 @@ extern "C" {
 		* CK_CHAR to CK_UTF8CHAR for v2.10 */
 		unsigned char   slotDescription[64];  /* blank padded */
 		unsigned char   manufacturerID[32];   /* blank padded */
-		unsigned long int      flags;
+		unsigned int      flags;
 
 		/* hardwareVersion and firmwareVersion are new for v2.0 */
 		OPST_CK_VERSION    hardwareVersion;  /* version of hardware */
@@ -306,8 +306,8 @@ extern "C" {
 	// 设备
 	typedef struct _OPST_DEV
 	{
-		unsigned long int	ulSlotID;
-		unsigned long int	hSession;
+		unsigned int	uiSlotID;
+		unsigned int	hSession;
 		// 用户是否已登录
 		unsigned char		bLoginState;
 		// 硬件信息
@@ -320,27 +320,27 @@ extern "C" {
 		// 容器名长度 + 容器类型  例： 容器名为1234  加密为1234+0 签名为1234+1
 		char szName[MAX_CON_NAME_LEN + 1];
 		// 容器名长度 + 1(类型长度)
-		int ulLen;
+		int uiLen;
 		OPST_DEV * ptr_dev;
 	}OPST_CONTAINER;
 
 	typedef struct _OPST_CERT_INFO
 	{
 		char common_name[32];
-		long common_name_len;
+		int common_name_len;
 		char subject[128];
-		long subject_len;
+		int subject_len;
 		char issuer[128];
-		long issuer_len;
+		int issuer_len;
 		char sn[128];
-		long sn_len;
-		long not_before;
-		long not_after;
-		long key_usage;
-		long key_type;
-		long verify;
+		int sn_len;
+		int not_before;
+		int not_after;
+		int key_usage;
+		int key_type;
+		int verify;
 		char public_key_value[128];
-		long public_key_len;
+		int public_key_len;
 	}OPST_CERT_INFO;
 
 
@@ -368,8 +368,8 @@ extern "C" {
 
 	typedef struct _OPT_ST_USB_META
 	{
-		unsigned int ulUSBMetaUseType;  // USB使用类型 OPE_USB_META_USE_TYPE
-		unsigned int ulUSBMetaManType;  // USB管理类型 OPE_USB_META_MAN_TYPE
+		unsigned int uiUSBMetaUseType;  // USB使用类型 OPE_USB_META_USE_TYPE
+		unsigned int uiUSBMetaManType;  // USB管理类型 OPE_USB_META_MAN_TYPE
 		char szName[256];
 		// other META
 	}OPT_ST_USB_META;
@@ -421,10 +421,10 @@ extern "C" {
 	// == SKF_ENVELOPEDKEYBLOB(SKF)
 	typedef struct _OPST_SKF_ENVELOPEDKEYBLOB{
 		OPT_UInt32 Version;							// 当前版本为 1
-		OPT_UInt32 ulSymmAlgID;						// 对称算法标识，限定ECB模式
-		OPT_UInt32 ulBits;							// 加密密钥对的密钥位长度
+		OPT_UInt32 uiSymmAlgID;						// 对称算法标识，限定ECB模式
+		OPT_UInt32 uiBits;							// 加密密钥对的密钥位长度
 		OPT_Byte cbEncryptedPriKey[64];			// 对称算法加密的加密私钥,加密私钥的原文为ECCPRIVATEKEYBLOB结构中的PrivateKey。	
-		// 其有效长度为原文的（ulBits + 7）/8
+		// 其有效长度为原文的（uiBits + 7）/8
 		OPST_SKF_ECCPUBLICKEYBLOB PubKey;				// 加密密钥对的公钥
 		OPST_SKF_ECCCIPHERBLOB ECCCipherBlob;			// 用保护公钥加密的对称密钥密文。
 	}OPST_SKF_ENVELOPEDKEYBLOB;
