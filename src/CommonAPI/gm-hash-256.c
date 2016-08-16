@@ -1,6 +1,6 @@
 
 // sm3.c
-#include "sm3.h"
+#include "gm-hash-256.h"
 
 #ifdef _WINDOWS
 #include <windows.h>
@@ -45,7 +45,7 @@
 #define P1(x) ((x) ^  ROTL((x),15) ^ ROTL((x),23))
 
 
-void tcm_sch_starts(sch_context *ctx ) 
+void gm_hash_256_starts(sch_context *ctx ) 
 {
 	if(!ctx)
 		return;
@@ -211,7 +211,7 @@ static void sm3_process(sch_context *ctx, const unsigned char *data)
 
 }
 
-void tcm_sch_update( sch_context *ctx, unsigned char *input, unsigned int length)
+void gm_hash_256_update( sch_context *ctx, unsigned char *input, unsigned int length)
 {
 	int fill;
 	unsigned int left;
@@ -255,7 +255,7 @@ static const unsigned char sm3_padding[64] = { 0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 		0, 0, 0, 0, 0, 0 };
 
-void tcm_sch_finish( sch_context *ctx, unsigned char digest[32] ) 
+void gm_hash_256_finish( sch_context *ctx, unsigned char digest[32] ) 
 {
 	unsigned int last, padn;
 	unsigned int high, low;
@@ -273,8 +273,8 @@ void tcm_sch_finish( sch_context *ctx, unsigned char digest[32] )
 	last = ctx->total[0] & 0x3F;
 	padn = (last < 56) ? (56 - last) : (120 - last);
 
-	tcm_sch_update(ctx, (unsigned char *) sm3_padding, padn);
-	tcm_sch_update(ctx, msgLen, 8);
+	gm_hash_256_update(ctx, (unsigned char *) sm3_padding, padn);
+	gm_hash_256_update(ctx, msgLen, 8);
 
 	PUT_ULONG_BE( ctx->state[0], digest, 0);
 	PUT_ULONG_BE( ctx->state[1], digest, 4);
@@ -288,16 +288,16 @@ void tcm_sch_finish( sch_context *ctx, unsigned char digest[32] )
 }
 
 
-int tcm_sch_hash( unsigned int datalen_in, unsigned char *pdata_in, unsigned char digest[32]) 
+int gm_hash_256_hash( unsigned int datalen_in, unsigned char *pdata_in, unsigned char digest[32]) 
 {
 	sch_context ctx;
 
 	if( (datalen_in>0) && (!pdata_in) )
 		return OPE_ERR_INVALID_PARAM;
 
-	tcm_sch_starts(&ctx);
-	tcm_sch_update(&ctx, pdata_in, datalen_in);
-	tcm_sch_finish(&ctx, digest);
+	gm_hash_256_starts(&ctx);
+	gm_hash_256_update(&ctx, pdata_in, datalen_in);
+	gm_hash_256_finish(&ctx, digest);
 
 	memset(&ctx, 0, sizeof(sch_context));
 
@@ -307,7 +307,7 @@ int tcm_sch_hash( unsigned int datalen_in, unsigned char *pdata_in, unsigned cha
 
 #define HAMC_PAD_LEN  64
 // reference: rfc2104
-int tcm_hmac(unsigned char *text, unsigned int text_len, unsigned char *key, unsigned int key_len, unsigned char digest[32])
+int gm_hash_256_hmac(unsigned char *text, unsigned int text_len, unsigned char *key, unsigned int key_len, unsigned char digest[32])
 {
 	sch_context ctx;
 	unsigned char k_ipad[HAMC_PAD_LEN], k_opad[HAMC_PAD_LEN];
@@ -320,7 +320,7 @@ int tcm_hmac(unsigned char *text, unsigned int text_len, unsigned char *key, uns
 
 	if(key_len > HAMC_PAD_LEN)
 	{
-		tcm_sch_hash(key_len, key, tk);
+		gm_hash_256_hash(key_len, key, tk);
 		key = tk;
 		key_len = SM3_DIGEST_LEN;
 	}
@@ -339,23 +339,23 @@ int tcm_hmac(unsigned char *text, unsigned int text_len, unsigned char *key, uns
 
 	memset(&ctx,0x00,sizeof(ctx));
 
-	tcm_sch_starts(&ctx);
-	tcm_sch_update(&ctx, k_ipad, HAMC_PAD_LEN);
-	tcm_sch_update(&ctx, text, text_len);
-	tcm_sch_finish(&ctx, temp_digest);
+	gm_hash_256_starts(&ctx);
+	gm_hash_256_update(&ctx, k_ipad, HAMC_PAD_LEN);
+	gm_hash_256_update(&ctx, text, text_len);
+	gm_hash_256_finish(&ctx, temp_digest);
 
 	memset(&ctx,0x00,sizeof(ctx));
 
-	tcm_sch_starts(&ctx);
-	tcm_sch_update(&ctx, k_opad, HAMC_PAD_LEN);
-	tcm_sch_update(&ctx, temp_digest, SM3_DIGEST_LEN);
-	tcm_sch_finish(&ctx, digest);
+	gm_hash_256_starts(&ctx);
+	gm_hash_256_update(&ctx, k_opad, HAMC_PAD_LEN);
+	gm_hash_256_update(&ctx, temp_digest, SM3_DIGEST_LEN);
+	gm_hash_256_finish(&ctx, digest);
 
 	return 0;
 }
 
 
-int tcm_kdf(/*out*/unsigned char *key, /*in*/int klen, /*in*/unsigned char *z, /*in*/ int zlen)
+int gm_hash_256_kdf(/*out*/unsigned char *key, /*in*/int klen, /*in*/unsigned char *z, /*in*/ int zlen)
 {
 	int count, ctIndex;
 	sch_context ctx;
@@ -379,10 +379,10 @@ int tcm_kdf(/*out*/unsigned char *key, /*in*/int klen, /*in*/unsigned char *z, /
 
 		PUT_ULONG_BE(ctIndex,zBuf,0);
 
-		tcm_sch_starts(&ctx);
-		tcm_sch_update(&ctx, z, zlen);
-		tcm_sch_update(&ctx, zBuf, sizeof(zBuf));
-		tcm_sch_finish(&ctx, temp_digest);
+		gm_hash_256_starts(&ctx);
+		gm_hash_256_update(&ctx, z, zlen);
+		gm_hash_256_update(&ctx, zBuf, sizeof(zBuf));
+		gm_hash_256_finish(&ctx, temp_digest);
 		if( (ctIndex == count) && (klen % SM3_DIGEST_LEN) )
 			memcpy(&key[(ctIndex-1) * SM3_DIGEST_LEN], temp_digest, klen % SM3_DIGEST_LEN);
 		else
