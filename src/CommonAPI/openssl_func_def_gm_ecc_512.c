@@ -350,8 +350,8 @@ unsigned int OpenSSL_GMECC512VerifyCert(const unsigned char *pbX509Cert, unsigne
 	unsigned char pbSig[BUFFER_LEN_1K] = {0};
 	unsigned int uiSigLen = BUFFER_LEN_1K;
 
-	unsigned char digest_value[(GM_HASH_BYTES_LEN*2)] = {0};
-	unsigned int digest_len = (GM_HASH_BYTES_LEN*2);
+	unsigned char digest_value[GM_HASH_MAX_BYTES_LEN] = {0};
+	unsigned int digest_len = GM_HASH_MAX_BYTES_LEN;
 
 	unsigned int r_len = GM_ECC_512_BYTES_LEN;
 	unsigned int s_len = GM_ECC_512_BYTES_LEN;
@@ -420,8 +420,8 @@ unsigned int OpenSSL_GMECC512VerifyCRL(const unsigned char *pbCRL, unsigned int 
 	unsigned int uiSigLen = BUFFER_LEN_1K;
 	EC_KEY      * ecPubkey = NULL;
 
-	unsigned char digest_value[(GM_HASH_BYTES_LEN*2)] = {0};
-	unsigned int digest_len = (GM_HASH_BYTES_LEN*2);
+	unsigned char digest_value[GM_HASH_MAX_BYTES_LEN] = {0};
+	unsigned int digest_len = GM_HASH_MAX_BYTES_LEN;
 
 	unsigned int r_len = GM_ECC_512_BYTES_LEN;
 	unsigned int s_len = GM_ECC_512_BYTES_LEN;
@@ -481,8 +481,8 @@ unsigned int OpenSSL_GMECC512VerifyMSG(const unsigned char *pbMSG, unsigned int 
 	const unsigned char *pbPublicKeyY, unsigned int uiPublicKeyYLen)
 {
 	unsigned int rv	= -1;
-	unsigned char digest_value[(GM_HASH_BYTES_LEN*2)] = {0};
-	unsigned int digest_len = (GM_HASH_BYTES_LEN*2);
+	unsigned char digest_value[GM_HASH_MAX_BYTES_LEN] = {0};
+	unsigned int digest_len = GM_HASH_MAX_BYTES_LEN;
 
 	unsigned int pubkey_xy_len = 2 * GM_ECC_512_BYTES_LEN + 1;
 	unsigned char pubkey_xy_value[2 * GM_ECC_512_BYTES_LEN + 1] = {0};
@@ -518,8 +518,8 @@ unsigned int OpenSSL_GMECC512VerifyCSR(
 	EVP_PKEY	*pktmp = NULL;
 	X509_REQ *req = NULL;
 	unsigned int rv = -1;
-	unsigned char digest_value[(GM_HASH_BYTES_LEN*2)] = {0};
-	unsigned int digest_len = (GM_HASH_BYTES_LEN*2);
+	unsigned char digest_value[GM_HASH_MAX_BYTES_LEN] = {0};
+	unsigned int digest_len = GM_HASH_MAX_BYTES_LEN;
 	unsigned char pbPublicKeyX[GM_ECC_512_BYTES_LEN] = {0};
 	unsigned char pbPublicKeyY[GM_ECC_512_BYTES_LEN] = {0};
 	unsigned int pubkey_xy_len = 2 * GM_ECC_512_BYTES_LEN + 1;
@@ -633,8 +633,8 @@ unsigned int OpenSSL_GMECC512SignCSR(
 	BIGNUM * pubkey_x = NULL;
 	BIGNUM * pubkey_y = NULL;
 	unsigned int rv = -1;
-	unsigned char digest_value[(GM_HASH_BYTES_LEN*2)] = {0};
-	unsigned int digest_len = (GM_HASH_BYTES_LEN*2);
+	unsigned char digest_value[GM_HASH_MAX_BYTES_LEN] = {0};
+	unsigned int digest_len = GM_HASH_MAX_BYTES_LEN;
 	unsigned char pbPublicKeyX[GM_ECC_512_BYTES_LEN] = {0};
 	unsigned char pbPublicKeyY[GM_ECC_512_BYTES_LEN] = {0};
 	unsigned int pubkey_xy_len = 2 * GM_ECC_512_BYTES_LEN + 1;
@@ -902,8 +902,8 @@ unsigned int OpenSSL_GMECC512SignMSG(const unsigned char *pbMSG, unsigned int ui
 	unsigned char *pbSig, unsigned int * puiSigLen)
 {
 	unsigned int rv	= -1;
-	unsigned char digest_value[(GM_HASH_BYTES_LEN*2)] = {0};
-	unsigned int digest_len = (GM_HASH_BYTES_LEN*2);
+	unsigned char digest_value[GM_HASH_MAX_BYTES_LEN] = {0};
+	unsigned int digest_len = GM_HASH_MAX_BYTES_LEN;
 
 	unsigned int pubkey_xy_len = 2 * GM_ECC_512_BYTES_LEN + 1;
 	unsigned char pubkey_xy_value[2 * GM_ECC_512_BYTES_LEN + 1] = {0};
@@ -943,8 +943,8 @@ unsigned int OpenSSL_GMECC512SignCRL(
 	unsigned int uiSigLen = BUFFER_LEN_1K;
 	//EC_KEY      * ecPubkey = NULL;
 
-	unsigned char digest_value[(GM_HASH_BYTES_LEN*2)] = {0};
-	unsigned int digest_len = (GM_HASH_BYTES_LEN*2);
+	unsigned char digest_value[GM_HASH_MAX_BYTES_LEN] = {0};
+	unsigned int digest_len = GM_HASH_MAX_BYTES_LEN;
 
 	unsigned int r_len = GM_ECC_512_BYTES_LEN;
 	unsigned int s_len = GM_ECC_512_BYTES_LEN;
@@ -1036,8 +1036,8 @@ unsigned int OpenSSL_GMECC512SignCert(
 	unsigned char pbSig[BUFFER_LEN_1K] = {0};
 	unsigned int uiSigLen = BUFFER_LEN_1K;
 
-	unsigned char digest_value[(GM_HASH_BYTES_LEN*2)] = {0};
-	unsigned int digest_len = (GM_HASH_BYTES_LEN*2);
+	unsigned char digest_value[GM_HASH_MAX_BYTES_LEN] = {0};
+	unsigned int digest_len = GM_HASH_MAX_BYTES_LEN;
 
 	unsigned int r_len = GM_ECC_512_BYTES_LEN;
 	unsigned int s_len = GM_ECC_512_BYTES_LEN;
