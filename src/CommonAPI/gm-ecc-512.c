@@ -4,7 +4,7 @@
 //#include <memory.h>
 
 #include "gm-ecc-512.h"
-#include "sm3.h"
+#include "gm-hash-bit.h"
 #include "o_all_type_def.h"
 
 EC_GROUP *g_group512=NULL;
@@ -382,7 +382,7 @@ int tcm_gmecc512_encrypt(unsigned char *plaintext, unsigned int uPlaintextLen, u
 	unsigned int c1Len;
 	int x2Len, y2Len;
 	unsigned int i;
-	sch_context sm3Ctx;
+	gm_hash_context gm_hashCtx;
 	unsigned int uCiphertextLen;
 
 	if(!g_group512)
@@ -398,7 +398,7 @@ int tcm_gmecc512_encrypt(unsigned char *plaintext, unsigned int uPlaintextLen, u
 	}
 
 	// get and check uCiphertextLen 
-	uCiphertextLen =  2*GM_ECC_512_BYTES_LEN + 1 + uPlaintextLen + SM3_DIGEST_LEN;
+	uCiphertextLen =  2*GM_ECC_512_BYTES_LEN + 1 + uPlaintextLen + GM_HASH_BYTES_LEN;
 	if(!ciphertext)
 	{
 		*puCiphertextLen = uCiphertextLen;
@@ -448,7 +448,7 @@ int tcm_gmecc512_encrypt(unsigned char *plaintext, unsigned int uPlaintextLen, u
 	t = OPENSSL_malloc(uPlaintextLen);
 	c1 = OPENSSL_malloc(2*GM_ECC_512_BYTES_LEN+1);
 	c2 = OPENSSL_malloc(uPlaintextLen);
-	c3 = OPENSSL_malloc(SM3_DIGEST_LEN);
+	c3 = OPENSSL_malloc(GM_HASH_BYTES_LEN);
 	if( !t || !c1 || !c2 || !c3)
 	{
 		nRet = OPE_ERR_NOT_ENOUGH_MEMORY;
@@ -457,7 +457,7 @@ int tcm_gmecc512_encrypt(unsigned char *plaintext, unsigned int uPlaintextLen, u
 	memset(t, 0x00, uPlaintextLen);
 	memset(c1, 0x00, 2*GM_ECC_512_BYTES_LEN+1);
 	memset(c2, 0x00, uPlaintextLen);
-	memset(c3, 0x00, SM3_DIGEST_LEN);
+	memset(c3, 0x00, GM_HASH_BYTES_LEN);
 
 	if (!EC_GROUP_get_order(g_group512, order, ctx)) 
 	{
@@ -526,7 +526,7 @@ int tcm_gmecc512_encrypt(unsigned char *plaintext, unsigned int uPlaintextLen, u
 
 
 		// t = kdf(x2||y2, uPlaintextLen), uPlaintextLen is keylen
-		nRet = tcm_kdf(t, uPlaintextLen, b_x2y2, 2*GM_ECC_512_BYTES_LEN);
+		nRet = gm_hash_kdf(t, uPlaintextLen, b_x2y2, 2*GM_ECC_512_BYTES_LEN, EHASH_TYPE_ZY_HASH_256);
 		if( 0 != nRet)
 			goto err;
 		// check t 是否是全0x00
@@ -548,18 +548,18 @@ int tcm_gmecc512_encrypt(unsigned char *plaintext, unsigned int uPlaintextLen, u
 		c2[i] = plaintext[i] ^ t[i];
 
 	// c3 = SM3(x2||plaintext||y2)
-	memset(&sm3Ctx,0x00,sizeof(sm3Ctx));
+	memset(&gm_hashCtx,0x00,sizeof(gm_hashCtx));
 
-	tcm_sch_starts(&sm3Ctx);
-	tcm_sch_update(&sm3Ctx, b_x2y2, GM_ECC_512_BYTES_LEN);
-	tcm_sch_update(&sm3Ctx, plaintext, uPlaintextLen);
-	tcm_sch_update(&sm3Ctx, b_x2y2+GM_ECC_512_BYTES_LEN, GM_ECC_512_BYTES_LEN);
-	tcm_sch_finish(&sm3Ctx, c3);
+	gm_hash_starts(&gm_hashCtx);
+	gm_hash_update(&gm_hashCtx, b_x2y2, GM_ECC_512_BYTES_LEN);
+	gm_hash_update(&gm_hashCtx, plaintext, uPlaintextLen);
+	gm_hash_update(&gm_hashCtx, b_x2y2+GM_ECC_512_BYTES_LEN, GM_ECC_512_BYTES_LEN);
+	gm_hash_finish(&gm_hashCtx, c3, EHASH_TYPE_ZY_HASH_256);
 
 	// ciphertext = c1 || c2 || c3
 	memcpy(ciphertext, c1, 2*GM_ECC_512_BYTES_LEN+1);
 	memcpy(ciphertext + 2*GM_ECC_512_BYTES_LEN + 1, c2, uPlaintextLen);
-	memcpy(ciphertext + 2*GM_ECC_512_BYTES_LEN + 1 + uPlaintextLen, c3, SM3_DIGEST_LEN);
+	memcpy(ciphertext + 2*GM_ECC_512_BYTES_LEN + 1 + uPlaintextLen, c3, GM_HASH_BYTES_LEN);
 
 	*puCiphertextLen = uCiphertextLen;
 
@@ -615,10 +615,10 @@ int tcm_gmecc512_decrypt(unsigned char *ciphertext, unsigned int uCiphertextLen,
 	EC_POINT *ptC1 = NULL, *tmp_point = NULL;
 	BIGNUM *bnPrikey = NULL, *h = NULL, *x2 = NULL, *y2 = NULL;
 	unsigned char b_x2y2[2*GM_ECC_512_BYTES_LEN];
-	unsigned char *t = NULL, *decPlaintext = NULL, sm3Digest[SM3_DIGEST_LEN], *c1, *c2 , *c3 ;
+	unsigned char *t = NULL, *decPlaintext = NULL, sm3Digest[GM_HASH_BYTES_LEN], *c1, *c2 , *c3 ;
 	int x2Len, y2Len;
 	unsigned int i;
-	sch_context sm3Ctx;
+	gm_hash_context gm_hashCtx;
 	unsigned int uPlaintextLen;
 
 	if(!g_group512)
@@ -627,14 +627,14 @@ int tcm_gmecc512_decrypt(unsigned char *ciphertext, unsigned int uCiphertextLen,
 		goto err;
 	}
 
-	if(!ciphertext || uCiphertextLen<=( 2*GM_ECC_512_BYTES_LEN + 1 + SM3_DIGEST_LEN) 
+	if(!ciphertext || uCiphertextLen<=( 2*GM_ECC_512_BYTES_LEN + 1 + GM_HASH_BYTES_LEN) 
 		|| !prikey || 0==uPrikeyLen || uPrikeyLen>GM_ECC_512_BYTES_LEN || !puPlaintextLen)
 	{
 		nRet=OPE_ERR_INVALID_PARAM;
 		goto err;
 	}
 
-	uPlaintextLen = uCiphertextLen -( 2*GM_ECC_512_BYTES_LEN + 1 + SM3_DIGEST_LEN);
+	uPlaintextLen = uCiphertextLen -( 2*GM_ECC_512_BYTES_LEN + 1 + GM_HASH_BYTES_LEN);
 	if(!plaintext)
 	{
 		*puPlaintextLen = uPlaintextLen;
@@ -750,7 +750,7 @@ int tcm_gmecc512_decrypt(unsigned char *ciphertext, unsigned int uCiphertextLen,
 	y2Len = BN_bn2bin(y2, b_x2y2 + 2*GM_ECC_512_BYTES_LEN - y2Len);
 
 	// t = kdf(x2||y2, uPlaintextLen), uPlaintextLen is keylen
-	nRet = tcm_kdf(t, uPlaintextLen, b_x2y2, 2*GM_ECC_512_BYTES_LEN);
+	nRet = gm_hash_kdf(t, uPlaintextLen, b_x2y2, 2*GM_ECC_512_BYTES_LEN,EHASH_TYPE_ZY_HASH_256);
 	if( 0 != nRet)
 		goto err;
 	// check t 是否是全0x00
@@ -770,16 +770,16 @@ int tcm_gmecc512_decrypt(unsigned char *ciphertext, unsigned int uCiphertextLen,
 		decPlaintext[i] = c2[i] ^ t[i];
 
 	// sm3Digest = SM3(x2||plaintext||y2)
-	memset(&sm3Ctx,0x00,sizeof(sm3Ctx));
+	memset(&gm_hashCtx,0x00,sizeof(gm_hashCtx));
 
-	tcm_sch_starts(&sm3Ctx);
-	tcm_sch_update(&sm3Ctx, b_x2y2, GM_ECC_512_BYTES_LEN);
-	tcm_sch_update(&sm3Ctx, decPlaintext, uPlaintextLen);
-	tcm_sch_update(&sm3Ctx, b_x2y2+GM_ECC_512_BYTES_LEN, GM_ECC_512_BYTES_LEN);
-	tcm_sch_finish(&sm3Ctx, sm3Digest);
+	gm_hash_starts(&gm_hashCtx);
+	gm_hash_update(&gm_hashCtx, b_x2y2, GM_ECC_512_BYTES_LEN);
+	gm_hash_update(&gm_hashCtx, decPlaintext, uPlaintextLen);
+	gm_hash_update(&gm_hashCtx, b_x2y2+GM_ECC_512_BYTES_LEN, GM_ECC_512_BYTES_LEN);
+	gm_hash_finish(&gm_hashCtx, sm3Digest, EHASH_TYPE_ZY_HASH_256);
 
 	// check sm3Digest = c3 or not
-	if(0 != memcmp(c3, sm3Digest,  SM3_DIGEST_LEN))
+	if(0 != memcmp(c3, sm3Digest,  GM_HASH_BYTES_LEN))
 	{
 		nRet = OPE_ERR_INVALID_PARAM;
 		goto err;
@@ -836,7 +836,7 @@ int tcm_gmecc512_get_usrinfo_value(unsigned char *userID, unsigned int uUserIDLe
 	unsigned char a[GM_ECC_512_BYTES_LEN], b[GM_ECC_512_BYTES_LEN], xG[GM_ECC_512_BYTES_LEN], yG[GM_ECC_512_BYTES_LEN];
 	unsigned char entlUserID[2];
 	unsigned char xID[GM_ECC_512_BYTES_LEN], yID[GM_ECC_512_BYTES_LEN];
-	sch_context sm3Ctx;
+	gm_hash_context gm_hashCtx;
 	int xIDLen, yIDLen;
 
 	if(!g_group512)
@@ -913,18 +913,18 @@ int tcm_gmecc512_get_usrinfo_value(unsigned char *userID, unsigned int uUserIDLe
 
 
 	// digest = SM3(entlUserID||userID||a||b||xG||yG||xID||yID)
-	memset(&sm3Ctx,0x00,sizeof(sm3Ctx));
+	memset(&gm_hashCtx,0x00,sizeof(gm_hashCtx));
 
-	tcm_sch_starts(&sm3Ctx);
-	tcm_sch_update(&sm3Ctx, entlUserID, 2);
-	tcm_sch_update(&sm3Ctx, userID, uUserIDLen);
-	tcm_sch_update(&sm3Ctx, a, GM_ECC_512_BYTES_LEN);
-	tcm_sch_update(&sm3Ctx, b, GM_ECC_512_BYTES_LEN);
-	tcm_sch_update(&sm3Ctx, xG, GM_ECC_512_BYTES_LEN);
-	tcm_sch_update(&sm3Ctx, yG, GM_ECC_512_BYTES_LEN);
-	tcm_sch_update(&sm3Ctx, xID, GM_ECC_512_BYTES_LEN);
-	tcm_sch_update(&sm3Ctx, yID, GM_ECC_512_BYTES_LEN);
-	tcm_sch_finish(&sm3Ctx, digest);
+	gm_hash_starts(&gm_hashCtx);
+	gm_hash_update(&gm_hashCtx, entlUserID, 2);
+	gm_hash_update(&gm_hashCtx, userID, uUserIDLen);
+	gm_hash_update(&gm_hashCtx, a, GM_ECC_512_BYTES_LEN);
+	gm_hash_update(&gm_hashCtx, b, GM_ECC_512_BYTES_LEN);
+	gm_hash_update(&gm_hashCtx, xG, GM_ECC_512_BYTES_LEN);
+	gm_hash_update(&gm_hashCtx, yG, GM_ECC_512_BYTES_LEN);
+	gm_hash_update(&gm_hashCtx, xID, GM_ECC_512_BYTES_LEN);
+	gm_hash_update(&gm_hashCtx, yID, GM_ECC_512_BYTES_LEN);
+	gm_hash_finish(&gm_hashCtx, digest, EHASH_TYPE_ZY_HASH_256);
 
 	if(bn_xID)
 		BN_clear_free(bn_xID);
@@ -954,8 +954,8 @@ int tcm_gmecc512_get_message_hash(unsigned char *msg, unsigned int msgLen, unsig
 	unsigned char *pubkey, unsigned int uPubkeyLen, unsigned char *digest, unsigned int *puDigestLen)
 {
 	int nRet;
-	unsigned char zIDDigest[SM3_DIGEST_LEN];
-	sch_context sm3Ctx;
+	unsigned char zIDDigest[GM_HASH_BYTES_LEN];
+	gm_hash_context gm_hashCtx;
 
 	if(!g_group512)
 	{
@@ -970,13 +970,13 @@ int tcm_gmecc512_get_message_hash(unsigned char *msg, unsigned int msgLen, unsig
 
 	if(!digest)
 	{
-		*puDigestLen = SM3_DIGEST_LEN*2;
+		*puDigestLen = GM_HASH_BYTES_LEN*2;
 		nRet = 0;  // OK
 		goto err;
 	}
-	if(*puDigestLen < SM3_DIGEST_LEN*2)
+	if(*puDigestLen < GM_HASH_BYTES_LEN*2)
 	{
-		*puDigestLen = SM3_DIGEST_LEN*2;
+		*puDigestLen = GM_HASH_BYTES_LEN*2;
 		nRet = OPE_ERR_NOT_ENOUGH_MEMORY;
 		goto err;
 	}
@@ -986,21 +986,14 @@ int tcm_gmecc512_get_message_hash(unsigned char *msg, unsigned int msgLen, unsig
 		goto err;
 
 	// digest = SM3(entlUserID||userID||a||b||xG||yG||xID||yID)
-	memset(&sm3Ctx,0x00,sizeof(sm3Ctx));
+	memset(&gm_hashCtx,0x00,sizeof(gm_hashCtx));
 
-	tcm_sch_starts(&sm3Ctx);
-	tcm_sch_update(&sm3Ctx, zIDDigest, SM3_DIGEST_LEN);
-	tcm_sch_update(&sm3Ctx, msg, msgLen);
-	tcm_sch_finish(&sm3Ctx, digest);
+	gm_hash_starts(&gm_hashCtx);
+	gm_hash_update(&gm_hashCtx, zIDDigest, GM_HASH_BYTES_LEN);
+	gm_hash_update(&gm_hashCtx, msg, msgLen);
+	gm_hash_finish(&gm_hashCtx, digest, EHASH_TYPE_ZY_HASH_512);
 
-	memset(&sm3Ctx,0x00,sizeof(sm3Ctx));
-
-	// twice digest
-	tcm_sch_starts(&sm3Ctx);
-	tcm_sch_update(&sm3Ctx, digest, SM3_DIGEST_LEN);
-	tcm_sch_finish(&sm3Ctx, digest + SM3_DIGEST_LEN);
-	
-	*puDigestLen = SM3_DIGEST_LEN*2;
+	*puDigestLen = GM_HASH_BYTES_LEN*2;
 
 	return 0;
 err:
@@ -1348,8 +1341,8 @@ int tcm_gmecc512_exchange(unsigned char fA, unsigned char prikey_A[GM_ECC_512_BY
 	unsigned char bx1[GM_ECC_512_BYTES_LEN], by1[GM_ECC_512_BYTES_LEN],bx2[GM_ECC_512_BYTES_LEN], by2[GM_ECC_512_BYTES_LEN];
 	int x1Len, y1Len, x2Len, y2Len;
 	unsigned char *pKdfInData = NULL;
-	unsigned char tmp_digest[SM3_DIGEST_LEN], tag[1];
-	sch_context sm3Ctx;
+	unsigned char tmp_digest[GM_HASH_BYTES_LEN], tag[1];
+	gm_hash_context gm_hashCtx;
 
 	if(!g_group512)
 	{
@@ -1527,28 +1520,28 @@ int tcm_gmecc512_exchange(unsigned char fA, unsigned char prikey_A[GM_ECC_512_BY
 	yULen = BN_bn2bin(yU, byU + GM_ECC_512_BYTES_LEN - yULen);
 
 	// pKdfInData
-	pKdfInData = (unsigned char*) OPENSSL_malloc(2*GM_ECC_512_BYTES_LEN + 2*SM3_DIGEST_LEN);
+	pKdfInData = (unsigned char*) OPENSSL_malloc(2*GM_ECC_512_BYTES_LEN + 2*GM_HASH_BYTES_LEN);
 	if(!pKdfInData)
 	{
 		nRet = OPE_ERR_NOT_ENOUGH_MEMORY;
 		goto err;
 	}
-	memset(pKdfInData, 0x00, 2*GM_ECC_512_BYTES_LEN + 2*SM3_DIGEST_LEN);
+	memset(pKdfInData, 0x00, 2*GM_ECC_512_BYTES_LEN + 2*GM_HASH_BYTES_LEN);
 	memcpy(pKdfInData, bxU, GM_ECC_512_BYTES_LEN);
 	memcpy(pKdfInData + GM_ECC_512_BYTES_LEN, byU, GM_ECC_512_BYTES_LEN);
 	if(fA)
 	{
-		memcpy(pKdfInData + 2* GM_ECC_512_BYTES_LEN, Za, SM3_DIGEST_LEN);
-		memcpy(pKdfInData + 2* GM_ECC_512_BYTES_LEN + SM3_DIGEST_LEN, Zb, SM3_DIGEST_LEN);
+		memcpy(pKdfInData + 2* GM_ECC_512_BYTES_LEN, Za, GM_HASH_BYTES_LEN);
+		memcpy(pKdfInData + 2* GM_ECC_512_BYTES_LEN + GM_HASH_BYTES_LEN, Zb, GM_HASH_BYTES_LEN);
 	}
 	else
 	{
-		memcpy(pKdfInData + 2* GM_ECC_512_BYTES_LEN, Zb, SM3_DIGEST_LEN);
-		memcpy(pKdfInData + 2* GM_ECC_512_BYTES_LEN + SM3_DIGEST_LEN, Za, SM3_DIGEST_LEN);
+		memcpy(pKdfInData + 2* GM_ECC_512_BYTES_LEN, Zb, GM_HASH_BYTES_LEN);
+		memcpy(pKdfInData + 2* GM_ECC_512_BYTES_LEN + GM_HASH_BYTES_LEN, Za, GM_HASH_BYTES_LEN);
 	}
 
 	// get key, must 16 bytes
-	nRet = tcm_kdf( key, keyLen, pKdfInData, 2*GM_ECC_512_BYTES_LEN + 2*SM3_DIGEST_LEN);
+	nRet = gm_hash_kdf( key, keyLen, pKdfInData, 2*GM_ECC_512_BYTES_LEN + 2*GM_HASH_BYTES_LEN, EHASH_TYPE_ZY_HASH_256);
 	if(0 != nRet)
 		goto err;
 
@@ -1570,42 +1563,42 @@ int tcm_gmecc512_exchange(unsigned char fA, unsigned char prikey_A[GM_ECC_512_BY
 	y2Len = BN_bn2bin(y2, by2 + GM_ECC_512_BYTES_LEN - y2Len);
 
 	// tmp_digest = SM3(xU || Za || Zb || x1 || y1 || x2 || y2)
-	memset(&sm3Ctx, 0x00, sizeof(sm3Ctx));
-	tcm_sch_starts(&sm3Ctx);
-	tcm_sch_update(&sm3Ctx, bxU, GM_ECC_512_BYTES_LEN);
+	memset(&gm_hashCtx, 0x00, sizeof(gm_hashCtx));
+	gm_hash_starts(&gm_hashCtx);
+	gm_hash_update(&gm_hashCtx, bxU, GM_ECC_512_BYTES_LEN);
 	if(fA)
 	{
-		tcm_sch_update(&sm3Ctx, Za, SM3_DIGEST_LEN);
-		tcm_sch_update(&sm3Ctx, Zb, SM3_DIGEST_LEN);
+		gm_hash_update(&gm_hashCtx, Za, GM_HASH_BYTES_LEN);
+		gm_hash_update(&gm_hashCtx, Zb, GM_HASH_BYTES_LEN);
 	}
 	else
 	{
-		tcm_sch_update(&sm3Ctx, Zb, SM3_DIGEST_LEN);
-		tcm_sch_update(&sm3Ctx, Za, SM3_DIGEST_LEN);
+		gm_hash_update(&gm_hashCtx, Zb, GM_HASH_BYTES_LEN);
+		gm_hash_update(&gm_hashCtx, Za, GM_HASH_BYTES_LEN);
 	}
-	tcm_sch_update(&sm3Ctx, bx1, GM_ECC_512_BYTES_LEN);
-	tcm_sch_update(&sm3Ctx, by1, GM_ECC_512_BYTES_LEN);
-	tcm_sch_update(&sm3Ctx, bx2, GM_ECC_512_BYTES_LEN);
-	tcm_sch_update(&sm3Ctx, by2, GM_ECC_512_BYTES_LEN);
-	tcm_sch_finish(&sm3Ctx, tmp_digest);
+	gm_hash_update(&gm_hashCtx, bx1, GM_ECC_512_BYTES_LEN);
+	gm_hash_update(&gm_hashCtx, by1, GM_ECC_512_BYTES_LEN);
+	gm_hash_update(&gm_hashCtx, bx2, GM_ECC_512_BYTES_LEN);
+	gm_hash_update(&gm_hashCtx, by2, GM_ECC_512_BYTES_LEN);
+	gm_hash_finish(&gm_hashCtx, tmp_digest,EHASH_TYPE_ZY_HASH_256);
 
 	// S1 = SM3(0x02 || yU || tmp_digest)
 	tag[0] = 0x02;
-	memset(&sm3Ctx, 0x00, sizeof(sm3Ctx));
-	tcm_sch_starts(&sm3Ctx);
-	tcm_sch_update(&sm3Ctx, tag, 1);
-	tcm_sch_update(&sm3Ctx, byU, GM_ECC_512_BYTES_LEN);
-	tcm_sch_update(&sm3Ctx, tmp_digest, SM3_DIGEST_LEN);
-	tcm_sch_finish(&sm3Ctx, S1);
+	memset(&gm_hashCtx, 0x00, sizeof(gm_hashCtx));
+	gm_hash_starts(&gm_hashCtx);
+	gm_hash_update(&gm_hashCtx, tag, 1);
+	gm_hash_update(&gm_hashCtx, byU, GM_ECC_512_BYTES_LEN);
+	gm_hash_update(&gm_hashCtx, tmp_digest, GM_HASH_BYTES_LEN);
+	gm_hash_finish(&gm_hashCtx, S1, EHASH_TYPE_ZY_HASH_256);
 
 	// Sa = SM3(0x03 || yU || tmp_digest)
 	tag[0] = 0x03;
-	memset(&sm3Ctx, 0x00, sizeof(sm3Ctx));
-	tcm_sch_starts(&sm3Ctx);
-	tcm_sch_update(&sm3Ctx, tag, 1);
-	tcm_sch_update(&sm3Ctx, byU, GM_ECC_512_BYTES_LEN);
-	tcm_sch_update(&sm3Ctx, tmp_digest, SM3_DIGEST_LEN);
-	tcm_sch_finish(&sm3Ctx, Sa);
+	memset(&gm_hashCtx, 0x00, sizeof(gm_hashCtx));
+	gm_hash_starts(&gm_hashCtx);
+	gm_hash_update(&gm_hashCtx, tag, 1);
+	gm_hash_update(&gm_hashCtx, byU, GM_ECC_512_BYTES_LEN);
+	gm_hash_update(&gm_hashCtx, tmp_digest, GM_HASH_BYTES_LEN);
+	gm_hash_finish(&gm_hashCtx, Sa, EHASH_TYPE_ZY_HASH_256);
 
 	if(pKdfInData)
 		OPENSSL_free(pKdfInData);

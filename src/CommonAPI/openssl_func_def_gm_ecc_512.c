@@ -20,7 +20,7 @@
 #include <openssl/asn1t.h>
 
 #include "gm-ecc-512.h"
-#include "sm3.h"
+#include "gm-hash-bit.h"
 
 #include "string.h"
 #include "openssl/x509v3.h"
@@ -350,8 +350,8 @@ unsigned int OpenSSL_GMECC512VerifyCert(const unsigned char *pbX509Cert, unsigne
 	unsigned char pbSig[BUFFER_LEN_1K] = {0};
 	unsigned int uiSigLen = BUFFER_LEN_1K;
 
-	unsigned char digest_value[(SM3_DIGEST_LEN*2)] = {0};
-	unsigned int digest_len = (SM3_DIGEST_LEN*2);
+	unsigned char digest_value[(GM_HASH_BYTES_LEN*2)] = {0};
+	unsigned int digest_len = (GM_HASH_BYTES_LEN*2);
 
 	unsigned int r_len = GM_ECC_512_BYTES_LEN;
 	unsigned int s_len = GM_ECC_512_BYTES_LEN;
@@ -420,8 +420,8 @@ unsigned int OpenSSL_GMECC512VerifyCRL(const unsigned char *pbCRL, unsigned int 
 	unsigned int uiSigLen = BUFFER_LEN_1K;
 	EC_KEY      * ecPubkey = NULL;
 
-	unsigned char digest_value[(SM3_DIGEST_LEN*2)] = {0};
-	unsigned int digest_len = (SM3_DIGEST_LEN*2);
+	unsigned char digest_value[(GM_HASH_BYTES_LEN*2)] = {0};
+	unsigned int digest_len = (GM_HASH_BYTES_LEN*2);
 
 	unsigned int r_len = GM_ECC_512_BYTES_LEN;
 	unsigned int s_len = GM_ECC_512_BYTES_LEN;
@@ -481,8 +481,8 @@ unsigned int OpenSSL_GMECC512VerifyMSG(const unsigned char *pbMSG, unsigned int 
 	const unsigned char *pbPublicKeyY, unsigned int uiPublicKeyYLen)
 {
 	unsigned int rv	= -1;
-	unsigned char digest_value[(SM3_DIGEST_LEN*2)] = {0};
-	unsigned int digest_len = (SM3_DIGEST_LEN*2);
+	unsigned char digest_value[(GM_HASH_BYTES_LEN*2)] = {0};
+	unsigned int digest_len = (GM_HASH_BYTES_LEN*2);
 
 	unsigned int pubkey_xy_len = 2 * GM_ECC_512_BYTES_LEN + 1;
 	unsigned char pubkey_xy_value[2 * GM_ECC_512_BYTES_LEN + 1] = {0};
@@ -518,8 +518,8 @@ unsigned int OpenSSL_GMECC512VerifyCSR(
 	EVP_PKEY	*pktmp = NULL;
 	X509_REQ *req = NULL;
 	unsigned int rv = -1;
-	unsigned char digest_value[(SM3_DIGEST_LEN*2)] = {0};
-	unsigned int digest_len = (SM3_DIGEST_LEN*2);
+	unsigned char digest_value[(GM_HASH_BYTES_LEN*2)] = {0};
+	unsigned int digest_len = (GM_HASH_BYTES_LEN*2);
 	unsigned char pbPublicKeyX[GM_ECC_512_BYTES_LEN] = {0};
 	unsigned char pbPublicKeyY[GM_ECC_512_BYTES_LEN] = {0};
 	unsigned int pubkey_xy_len = 2 * GM_ECC_512_BYTES_LEN + 1;
@@ -633,8 +633,8 @@ unsigned int OpenSSL_GMECC512SignCSR(
 	BIGNUM * pubkey_x = NULL;
 	BIGNUM * pubkey_y = NULL;
 	unsigned int rv = -1;
-	unsigned char digest_value[(SM3_DIGEST_LEN*2)] = {0};
-	unsigned int digest_len = (SM3_DIGEST_LEN*2);
+	unsigned char digest_value[(GM_HASH_BYTES_LEN*2)] = {0};
+	unsigned int digest_len = (GM_HASH_BYTES_LEN*2);
 	unsigned char pbPublicKeyX[GM_ECC_512_BYTES_LEN] = {0};
 	unsigned char pbPublicKeyY[GM_ECC_512_BYTES_LEN] = {0};
 	unsigned int pubkey_xy_len = 2 * GM_ECC_512_BYTES_LEN + 1;
@@ -902,8 +902,8 @@ unsigned int OpenSSL_GMECC512SignMSG(const unsigned char *pbMSG, unsigned int ui
 	unsigned char *pbSig, unsigned int * puiSigLen)
 {
 	unsigned int rv	= -1;
-	unsigned char digest_value[(SM3_DIGEST_LEN*2)] = {0};
-	unsigned int digest_len = (SM3_DIGEST_LEN*2);
+	unsigned char digest_value[(GM_HASH_BYTES_LEN*2)] = {0};
+	unsigned int digest_len = (GM_HASH_BYTES_LEN*2);
 
 	unsigned int pubkey_xy_len = 2 * GM_ECC_512_BYTES_LEN + 1;
 	unsigned char pubkey_xy_value[2 * GM_ECC_512_BYTES_LEN + 1] = {0};
@@ -943,8 +943,8 @@ unsigned int OpenSSL_GMECC512SignCRL(
 	unsigned int uiSigLen = BUFFER_LEN_1K;
 	//EC_KEY      * ecPubkey = NULL;
 
-	unsigned char digest_value[(SM3_DIGEST_LEN*2)] = {0};
-	unsigned int digest_len = (SM3_DIGEST_LEN*2);
+	unsigned char digest_value[(GM_HASH_BYTES_LEN*2)] = {0};
+	unsigned int digest_len = (GM_HASH_BYTES_LEN*2);
 
 	unsigned int r_len = GM_ECC_512_BYTES_LEN;
 	unsigned int s_len = GM_ECC_512_BYTES_LEN;
@@ -1036,8 +1036,8 @@ unsigned int OpenSSL_GMECC512SignCert(
 	unsigned char pbSig[BUFFER_LEN_1K] = {0};
 	unsigned int uiSigLen = BUFFER_LEN_1K;
 
-	unsigned char digest_value[(SM3_DIGEST_LEN*2)] = {0};
-	unsigned int digest_len = (SM3_DIGEST_LEN*2);
+	unsigned char digest_value[(GM_HASH_BYTES_LEN*2)] = {0};
+	unsigned int digest_len = (GM_HASH_BYTES_LEN*2);
 
 	unsigned int r_len = GM_ECC_512_BYTES_LEN;
 	unsigned int s_len = GM_ECC_512_BYTES_LEN;
@@ -2242,7 +2242,7 @@ unsigned int OpenSSL_GMECC512Encrypt(const unsigned char * pbPublicKeyX, unsigne
 	memcpy(pubkey_xy_value + 1 , pbPublicKeyX, GM_ECC_512_BYTES_LEN);
 	memcpy(pubkey_xy_value + 1 + GM_ECC_512_BYTES_LEN, pbPublicKeyY, GM_ECC_512_BYTES_LEN);
 
-	//uiRet = tcm_ecc_encrypt((unsigned char *)pbIN, uiINLen, (unsigned char *)pubkey_xy_value, pubkey_xy_len, szData, &szLen);
+	//uiRet = gm_hash_ecc_encrypt((unsigned char *)pbIN, uiINLen, (unsigned char *)pubkey_xy_value, pubkey_xy_len, szData, &szLen);
 	uiRet = OpenSSL_GMECC512EncryptInner(pbIN,uiINLen,pbPublicKeyX,uiPublicKeyXLen,pbPublicKeyY,uiPublicKeyYLen,szData,&szLen);
 
 	if(uiRet)
@@ -2253,7 +2253,7 @@ unsigned int OpenSSL_GMECC512Encrypt(const unsigned char * pbPublicKeyX, unsigne
 	szData = malloc(szLen);
 	memset(szData, 0, szLen);
 
-	//uiRet = tcm_ecc_encrypt((unsigned char *)pbIN, uiINLen, (unsigned char *)pubkey_xy_value, pubkey_xy_len, szData, &szLen);
+	//uiRet = gm_hash_ecc_encrypt((unsigned char *)pbIN, uiINLen, (unsigned char *)pubkey_xy_value, pubkey_xy_len, szData, &szLen);
 	uiRet = OpenSSL_GMECC512EncryptInner(pbIN,uiINLen,pbPublicKeyX,uiPublicKeyXLen,pbPublicKeyY,uiPublicKeyYLen,szData,&szLen);
 
 	if (uiRet)
@@ -2572,8 +2572,8 @@ unsigned int OpenSSL_GMECC512DecryptInner(const unsigned char *pbIN, unsigned in
 	unsigned char * t = NULL;
 	unsigned char * zero_buffer = NULL;
 	unsigned char * data_value_out = NULL;
-	unsigned char data_value_digest[(SM3_DIGEST_LEN)] = {0};
-	unsigned int data_len_digest = (SM3_DIGEST_LEN);
+	unsigned char data_value_digest[(GM_HASH_BYTES_LEN)] = {0};
+	unsigned int data_len_digest = (GM_HASH_BYTES_LEN);
 
 	BIGNUM * pubkey_x_C1 = NULL; 
 	BIGNUM * pubkey_y_C1 = NULL; 
@@ -2590,19 +2590,19 @@ unsigned int OpenSSL_GMECC512DecryptInner(const unsigned char *pbIN, unsigned in
 	BN_CTX * ctx = NULL;
 	unsigned char x2y2[2*GM_ECC_512_BYTES_LEN] = {0};
 
-	sch_context sm3Ctx;
+	gm_hash_context gm_hashCtx;
 
 
 	int i = 0;
 
-	if (!pbIN || uiINLen < (2*GM_ECC_512_BYTES_LEN+1+(SM3_DIGEST_LEN)) || !puiOUTLen
+	if (!pbIN || uiINLen < (2*GM_ECC_512_BYTES_LEN+1+(GM_HASH_BYTES_LEN)) || !puiOUTLen
 		|| !pbPrivateKey || uiPrivateKeyLen != GM_ECC_512_BYTES_LEN)
 	{
 		uiRet = OPE_ERR_INVALID_PARAM;
 		goto err;
 	}
 
-	uiPlainTextLen = uiINLen  -( 2*GM_ECC_512_BYTES_LEN + 1 + (SM3_DIGEST_LEN));
+	uiPlainTextLen = uiINLen  -( 2*GM_ECC_512_BYTES_LEN + 1 + (GM_HASH_BYTES_LEN));
 
 	if(!pbOUT)
 	{
@@ -2740,7 +2740,7 @@ unsigned int OpenSSL_GMECC512DecryptInner(const unsigned char *pbIN, unsigned in
 	// 第四步
 	// 计算t = KDF(x2||y2,klen)
 
-	uiRet = tcm_kdf(t,uiPlainTextLen,x2y2,sizeof(x2y2));
+	uiRet = gm_hash_kdf(t,uiPlainTextLen,x2y2,sizeof(x2y2),EHASH_TYPE_ZY_HASH_256);
 	if(uiRet)
 	{
 		goto err;
@@ -2763,14 +2763,14 @@ unsigned int OpenSSL_GMECC512DecryptInner(const unsigned char *pbIN, unsigned in
 
 	// 第六步
 	// u = HASH(x2||M'||y2)
-	memset(&sm3Ctx,0x00,sizeof(sm3Ctx));
-	tcm_sch_starts(&sm3Ctx);
-	tcm_sch_update(&sm3Ctx, x2y2, GM_ECC_512_BYTES_LEN);
-	tcm_sch_update(&sm3Ctx, (unsigned char *)data_value_out, uiPlainTextLen);
-	tcm_sch_update(&sm3Ctx, x2y2+GM_ECC_512_BYTES_LEN, GM_ECC_512_BYTES_LEN);
-	tcm_sch_finish(&sm3Ctx, data_value_digest);
+	memset(&gm_hashCtx,0x00,sizeof(gm_hashCtx));
+	gm_hash_starts(&gm_hashCtx);
+	gm_hash_update(&gm_hashCtx, x2y2, GM_ECC_512_BYTES_LEN);
+	gm_hash_update(&gm_hashCtx, (unsigned char *)data_value_out, uiPlainTextLen);
+	gm_hash_update(&gm_hashCtx, x2y2+GM_ECC_512_BYTES_LEN, GM_ECC_512_BYTES_LEN);
+	gm_hash_finish(&gm_hashCtx, data_value_digest, EHASH_TYPE_ZY_HASH_256);
 
-	if (0 == memcmp(c3,data_value_digest,(SM3_DIGEST_LEN)))
+	if (0 == memcmp(c3,data_value_digest,(GM_HASH_BYTES_LEN)))
 	{
 		uiRet = 0;
 		*puiOUTLen = uiPlainTextLen;
@@ -2856,7 +2856,7 @@ unsigned int OpenSSL_GMECC512EncryptInner(
 	unsigned char * c3 = NULL;
 	int i = 0;
 
-	sch_context sm3Ctx;
+	gm_hash_context gm_hashCtx;
 
 	// 判断是否初始化OPENSSL GROUP
 	if(!g_group512)
@@ -2875,7 +2875,7 @@ unsigned int OpenSSL_GMECC512EncryptInner(
 	}
 
 	// 计算密文长度
-	uiCiphertextLen =  2*GM_ECC_512_BYTES_LEN + 1 + uiINLen + (SM3_DIGEST_LEN);
+	uiCiphertextLen =  2*GM_ECC_512_BYTES_LEN + 1 + uiINLen + (GM_HASH_BYTES_LEN);
 	if(NULL == pbOUT)
 	{
 		*puiOUTLen = uiCiphertextLen;
@@ -2956,7 +2956,7 @@ unsigned int OpenSSL_GMECC512EncryptInner(
 	t = (unsigned char *)OPENSSL_malloc(uiINLen);
 	c1 = (unsigned char *)OPENSSL_malloc(2*GM_ECC_512_BYTES_LEN+1);
 	c2 = (unsigned char *)OPENSSL_malloc(uiINLen);
-	c3 = (unsigned char *)OPENSSL_malloc((SM3_DIGEST_LEN));
+	c3 = (unsigned char *)OPENSSL_malloc((GM_HASH_BYTES_LEN));
 	zero_buffer = (unsigned char *)OPENSSL_malloc(uiINLen);
 
 	if( !t || !c1 || !c2 || !c3 || !zero_buffer)
@@ -2968,7 +2968,7 @@ unsigned int OpenSSL_GMECC512EncryptInner(
 	memset(zero_buffer, 0, uiINLen);
 	memset(c1, 0, 2*GM_ECC_512_BYTES_LEN+1);
 	memset(c2, 0, uiINLen);
-	memset(c3, 0, (SM3_DIGEST_LEN));
+	memset(c3, 0, (GM_HASH_BYTES_LEN));
 
 	for(;;)
 	{
@@ -3059,7 +3059,7 @@ unsigned int OpenSSL_GMECC512EncryptInner(
 
 		// 第五步
 		// t= KDF(x2||y2,klen)
-		uiRet = tcm_kdf(t, uiINLen, x2y2, 2*GM_ECC_512_BYTES_LEN);
+		uiRet = gm_hash_kdf(t, uiINLen, x2y2, 2*GM_ECC_512_BYTES_LEN, EHASH_TYPE_ZY_HASH_256);
 
 		// t全0
 		if (0 == memcmp(zero_buffer,t,uiINLen))
@@ -3079,20 +3079,20 @@ unsigned int OpenSSL_GMECC512EncryptInner(
 	}
 	// 第七步
 	// C3=Hash(x2||M||y2)
-	memset(&sm3Ctx,0x00,sizeof(sm3Ctx));
-	tcm_sch_starts(&sm3Ctx);
-	tcm_sch_update(&sm3Ctx, x2y2, GM_ECC_512_BYTES_LEN);
-	tcm_sch_update(&sm3Ctx, (unsigned char *)pbIN, uiINLen);
-	tcm_sch_update(&sm3Ctx, x2y2+GM_ECC_512_BYTES_LEN, GM_ECC_512_BYTES_LEN);
-	tcm_sch_finish(&sm3Ctx, c3);
+	memset(&gm_hashCtx,0x00,sizeof(gm_hashCtx));
+	gm_hash_starts(&gm_hashCtx);
+	gm_hash_update(&gm_hashCtx, x2y2, GM_ECC_512_BYTES_LEN);
+	gm_hash_update(&gm_hashCtx, (unsigned char *)pbIN, uiINLen);
+	gm_hash_update(&gm_hashCtx, x2y2+GM_ECC_512_BYTES_LEN, GM_ECC_512_BYTES_LEN);
+	gm_hash_finish(&gm_hashCtx, c3,EHASH_TYPE_ZY_HASH_256);
 
 	uiRet = 0;
 
 	memcpy(pbOUT,c1, GM_ECC_512_BYTES_LEN*2+1);
 	memcpy(pbOUT + GM_ECC_512_BYTES_LEN*2+1 , c2, uiINLen);
-	memcpy(pbOUT + GM_ECC_512_BYTES_LEN*2+1 + uiINLen,c3,(SM3_DIGEST_LEN));
+	memcpy(pbOUT + GM_ECC_512_BYTES_LEN*2+1 + uiINLen,c3,(GM_HASH_BYTES_LEN));
 
-	*puiOUTLen = GM_ECC_512_BYTES_LEN*2+1 + uiINLen + (SM3_DIGEST_LEN);
+	*puiOUTLen = GM_ECC_512_BYTES_LEN*2+1 + uiINLen + (GM_HASH_BYTES_LEN);
 
 err:
 
