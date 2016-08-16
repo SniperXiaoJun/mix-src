@@ -1,5 +1,5 @@
 
-// sm3.h
+// gm-hash-256.h
 #ifndef _GM_HASH_256_H_
 #define _GM_HASH_256_H_
 
@@ -10,7 +10,7 @@ typedef struct {
 	unsigned int total[2];
 	unsigned int state[8];
 	unsigned char buffer[64];
-} sch_context;
+} gm_hash_256_context;
 
 
 #ifdef __cplusplus
@@ -18,25 +18,25 @@ extern "C" {
 #endif
 
 /*
- * 建立SM3 context
- * ctx SM3计算的上下文
+ * 建立gm-hash-256 context
+ * ctx gm-hash-256计算的上下文
  */
-void gm_hash_256_starts(sch_context *ctx );
+void gm_hash_256_starts(gm_hash_256_context *ctx );
 
 /*
  * 提供输入数据
- * ctx SM3计算的上下文
+ * ctx gm-hash-256计算的上下文
  * input 输入数据
  * length 输入数据长度
  */
-void gm_hash_256_update( sch_context *ctx, unsigned char *input, unsigned int length);
+void gm_hash_256_update( gm_hash_256_context *ctx, unsigned char *input, unsigned int length);
 
 /*
  * 计算结果
- * ctx SM3计算的上下文
+ * ctx gm-hash-256计算的上下文
  * digest 输出的Hash值
  */
-void gm_hash_256_finish( sch_context *ctx, unsigned char digest[32] );
+void gm_hash_256_finish( gm_hash_256_context *ctx, unsigned char digest[32] );
 
 
 /* 
@@ -57,4 +57,4 @@ int gm_hash_256_kdf(/*out*/unsigned char *key, /*in*/int klen, /*in*/unsigned ch
 }
 #endif
 
-#endif /* sm3.h */
+#endif /* gm-hash-256.h */

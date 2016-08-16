@@ -1,5 +1,5 @@
 
-// sm3.c
+// gm-hash-256.c
 #include "gm-hash-256.h"
 
 #ifdef _WINDOWS
@@ -45,7 +45,7 @@
 #define P1(x) ((x) ^  ROTL((x),15) ^ ROTL((x),23))
 
 
-void gm_hash_256_starts(sch_context *ctx ) 
+void gm_hash_256_starts(gm_hash_256_context *ctx ) 
 {
 	if(!ctx)
 		return;
@@ -64,7 +64,7 @@ void gm_hash_256_starts(sch_context *ctx )
 }
 
 // data: 64 bytes
-static void sm3_process(sch_context *ctx, const unsigned char *data) 
+static void gm_hash_256_process(gm_hash_256_context *ctx, const unsigned char *data) 
 {
 	unsigned int SS1, SS2, TT1, TT2, W[68], W1[64];
 	unsigned int A, B, C, D, E, F, G, H;
@@ -211,7 +211,7 @@ static void sm3_process(sch_context *ctx, const unsigned char *data)
 
 }
 
-void gm_hash_256_update( sch_context *ctx, unsigned char *input, unsigned int length)
+void gm_hash_256_update( gm_hash_256_context *ctx, unsigned char *input, unsigned int length)
 {
 	int fill;
 	unsigned int left;
@@ -231,7 +231,7 @@ void gm_hash_256_update( sch_context *ctx, unsigned char *input, unsigned int le
 	if (left && (length >= (unsigned int)fill) )
 	{
 		memcpy((void *) (ctx->buffer + left), (void *) input, fill);
-		sm3_process(ctx, ctx->buffer);
+		gm_hash_256_process(ctx, ctx->buffer);
 		input += fill;
 		length -= fill;
 		left = 0;
@@ -239,7 +239,7 @@ void gm_hash_256_update( sch_context *ctx, unsigned char *input, unsigned int le
 
 	while (length >= 64) 
 	{
-		sm3_process(ctx, input);
+		gm_hash_256_process(ctx, input);
 		input += 64;
 		length -= 64;
 	}
@@ -250,12 +250,12 @@ void gm_hash_256_update( sch_context *ctx, unsigned char *input, unsigned int le
 	}
 }
 
-static const unsigned char sm3_padding[64] = { 0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+static const unsigned char gm_hash_256_padding[64] = { 0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 		0, 0, 0, 0, 0, 0 };
 
-void gm_hash_256_finish( sch_context *ctx, unsigned char digest[32] ) 
+void gm_hash_256_finish( gm_hash_256_context *ctx, unsigned char digest[32] ) 
 {
 	unsigned int last, padn;
 	unsigned int high, low;
@@ -273,7 +273,7 @@ void gm_hash_256_finish( sch_context *ctx, unsigned char digest[32] )
 	last = ctx->total[0] & 0x3F;
 	padn = (last < 56) ? (56 - last) : (120 - last);
 
-	gm_hash_256_update(ctx, (unsigned char *) sm3_padding, padn);
+	gm_hash_256_update(ctx, (unsigned char *) gm_hash_256_padding, padn);
 	gm_hash_256_update(ctx, msgLen, 8);
 
 	PUT_ULONG_BE( ctx->state[0], digest, 0);
@@ -290,7 +290,7 @@ void gm_hash_256_finish( sch_context *ctx, unsigned char digest[32] )
 
 int gm_hash_256_hash( unsigned int datalen_in, unsigned char *pdata_in, unsigned char digest[32]) 
 {
-	sch_context ctx;
+	gm_hash_256_context ctx;
 
 	if( (datalen_in>0) && (!pdata_in) )
 		return OPE_ERR_INVALID_PARAM;
@@ -299,7 +299,7 @@ int gm_hash_256_hash( unsigned int datalen_in, unsigned char *pdata_in, unsigned
 	gm_hash_256_update(&ctx, pdata_in, datalen_in);
 	gm_hash_256_finish(&ctx, digest);
 
-	memset(&ctx, 0, sizeof(sch_context));
+	memset(&ctx, 0, sizeof(gm_hash_256_context));
 
 	return 0;
 }
@@ -309,10 +309,10 @@ int gm_hash_256_hash( unsigned int datalen_in, unsigned char *pdata_in, unsigned
 // reference: rfc2104
 int gm_hash_256_hmac(unsigned char *text, unsigned int text_len, unsigned char *key, unsigned int key_len, unsigned char digest[32])
 {
-	sch_context ctx;
+	gm_hash_256_context ctx;
 	unsigned char k_ipad[HAMC_PAD_LEN], k_opad[HAMC_PAD_LEN];
-	unsigned char tk[SM3_DIGEST_LEN];
-	unsigned char temp_digest[SM3_DIGEST_LEN];
+	unsigned char tk[GM_HASH_256_DIGEST_LEN];
+	unsigned char temp_digest[GM_HASH_256_DIGEST_LEN];
 	int i;
 
 	if(!key)
@@ -322,7 +322,7 @@ int gm_hash_256_hmac(unsigned char *text, unsigned int text_len, unsigned char *
 	{
 		gm_hash_256_hash(key_len, key, tk);
 		key = tk;
-		key_len = SM3_DIGEST_LEN;
+		key_len = GM_HASH_256_DIGEST_LEN;
 	}
 
 	memset(k_ipad, 0x00, sizeof(k_ipad));
@@ -348,7 +348,7 @@ int gm_hash_256_hmac(unsigned char *text, unsigned int text_len, unsigned char *
 
 	gm_hash_256_starts(&ctx);
 	gm_hash_256_update(&ctx, k_opad, HAMC_PAD_LEN);
-	gm_hash_256_update(&ctx, temp_digest, SM3_DIGEST_LEN);
+	gm_hash_256_update(&ctx, temp_digest, GM_HASH_256_DIGEST_LEN);
 	gm_hash_256_finish(&ctx, digest);
 
 	return 0;
@@ -358,9 +358,9 @@ int gm_hash_256_hmac(unsigned char *text, unsigned int text_len, unsigned char *
 int gm_hash_256_kdf(/*out*/unsigned char *key, /*in*/int klen, /*in*/unsigned char *z, /*in*/ int zlen)
 {
 	int count, ctIndex;
-	sch_context ctx;
+	gm_hash_256_context ctx;
 	unsigned char zBuf[4];
-	unsigned char temp_digest[SM3_DIGEST_LEN];
+	unsigned char temp_digest[GM_HASH_256_DIGEST_LEN];
 
 	if( (!key) || (klen <0 ) )
 		return OPE_ERR_INVALID_PARAM;
@@ -368,9 +368,9 @@ int gm_hash_256_kdf(/*out*/unsigned char *key, /*in*/int klen, /*in*/unsigned ch
 	if(0 == klen)
 		return 0;
 
-	count=klen / SM3_DIGEST_LEN;
+	count=klen / GM_HASH_256_DIGEST_LEN;
 
-	if(klen % SM3_DIGEST_LEN)
+	if(klen % GM_HASH_256_DIGEST_LEN)
 		count++ ;
 
 	for(ctIndex=1; ctIndex <= count; ctIndex++)
@@ -383,10 +383,10 @@ int gm_hash_256_kdf(/*out*/unsigned char *key, /*in*/int klen, /*in*/unsigned ch
 		gm_hash_256_update(&ctx, z, zlen);
 		gm_hash_256_update(&ctx, zBuf, sizeof(zBuf));
 		gm_hash_256_finish(&ctx, temp_digest);
-		if( (ctIndex == count) && (klen % SM3_DIGEST_LEN) )
-			memcpy(&key[(ctIndex-1) * SM3_DIGEST_LEN], temp_digest, klen % SM3_DIGEST_LEN);
+		if( (ctIndex == count) && (klen % GM_HASH_256_DIGEST_LEN) )
+			memcpy(&key[(ctIndex-1) * GM_HASH_256_DIGEST_LEN], temp_digest, klen % GM_HASH_256_DIGEST_LEN);
 		else
-			memcpy(&key[(ctIndex-1) * SM3_DIGEST_LEN], temp_digest, SM3_DIGEST_LEN);
+			memcpy(&key[(ctIndex-1) * GM_HASH_256_DIGEST_LEN], temp_digest, GM_HASH_256_DIGEST_LEN);
 	}
 
 	return 0;
