@@ -1,6 +1,6 @@
 
-// gm-hash-256.c
-#include "gm-hash-256.h"
+// gm-hash-bit.c
+#include "gm-hash-bit.h"
 
 #ifdef _WINDOWS
 #include <windows.h>
@@ -48,7 +48,7 @@
 #define P1(x) ((x) ^  ROTL((x),15) ^ ROTL((x),23))
 
 
-void gm_hash_256_starts(gm_hash_256_context *ctx ) 
+void gm_hash_starts(gm_hash_context *ctx ) 
 {
 	if(!ctx)
 		return;
@@ -67,7 +67,7 @@ void gm_hash_256_starts(gm_hash_256_context *ctx )
 }
 
 // data: 64 bytes
-static void gm_hash_256_process(gm_hash_256_context *ctx, const unsigned char *data) 
+static void gm_hash_process(gm_hash_context *ctx, const unsigned char *data) 
 {
 	unsigned int SS1, SS2, TT1, TT2, W[68], W1[64];
 	unsigned int A, B, C, D, E, F, G, H;
@@ -214,7 +214,7 @@ static void gm_hash_256_process(gm_hash_256_context *ctx, const unsigned char *d
 
 }
 
-void gm_hash_256_update( gm_hash_256_context *ctx, unsigned char *input, unsigned int length)
+void gm_hash_update( gm_hash_context *ctx, unsigned char *input, unsigned int length)
 {
 	int fill;
 	unsigned int left;
@@ -234,7 +234,7 @@ void gm_hash_256_update( gm_hash_256_context *ctx, unsigned char *input, unsigne
 	if (left && (length >= (unsigned int)fill) )
 	{
 		memcpy((void *) (ctx->buffer + left), (void *) input, fill);
-		gm_hash_256_process(ctx, ctx->buffer);
+		gm_hash_process(ctx, ctx->buffer);
 		input += fill;
 		length -= fill;
 		left = 0;
@@ -242,7 +242,7 @@ void gm_hash_256_update( gm_hash_256_context *ctx, unsigned char *input, unsigne
 
 	while (length >= 64) 
 	{
-		gm_hash_256_process(ctx, input);
+		gm_hash_process(ctx, input);
 		input += 64;
 		length -= 64;
 	}
@@ -253,12 +253,14 @@ void gm_hash_256_update( gm_hash_256_context *ctx, unsigned char *input, unsigne
 	}
 }
 
-static const unsigned char gm_hash_256_padding[64] = { 0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+static const unsigned char gm_hash_padding[64] = { 0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 		0, 0, 0, 0, 0, 0 };
 
-void gm_hash_256_finish( gm_hash_256_context *ctx, unsigned char digest[32] ) 
+
+
+void gm_hash_finish( gm_hash_context *ctx, unsigned char digest[GM_HASH_MAX_BYTES_LEN], EHASH_TYPE hash_type) 
 {
 	unsigned int last, padn;
 	unsigned int high, low;
@@ -276,8 +278,8 @@ void gm_hash_256_finish( gm_hash_256_context *ctx, unsigned char digest[32] )
 	last = ctx->total[0] & 0x3F;
 	padn = (last < 56) ? (56 - last) : (120 - last);
 
-	gm_hash_256_update(ctx, (unsigned char *) gm_hash_256_padding, padn);
-	gm_hash_256_update(ctx, msgLen, 8);
+	gm_hash_update(ctx, (unsigned char *) gm_hash_padding, padn);
+	gm_hash_update(ctx, msgLen, 8);
 
 	PUT_ULONG_BE( ctx->state[0], digest, 0);
 	PUT_ULONG_BE( ctx->state[1], digest, 4);
@@ -288,21 +290,51 @@ void gm_hash_256_finish( gm_hash_256_context *ctx, unsigned char digest[32] )
 	PUT_ULONG_BE( ctx->state[6], digest, 24);
 	PUT_ULONG_BE( ctx->state[7], digest, 28);
 
+	switch(hash_type)
+	{
+	case EHASH_TYPE_SM3:
+		{
+			// 
+		}
+		break;
+	case EHASH_TYPE_ZY_HASH_256:
+		{
+			int i = 0;
+
+			for(i = 0; i < GM_HASH_BYTES_LEN; i++)
+			{
+				digest[i] = digest[i] ^ (unsigned char)GM_HASH_256_BYTES_XOR[i];
+			}
+		}
+		break;
+	case EHASH_TYPE_ZY_HASH_512:
+		{
+			int i = 0;
+
+			for(i = 0; i < GM_HASH_BYTES_LEN; i++)
+			{
+				digest[i] = digest[i] ^ (unsigned char)GM_HASH_512_BYTES_XOR[i];
+			}
+
+			gm_hash_hash(GM_HASH_BYTES_LEN,digest,digest+32,EHASH_TYPE_SM3);
+		}
+		break;
+	}
 }
 
 
-int gm_hash_256_hash( unsigned int datalen_in, unsigned char *pdata_in, unsigned char digest[32]) 
+int gm_hash_hash( unsigned int datalen_in, unsigned char *pdata_in, unsigned char digest[GM_HASH_MAX_BYTES_LEN], EHASH_TYPE hash_type) 
 {
-	gm_hash_256_context ctx;
+	gm_hash_context ctx;
 
 	if( (datalen_in>0) && (!pdata_in) )
 		return OPE_ERR_INVALID_PARAM;
 
-	gm_hash_256_starts(&ctx);
-	gm_hash_256_update(&ctx, pdata_in, datalen_in);
-	gm_hash_256_finish(&ctx, digest);
+	gm_hash_starts(&ctx);
+	gm_hash_update(&ctx, pdata_in, datalen_in);
+	gm_hash_finish(&ctx, digest,hash_type);
 
-	memset(&ctx, 0, sizeof(gm_hash_256_context));
+	memset(&ctx, 0, sizeof(gm_hash_context));
 
 	return 0;
 }
@@ -310,12 +342,12 @@ int gm_hash_256_hash( unsigned int datalen_in, unsigned char *pdata_in, unsigned
 
 #define HAMC_PAD_LEN  64
 // reference: rfc2104
-int gm_hash_256_hmac(unsigned char *text, unsigned int text_len, unsigned char *key, unsigned int key_len, unsigned char digest[32])
+int gm_hash_hmac(unsigned char *text, unsigned int text_len, unsigned char *key, unsigned int key_len, unsigned char digest[GM_HASH_MAX_BYTES_LEN], EHASH_TYPE hash_type)
 {
-	gm_hash_256_context ctx;
+	gm_hash_context ctx;
 	unsigned char k_ipad[HAMC_PAD_LEN], k_opad[HAMC_PAD_LEN];
-	unsigned char tk[GM_HASH_256_DIGEST_LEN];
-	unsigned char temp_digest[GM_HASH_256_DIGEST_LEN];
+	unsigned char tk[GM_HASH_MAX_BYTES_LEN];
+	unsigned char temp_digest[GM_HASH_MAX_BYTES_LEN];
 	int i;
 
 	if(!key)
@@ -323,9 +355,20 @@ int gm_hash_256_hmac(unsigned char *text, unsigned int text_len, unsigned char *
 
 	if(key_len > HAMC_PAD_LEN)
 	{
-		gm_hash_256_hash(key_len, key, tk);
+		gm_hash_hash(key_len, key, tk, hash_type);
 		key = tk;
-		key_len = GM_HASH_256_DIGEST_LEN;
+		switch(hash_type)
+		{
+		case EHASH_TYPE_SM3:
+			key_len = GM_HASH_256_BYTES_LEN;
+			break;
+		case EHASH_TYPE_ZY_HASH_256:
+			key_len = GM_HASH_256_BYTES_LEN;
+			break;
+		case EHASH_TYPE_ZY_HASH_512:
+			key_len = GM_HASH_512_BYTES_LEN;
+			break;
+		}
 	}
 
 	memset(k_ipad, 0x00, sizeof(k_ipad));
@@ -342,28 +385,29 @@ int gm_hash_256_hmac(unsigned char *text, unsigned int text_len, unsigned char *
 
 	memset(&ctx,0x00,sizeof(ctx));
 
-	gm_hash_256_starts(&ctx);
-	gm_hash_256_update(&ctx, k_ipad, HAMC_PAD_LEN);
-	gm_hash_256_update(&ctx, text, text_len);
-	gm_hash_256_finish(&ctx, temp_digest);
+	gm_hash_starts(&ctx);
+	gm_hash_update(&ctx, k_ipad, HAMC_PAD_LEN);
+	gm_hash_update(&ctx, text, text_len);
+	gm_hash_finish(&ctx, temp_digest, hash_type);
 
 	memset(&ctx,0x00,sizeof(ctx));
 
-	gm_hash_256_starts(&ctx);
-	gm_hash_256_update(&ctx, k_opad, HAMC_PAD_LEN);
-	gm_hash_256_update(&ctx, temp_digest, GM_HASH_256_DIGEST_LEN);
-	gm_hash_256_finish(&ctx, digest);
+	gm_hash_starts(&ctx);
+	gm_hash_update(&ctx, k_opad, HAMC_PAD_LEN);
+	gm_hash_update(&ctx, temp_digest, GM_HASH_MAX_BYTES_LEN);
+	gm_hash_finish(&ctx, digest, hash_type);
 
 	return 0;
 }
 
 
-int gm_hash_256_kdf(/*out*/unsigned char *key, /*in*/int klen, /*in*/unsigned char *z, /*in*/ int zlen)
+int gm_hash_kdf(/*out*/unsigned char *key, /*in*/int klen, /*in*/unsigned char *z, /*in*/ int zlen, EHASH_TYPE hash_type)
 {
 	int count, ctIndex;
-	gm_hash_256_context ctx;
+	gm_hash_context ctx;
 	unsigned char zBuf[4];
-	unsigned char temp_digest[GM_HASH_256_DIGEST_LEN];
+	unsigned char temp_digest[GM_HASH_MAX_BYTES_LEN];
+	int gm_hash_bytes_len = 0;
 
 	if( (!key) || (klen <0 ) )
 		return OPE_ERR_INVALID_PARAM;
@@ -371,9 +415,22 @@ int gm_hash_256_kdf(/*out*/unsigned char *key, /*in*/int klen, /*in*/unsigned ch
 	if(0 == klen)
 		return 0;
 
-	count=klen / GM_HASH_256_DIGEST_LEN;
+	switch(hash_type)
+	{
+	case EHASH_TYPE_SM3:
+		gm_hash_bytes_len = GM_HASH_256_BYTES_LEN;
+		break;
+	case EHASH_TYPE_ZY_HASH_256:
+		gm_hash_bytes_len = GM_HASH_256_BYTES_LEN;
+		break;
+	case EHASH_TYPE_ZY_HASH_512:
+		gm_hash_bytes_len = GM_HASH_512_BYTES_LEN;
+		break;
+	}
 
-	if(klen % GM_HASH_256_DIGEST_LEN)
+	count=klen / gm_hash_bytes_len;
+
+	if(klen % gm_hash_bytes_len)
 		count++ ;
 
 	for(ctIndex=1; ctIndex <= count; ctIndex++)
@@ -382,14 +439,15 @@ int gm_hash_256_kdf(/*out*/unsigned char *key, /*in*/int klen, /*in*/unsigned ch
 
 		PUT_ULONG_BE(ctIndex,zBuf,0);
 
-		gm_hash_256_starts(&ctx);
-		gm_hash_256_update(&ctx, z, zlen);
-		gm_hash_256_update(&ctx, zBuf, sizeof(zBuf));
-		gm_hash_256_finish(&ctx, temp_digest);
-		if( (ctIndex == count) && (klen % GM_HASH_256_DIGEST_LEN) )
-			memcpy(&key[(ctIndex-1) * GM_HASH_256_DIGEST_LEN], temp_digest, klen % GM_HASH_256_DIGEST_LEN);
+		gm_hash_starts(&ctx);
+		gm_hash_update(&ctx, z, zlen);
+		gm_hash_update(&ctx, zBuf, sizeof(zBuf));
+		gm_hash_finish(&ctx, temp_digest, hash_type);
+
+		if( (ctIndex == count) && (klen % gm_hash_bytes_len) )
+			memcpy(&key[(ctIndex-1) * gm_hash_bytes_len], temp_digest, klen % gm_hash_bytes_len);
 		else
-			memcpy(&key[(ctIndex-1) * GM_HASH_256_DIGEST_LEN], temp_digest, GM_HASH_256_DIGEST_LEN);
+			memcpy(&key[(ctIndex-1) * gm_hash_bytes_len], temp_digest, gm_hash_bytes_len);
 	}
 
 	return 0;
