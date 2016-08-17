@@ -4177,7 +4177,7 @@ err:
 	return pkey;
 }
 
-unsigned int OpenSSL_SM2GenPFX(char *password, char *nickname, 
+unsigned int OpenSSL_SM2GenPFX(const char *password,const char *nickname, 
 	const unsigned char *pbPrivateKey, unsigned int uiPrivateKeyLen, 
 	const unsigned char * pbPublicKeyX, unsigned int uiPublicKeyXLen, 
 	const unsigned char * pbPublicKeyY, unsigned int uiPublicKeyYLen,

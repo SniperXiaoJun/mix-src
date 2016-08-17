@@ -924,7 +924,7 @@ extern "C" {
 	// GM_ECC_512 end 
 #endif
 
-	COMMON_API unsigned int OpenSSL_SM2GenPFX(char *password, char *nickname, 
+	COMMON_API unsigned int OpenSSL_SM2GenPFX(const char *password,const char *nickname, 
 		const unsigned char *pbPrivateKey, unsigned int uiPrivateKeyLen, 
 		const unsigned char * pbPublicKeyX, unsigned int uiPublicKeyXLen, 
 		const unsigned char * pbPublicKeyY, unsigned int uiPublicKeyYLen,
