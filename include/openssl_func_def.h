@@ -921,6 +921,9 @@ extern "C" {
 		unsigned char *pbOUT, unsigned int * puiOUTLen
 		);
 
+	// GM_ECC_512 end 
+#endif
+
 	COMMON_API unsigned int OpenSSL_SM2GenPFX(char *password, char *nickname, 
 		const unsigned char *pbPrivateKey, unsigned int uiPrivateKeyLen, 
 		const unsigned char * pbPublicKeyX, unsigned int uiPublicKeyXLen, 
@@ -930,10 +933,6 @@ extern "C" {
 		int nid_key, int nid_cert, int iter, int mac_iter, int keytype,
 		unsigned char *pbPFX, unsigned int * puiPFXLen
 		);
-
-
-	// GM_ECC_512 end 
-#endif
 
 #ifdef __cplusplus
 }
