@@ -989,7 +989,7 @@ int tcm_gmecc512_get_message_hash(unsigned char *msg, unsigned int msgLen, unsig
 	memset(&gm_hashCtx,0x00,sizeof(gm_hashCtx));
 
 	gm_hash_starts(&gm_hashCtx);
-	gm_hash_update(&gm_hashCtx, zIDDigest, GM_HASH_BYTES_LEN);
+	gm_hash_update(&gm_hashCtx, zIDDigest, GM_HASH_512_BYTES_LEN);
 	gm_hash_update(&gm_hashCtx, msg, msgLen);
 	gm_hash_finish(&gm_hashCtx, digest, EHASH_TYPE_ZY_HASH_512);
 
