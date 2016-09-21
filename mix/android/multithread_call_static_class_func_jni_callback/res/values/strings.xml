@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">线程测试</string>
+    <string name="action_settings">Settings</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="buttonThreadMain">主线程</string>
+    <string name="buttonThreadC">C线程</string>
+    <string name="buttonThreadJava">子线程</string>
+	
+</resources>

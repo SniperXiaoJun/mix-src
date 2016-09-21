@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/TextViewLicenseName"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="LICENSE名"
+        android:textColor="@color/blue"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textSize="20sp" />
+
+    <EditText
+        android:id="@+id/editTextLicenseName"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="text"
+        android:text="4" />
+
+    <TextView
+        android:id="@+id/TextViewLicenseValue"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="LICENSE值"
+        android:textColor="@color/red"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textSize="20sp" />
+
+    <EditText
+        android:id="@+id/editTextLicenseValue"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="text"
+        android:text="BEAA2232167D3ED6" />
+
+</LinearLayout>
