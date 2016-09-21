@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="tab_down">#37aaa9</color>
+    <color name="tab">#46dad8</color>
+    
+    <color name="devide_line">#CBCED2</color>
+    <color name="red">#FF0000</color>
+
+</resources>

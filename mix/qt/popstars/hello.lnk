@@ -1,0 +1,5 @@
+
+
+cd /usr/local/acorn/app/hello
+
+./hello
