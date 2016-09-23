@@ -4255,3 +4255,159 @@ err:
 
 	return rv;
 }
+
+#include "sm4.h"
+#define	SGD_SMS4_ECB	0x00000401		//SMS4算法ECB加密模式
+
+unsigned int OpenSSL_SM2GenExportEnvelopedKey(
+	const unsigned char * pbPublicKeyX, unsigned int uiPublicKeyXLen, 
+	const unsigned char * pbPublicKeyY, unsigned int uiPublicKeyYLen,
+	unsigned char *pbOUT, unsigned int * puiOUTLen
+	)
+{
+	unsigned int rv = -1;
+
+	unsigned char prv_data_value[SM2_BYTES_LEN] = {0};
+	unsigned char x_data_value[SM2_BYTES_LEN] = {0};
+	unsigned char y_data_value[SM2_BYTES_LEN] = {0};
+	unsigned int prv_data_len = SM2_BYTES_LEN;
+	unsigned int x_data_len = SM2_BYTES_LEN;
+	unsigned int y_data_len = SM2_BYTES_LEN;
+
+	unsigned char en_value[1+32*3+16] = {0};
+
+	unsigned int en_len = 1+32*3+16;
+
+	unsigned int sm4_key_len = 16;
+	unsigned char sm4_key_value[16];
+
+	OPST_SKF_ENVELOPEDKEYBLOB keyBlob = {0};
+
+	sm4_context ctx;
+
+	rv = OpenSSL_SM2GenKeys(x_data_value,&x_data_len,y_data_value,&y_data_len,prv_data_value,&prv_data_len);
+
+	if(0 != rv)
+	{
+		goto err;
+	}
+
+	RAND_bytes(sm4_key_value,sm4_key_len);
+
+	memset(&ctx,0,sizeof(sm4_context));
+
+	sm4_setkey_enc(&ctx,sm4_key_value);
+
+
+	keyBlob.Version = 1;
+	keyBlob.uiBits = ECC_MAX_XCOORDINATE_BITS_LEN / 2;
+	keyBlob.uiSymmAlgID = SGD_SMS4_ECB;
+
+	// 公钥赋值
+	keyBlob.PubKey.BitLen = ECCref_MAX_BITS;
+	memcpy(keyBlob.PubKey.XCoordinate + ECCref_MAX_LEN,x_data_value,ECCref_MAX_LEN);
+	memcpy(keyBlob.PubKey.YCoordinate + ECCref_MAX_LEN,y_data_value,ECCref_MAX_LEN);
+
+	rv = OpenSSL_SM2Encrypt(pbPublicKeyX,SM2_BYTES_LEN,pbPublicKeyY,SM2_BYTES_LEN,sm4_key_value,sm4_key_len,en_value,&en_len);
+	if(0 != rv)
+	{
+		goto err;
+	}
+
+	keyBlob.ECCCipherBlob.CipherLen = 16;
+	memcpy(keyBlob.ECCCipherBlob.HASH,en_value+1+32*2+16,ECCref_MAX_LEN);
+	memcpy(keyBlob.ECCCipherBlob.XCoordinate + ECCref_MAX_LEN,en_value+1,ECCref_MAX_LEN);
+	memcpy(keyBlob.ECCCipherBlob.YCoordinate + ECCref_MAX_LEN,en_value+1+32,ECCref_MAX_LEN);
+	memcpy(keyBlob.ECCCipherBlob.Cipher,en_value+1+32*2,16);
+
+	sm4_crypt_ecb(&ctx,SM4_ENCRYPT,SM2_BYTES_LEN,prv_data_value,keyBlob.cbEncryptedPriKey+SM2_BYTES_LEN);
+
+	if (pbOUT == NULL || *puiOUTLen == 0)
+	{
+		*puiOUTLen = sizeof(keyBlob);
+	}
+	else if (*puiOUTLen < sizeof(keyBlob))
+	{
+		rv = -1;
+		goto err;
+	}
+	else
+	{
+		memcpy(pbOUT,&keyBlob,sizeof(keyBlob));
+
+		*puiOUTLen = sizeof(keyBlob);
+	}
+	rv = 0;
+err:
+
+	return rv;
+}
+
+COMMON_API unsigned int OpenSSL_SM2RestoreExportEnvelopedKey(
+	const unsigned char * pbPublicKeyX, unsigned int uiPublicKeyXLen, 
+	const unsigned char * pbPublicKeyY, unsigned int uiPublicKeyYLen,
+	const unsigned char * pbOldPrivateKey, unsigned int uiOldPrivateKeyLen, 
+	unsigned char *pbIN, unsigned int uiINLen,
+	unsigned char *pbOUT, unsigned int * puiOUTLen
+	)
+{
+	unsigned int rv = -1;
+
+	unsigned char en_value[1+32*3+16] = {0};
+
+	unsigned int en_len = 1+32*3+16;
+
+	unsigned int sm4_key_len = 16;
+	unsigned char sm4_key_value[16];
+
+	OPST_SKF_ENVELOPEDKEYBLOB keyBlob;
+
+	// set in and out;
+	memcpy(&keyBlob,pbIN,sizeof(OPST_SKF_ENVELOPEDKEYBLOB));
+
+	//
+	en_value[0] = 0x04;
+
+	memcpy(en_value+1+32*2+16,keyBlob.ECCCipherBlob.HASH,ECCref_MAX_LEN);
+	memcpy(en_value+1,keyBlob.ECCCipherBlob.XCoordinate + ECCref_MAX_LEN,ECCref_MAX_LEN);
+	memcpy(en_value+1+32,keyBlob.ECCCipherBlob.YCoordinate + ECCref_MAX_LEN,ECCref_MAX_LEN);
+	memcpy(en_value+1+32*2,keyBlob.ECCCipherBlob.Cipher,16);
+
+	rv = OpenSSL_SM2Decrypt(pbOldPrivateKey,SM2_BYTES_LEN,en_value,en_len,sm4_key_value,&sm4_key_len);
+	if(0 != rv)
+	{
+		goto err;
+	}
+
+	rv = OpenSSL_SM2Encrypt(pbPublicKeyX,SM2_BYTES_LEN,pbPublicKeyY,SM2_BYTES_LEN,sm4_key_value,sm4_key_len,en_value,&en_len);
+	if(0 != rv)
+	{
+		goto err;
+	}
+
+	keyBlob.ECCCipherBlob.CipherLen = 16;
+	memcpy(keyBlob.ECCCipherBlob.HASH,en_value+1+32*2+16,ECCref_MAX_LEN);
+	memcpy(keyBlob.ECCCipherBlob.XCoordinate + ECCref_MAX_LEN,en_value+1,ECCref_MAX_LEN);
+	memcpy(keyBlob.ECCCipherBlob.YCoordinate + ECCref_MAX_LEN,en_value+1+32,ECCref_MAX_LEN);
+	memcpy(keyBlob.ECCCipherBlob.Cipher,en_value+1+32*2,16);
+
+	if (pbOUT == NULL || *puiOUTLen == 0)
+	{
+		*puiOUTLen = sizeof(keyBlob);
+	}
+	else if (*puiOUTLen < sizeof(keyBlob))
+	{
+		rv = -1;
+		goto err;
+	}
+	else
+	{
+		memcpy(pbOUT,&keyBlob,sizeof(keyBlob));
+
+		*puiOUTLen = sizeof(keyBlob);
+	}
+	rv = 0;
+err:
+
+	return rv;
+}

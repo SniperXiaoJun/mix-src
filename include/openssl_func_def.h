@@ -934,6 +934,21 @@ extern "C" {
 		unsigned char *pbPFX, unsigned int * puiPFXLen
 		);
 
+	COMMON_API unsigned int OpenSSL_SM2GenExportEnvelopedKey(
+		const unsigned char * pbPublicKeyX, unsigned int uiPublicKeyXLen, 
+		const unsigned char * pbPublicKeyY, unsigned int uiPublicKeyYLen,
+		unsigned char *pbOUT, unsigned int * puiOUTLen
+		);
+
+	COMMON_API unsigned int OpenSSL_SM2RestoreExportEnvelopedKey(
+		const unsigned char * pbPublicKeyX, unsigned int uiPublicKeyXLen, 
+		const unsigned char * pbPublicKeyY, unsigned int uiPublicKeyYLen,
+		const unsigned char * pbOldPrivateKey, unsigned int uiOldPrivateKeyLen, 
+		unsigned char *pbIN, unsigned int uiINLen,
+		unsigned char *pbOUT, unsigned int * puiOUTLen
+		);
+
+
 #ifdef __cplusplus
 }
 #endif
