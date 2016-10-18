@@ -3,6 +3,9 @@
 
 #define GM_ECC_512_BYTES_LEN			64
 
+
+#include "gm-hash-bit.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -19,7 +22,7 @@ int tcm_gmecc512_encrypt(unsigned char *plaintext, unsigned int uPlaintextLen, u
 
 int tcm_gmecc512_decrypt(unsigned char *ciphertext, unsigned int uCiphertextLen, unsigned char *prikey, unsigned int uPrikeyLen, unsigned char *plaintext, unsigned int *puPlaintextLen);
 
-int tcm_gmecc512_get_usrinfo_value(unsigned char *userID, unsigned int uUserIDLen, unsigned char *pubkey, unsigned int uPubkeyLen, unsigned char digest[32]);
+int tcm_gmecc512_get_usrinfo_value(unsigned char *userID, unsigned int uUserIDLen, unsigned char *pubkey, unsigned int uPubkeyLen, unsigned char digest[GM_ECC_512_BYTES_LEN],EHASH_TYPE hash_type);
 
 int tcm_gmecc512_get_message_hash(unsigned char *msg, unsigned int msgLen, unsigned char  *userID, unsigned int uUserIDLen, 
 	unsigned char *pubkey, unsigned int uPubkeyLen, unsigned char *digest, unsigned int *puDigestLen);

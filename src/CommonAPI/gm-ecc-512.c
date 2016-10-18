@@ -826,7 +826,7 @@ err:
 }
 
 
-int tcm_gmecc512_get_usrinfo_value(unsigned char *userID, unsigned int uUserIDLen, unsigned char *pubkey, unsigned int uPubkeyLen, unsigned char digest[GM_HASH_MAX_BYTES_LEN])
+int tcm_gmecc512_get_usrinfo_value(unsigned char *userID, unsigned int uUserIDLen, unsigned char *pubkey, unsigned int uPubkeyLen, unsigned char digest[GM_HASH_MAX_BYTES_LEN], EHASH_TYPE hash_type)
 {
 	int nRet;
 	unsigned int uUserIDBitLen;
@@ -924,7 +924,7 @@ int tcm_gmecc512_get_usrinfo_value(unsigned char *userID, unsigned int uUserIDLe
 	gm_hash_update(&gm_hashCtx, yG, GM_ECC_512_BYTES_LEN);
 	gm_hash_update(&gm_hashCtx, xID, GM_ECC_512_BYTES_LEN);
 	gm_hash_update(&gm_hashCtx, yID, GM_ECC_512_BYTES_LEN);
-	gm_hash_finish(&gm_hashCtx, digest, EHASH_TYPE_ZY_HASH_512);
+	gm_hash_finish(&gm_hashCtx, digest, hash_type);
 
 	if(bn_xID)
 		BN_clear_free(bn_xID);
@@ -981,7 +981,7 @@ int tcm_gmecc512_get_message_hash(unsigned char *msg, unsigned int msgLen, unsig
 		goto err;
 	}
 
-	nRet = tcm_gmecc512_get_usrinfo_value(userID, uUserIDLen, pubkey, uPubkeyLen, zIDDigest);
+	nRet = tcm_gmecc512_get_usrinfo_value(userID, uUserIDLen, pubkey, uPubkeyLen, zIDDigest, EHASH_TYPE_ZY_HASH_512);
 	if(0 != nRet)
 		goto err;
 
