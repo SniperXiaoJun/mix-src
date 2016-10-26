@@ -921,6 +921,30 @@ extern "C" {
 		unsigned char *pbOUT, unsigned int * puiOUTLen
 		);
 
+	COMMON_API unsigned int OpenSSL_GMECC512GenPFX(const char *password,const char *nickname, 
+		const unsigned char *pbPrivateKey, unsigned int uiPrivateKeyLen, 
+		const unsigned char * pbPublicKeyX, unsigned int uiPublicKeyXLen, 
+		const unsigned char * pbPublicKeyY, unsigned int uiPublicKeyYLen,
+		const unsigned char * pbX509Cert, unsigned int uiX509CertLen,
+		const unsigned char * pbX509CA, unsigned int uiX509CALen,
+		int nid_key, int nid_cert, int iter, int mac_iter, int keytype,
+		unsigned char *pbPFX, unsigned int * puiPFXLen
+		);
+
+	COMMON_API unsigned int OpenSSL_GMECC512GenExportEnvelopedKey(
+		const unsigned char * pbPublicKeyX, unsigned int uiPublicKeyXLen, 
+		const unsigned char * pbPublicKeyY, unsigned int uiPublicKeyYLen,
+		unsigned char *pbOUT, unsigned int * puiOUTLen
+		);
+
+	COMMON_API unsigned int OpenSSL_GMECC512RestoreExportEnvelopedKey(
+		const unsigned char * pbPublicKeyX, unsigned int uiPublicKeyXLen, 
+		const unsigned char * pbPublicKeyY, unsigned int uiPublicKeyYLen,
+		const unsigned char * pbOldPrivateKey, unsigned int uiOldPrivateKeyLen, 
+		unsigned char *pbIN, unsigned int uiINLen,
+		unsigned char *pbOUT, unsigned int * puiOUTLen
+		);
+
 	// GM_ECC_512 end 
 #endif
 

@@ -3137,3 +3137,333 @@ err:
 
 	return uiRet;
 }
+
+
+EVP_PKEY * OpenSSL_NewEVP_PKEY_OF_GMECC512Keys(
+	const unsigned char *pbPrivateKey, unsigned int uiPrivateKeyLen, 
+	const unsigned char * pbPublicKeyX, unsigned int uiPublicKeyXLen, 
+	const unsigned char * pbPublicKeyY, unsigned int uiPublicKeyYLen
+	)
+{
+	EVP_PKEY	*pkey = NULL;
+	EC_KEY		*ec = NULL;
+	BN_CTX      *ctx=NULL;
+	EC_POINT    *pubkey=NULL;
+	BIGNUM      *pubkey_x=NULL, *pubkey_y=NULL, *prvkey=NULL;
+	// 初始化证书公钥
+	if((pkey = EVP_PKEY_new()) == NULL)
+	{
+		goto err;
+	}
+	if (!(ctx = BN_CTX_new()) )
+	{
+		goto err;
+	}
+	ec = EC_KEY_new();
+	if (NULL==ec)
+	{
+		goto err;
+	}
+	if (!(EC_KEY_set_group(ec, g_group512)))
+	{
+		goto err;
+	}
+	if (!(pubkey = EC_POINT_new(g_group512)))
+	{ 
+		goto err;
+	}
+	if (!EC_KEY_generate_key(ec))
+	{
+		goto err;
+	}
+
+	/* set public key */
+	pubkey_x = BN_bin2bn( pbPublicKeyX,uiPublicKeyXLen, NULL );
+	if (NULL == pubkey_x)
+	{
+		goto err;
+	} 
+
+	pubkey_y = BN_bin2bn( pbPublicKeyY,uiPublicKeyYLen, NULL );
+	if ( NULL == pubkey_y)
+	{
+		goto err;
+	} 
+
+
+	prvkey = BN_bin2bn( pbPrivateKey,uiPrivateKeyLen, NULL );
+	if ( NULL == prvkey)
+	{
+		goto err;
+	} 
+
+	if ( !EC_POINT_set_affine_coordinates_GFp(g_group512, pubkey, pubkey_x, pubkey_y, ctx) )
+	{
+		goto err;
+	} 
+
+
+	if ( !EC_KEY_set_public_key(ec, pubkey) )
+	{
+		goto err;
+	} 
+
+	if ( !EC_KEY_set_private_key(ec,prvkey) )
+	{
+		goto err;
+	}
+
+	if(!EVP_PKEY_assign_EC_KEY(pkey, ec))
+	{
+		goto err;
+	}
+
+	ec = NULL;
+err:
+	if(ctx)
+	{
+		BN_CTX_free(ctx);
+	}
+
+	if(ec)
+	{
+		EC_KEY_free(ec);
+	}
+
+	return pkey;
+}
+
+unsigned int OpenSSL_GMECC512GenPFX(const char *password,const char *nickname, 
+	const unsigned char *pbPrivateKey, unsigned int uiPrivateKeyLen, 
+	const unsigned char * pbPublicKeyX, unsigned int uiPublicKeyXLen, 
+	const unsigned char * pbPublicKeyY, unsigned int uiPublicKeyYLen,
+	const unsigned char * pbX509Cert, unsigned int uiX509CertLen,
+	const unsigned char * pbX509CA, unsigned int uiX509CALen,
+	int nid_key, int nid_cert, int iter, int mac_iter, int keytype,
+	unsigned char *pbPFX, unsigned int * puiPFXLen
+	)
+{
+	X509 * x509 =  NULL;
+	unsigned int rv = -1;
+	PKCS12 * p12 = NULL;
+	EVP_PKEY	*pkey = NULL;
+	unsigned char *ptr_out = NULL;
+
+	unsigned char value[BUFFER_LEN_1K * 4] = {0};
+	unsigned int len = BUFFER_LEN_1K * 4;
+
+	ptr_out = value;
+
+
+	x509 = d2i_X509( NULL, (const unsigned char **)&pbX509Cert,uiX509CertLen);
+	if (!x509)
+	{	
+		goto err;
+	}
+
+	pkey = OpenSSL_NewEVP_PKEY_OF_GMECC512Keys( 
+		pbPrivateKey, uiPrivateKeyLen, 
+		pbPublicKeyX, uiPublicKeyXLen, 
+		pbPublicKeyY, uiPublicKeyYLen);
+
+	if (!pkey)
+	{
+		goto err;
+	}
+
+	p12 = PKCS12_create(password, nickname, pkey, x509,
+		NULL, nid_key, nid_cert, iter, mac_iter, keytype
+		);
+
+
+	//X509_ALGOR_set0(req->req_info->pubkey->algor,
+	//	OBJ_txt2obj("1.2.840.10045.2.1",OBJ_NAME_TYPE_PKEY_METH)
+	//	,V_ASN1_OBJECT,OBJ_txt2obj("1.2.156.10197.1.301",OBJ_NAME_TYPE_PKEY_METH)
+	//	);
+
+	//X509_ALGOR_set0(ec algor,
+	//	OBJ_txt2obj("1.2.840.10045.2.1",OBJ_NAME_TYPE_PKEY_METH)
+	//	,V_ASN1_OBJECT,OBJ_txt2obj("1.2.156.10197.1.301",OBJ_NAME_TYPE_PKEY_METH)
+	//	);
+
+
+
+	len = i2d_PKCS12(p12, NULL);
+
+	if (len > *puiPFXLen)
+	{
+		*puiPFXLen = len;
+	}
+	else
+	{
+		len = i2d_PKCS12(p12, &ptr_out);
+		*puiPFXLen = len;
+		memcpy(pbPFX,value, len);
+	}
+
+	rv = 0;
+err:
+
+	if(x509)
+	{
+		X509_free(x509);
+	}
+
+	return rv;
+}
+
+#include "sm4.h"
+#define	SGD_SMS4_ECB	0x00000401		//SMS4算法ECB加密模式
+
+unsigned int OpenSSL_GMECC512GenExportEnvelopedKey(
+	const unsigned char * pbPublicKeyX, unsigned int uiPublicKeyXLen, 
+	const unsigned char * pbPublicKeyY, unsigned int uiPublicKeyYLen,
+	unsigned char *pbOUT, unsigned int * puiOUTLen
+	)
+{
+	unsigned int rv = -1;
+
+	unsigned char prv_data_value[GM_ECC_512_BYTES_LEN] = {0};
+	unsigned char x_data_value[GM_ECC_512_BYTES_LEN] = {0};
+	unsigned char y_data_value[GM_ECC_512_BYTES_LEN] = {0};
+	unsigned int prv_data_len = GM_ECC_512_BYTES_LEN;
+	unsigned int x_data_len = GM_ECC_512_BYTES_LEN;
+	unsigned int y_data_len = GM_ECC_512_BYTES_LEN;
+
+	unsigned char en_value[1+32*3+16] = {0};
+
+	unsigned int en_len = 1+32*3+16;
+
+	unsigned int sm4_key_len = 16;
+	unsigned char sm4_key_value[16];
+
+	OPST_SKF_ENVELOPEDKEYBLOB keyBlob = {0};
+
+	sm4_context ctx;
+
+	rv = OpenSSL_GMECC512GenKeys(x_data_value,&x_data_len,y_data_value,&y_data_len,prv_data_value,&prv_data_len);
+
+	if(0 != rv)
+	{
+		goto err;
+	}
+
+	RAND_bytes(sm4_key_value,sm4_key_len);
+
+	memset(&ctx,0,sizeof(sm4_context));
+
+	sm4_setkey_enc(&ctx,sm4_key_value);
+
+
+	keyBlob.Version = 1;
+	keyBlob.uiBits = ECC_MAX_XCOORDINATE_BITS_LEN / 2;
+	keyBlob.uiSymmAlgID = SGD_SMS4_ECB;
+
+	// 公钥赋值
+	keyBlob.PubKey.BitLen = ECCref_MAX_BITS;
+	memcpy(keyBlob.PubKey.XCoordinate + ECCref_MAX_LEN,x_data_value,ECCref_MAX_LEN);
+	memcpy(keyBlob.PubKey.YCoordinate + ECCref_MAX_LEN,y_data_value,ECCref_MAX_LEN);
+
+	rv = OpenSSL_GMECC512Encrypt(pbPublicKeyX,GM_ECC_512_BYTES_LEN,pbPublicKeyY,GM_ECC_512_BYTES_LEN,sm4_key_value,sm4_key_len,en_value,&en_len);
+	if(0 != rv)
+	{
+		goto err;
+	}
+
+	keyBlob.ECCCipherBlob.CipherLen = 16;
+	memcpy(keyBlob.ECCCipherBlob.HASH,en_value+1+32*2+16,ECCref_MAX_LEN);
+	memcpy(keyBlob.ECCCipherBlob.XCoordinate + ECCref_MAX_LEN,en_value+1,ECCref_MAX_LEN);
+	memcpy(keyBlob.ECCCipherBlob.YCoordinate + ECCref_MAX_LEN,en_value+1+32,ECCref_MAX_LEN);
+	memcpy(keyBlob.ECCCipherBlob.Cipher,en_value+1+32*2,16);
+
+	sm4_crypt_ecb(&ctx,SM4_ENCRYPT,GM_ECC_512_BYTES_LEN,prv_data_value,keyBlob.cbEncryptedPriKey+GM_ECC_512_BYTES_LEN);
+
+	if (pbOUT == NULL || *puiOUTLen == 0)
+	{
+		*puiOUTLen = sizeof(keyBlob);
+	}
+	else if (*puiOUTLen < sizeof(keyBlob))
+	{
+		rv = -1;
+		goto err;
+	}
+	else
+	{
+		memcpy(pbOUT,&keyBlob,sizeof(keyBlob));
+
+		*puiOUTLen = sizeof(keyBlob);
+	}
+	rv = 0;
+err:
+
+	return rv;
+}
+
+COMMON_API unsigned int OpenSSL_GMECC512RestoreExportEnvelopedKey(
+	const unsigned char * pbPublicKeyX, unsigned int uiPublicKeyXLen, 
+	const unsigned char * pbPublicKeyY, unsigned int uiPublicKeyYLen,
+	const unsigned char * pbOldPrivateKey, unsigned int uiOldPrivateKeyLen, 
+	unsigned char *pbIN, unsigned int uiINLen,
+	unsigned char *pbOUT, unsigned int * puiOUTLen
+	)
+{
+	unsigned int rv = -1;
+
+	unsigned char en_value[1+32*3+16] = {0};
+
+	unsigned int en_len = 1+32*3+16;
+
+	unsigned int sm4_key_len = 16;
+	unsigned char sm4_key_value[16];
+
+	OPST_SKF_ENVELOPEDKEYBLOB keyBlob;
+
+	// set in and out;
+	memcpy(&keyBlob,pbIN,sizeof(OPST_SKF_ENVELOPEDKEYBLOB));
+
+	//
+	en_value[0] = 0x04;
+
+	memcpy(en_value+1+32*2+16,keyBlob.ECCCipherBlob.HASH,ECCref_MAX_LEN);
+	memcpy(en_value+1,keyBlob.ECCCipherBlob.XCoordinate + ECCref_MAX_LEN,ECCref_MAX_LEN);
+	memcpy(en_value+1+32,keyBlob.ECCCipherBlob.YCoordinate + ECCref_MAX_LEN,ECCref_MAX_LEN);
+	memcpy(en_value+1+32*2,keyBlob.ECCCipherBlob.Cipher,16);
+
+	rv = OpenSSL_GMECC512Decrypt(pbOldPrivateKey,GM_ECC_512_BYTES_LEN,en_value,en_len,sm4_key_value,&sm4_key_len);
+	if(0 != rv)
+	{
+		goto err;
+	}
+
+	rv = OpenSSL_GMECC512Encrypt(pbPublicKeyX,GM_ECC_512_BYTES_LEN,pbPublicKeyY,GM_ECC_512_BYTES_LEN,sm4_key_value,sm4_key_len,en_value,&en_len);
+	if(0 != rv)
+	{
+		goto err;
+	}
+
+	keyBlob.ECCCipherBlob.CipherLen = 16;
+	memcpy(keyBlob.ECCCipherBlob.HASH,en_value+1+32*2+16,ECCref_MAX_LEN);
+	memcpy(keyBlob.ECCCipherBlob.XCoordinate + ECCref_MAX_LEN,en_value+1,ECCref_MAX_LEN);
+	memcpy(keyBlob.ECCCipherBlob.YCoordinate + ECCref_MAX_LEN,en_value+1+32,ECCref_MAX_LEN);
+	memcpy(keyBlob.ECCCipherBlob.Cipher,en_value+1+32*2,16);
+
+	if (pbOUT == NULL || *puiOUTLen == 0)
+	{
+		*puiOUTLen = sizeof(keyBlob);
+	}
+	else if (*puiOUTLen < sizeof(keyBlob))
+	{
+		rv = -1;
+		goto err;
+	}
+	else
+	{
+		memcpy(pbOUT,&keyBlob,sizeof(keyBlob));
+
+		*puiOUTLen = sizeof(keyBlob);
+	}
+	rv = 0;
+err:
+
+	return rv;
+}
