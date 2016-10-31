@@ -62,6 +62,8 @@ public:
 	unsigned int get_ulResult();
 	unsigned int get_ulRetry();
 
+	unsigned int get_keyCount();
+
 	std::string get_PublicKeySIGN();
 
 	std::string get_signed_csr();
@@ -147,6 +149,8 @@ public:
 
 	// ÈÏÖ¤KEY£¨µÇÂ¼KEY£©
 	static char m_szAuthKey[BUFFER_LEN_1K]; 
+
+	static int m_iKeyCount; 
 
 private:
     FBCommonWeakPtr m_plugin;

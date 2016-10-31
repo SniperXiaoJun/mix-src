@@ -45,7 +45,6 @@ void __stdcall CreateDlgThread();
 std::vector<FBCommonAPI *> g_plgnObjVector;// 插拔KEY事件检测   用于登录
 std::vector<FBCommonAPI *> g_plgnObjVectorLoginKeyOnOff;// 插拔KEY事件检测   用于锁屏
 
-
 // 认证KEY
 OPT_ST_USB_META FBCommonAPI::m_stMetaAuth = {0};
 // 证书KEY
@@ -54,6 +53,8 @@ OPT_ST_USB_META FBCommonAPI::m_stMetaCert = {0};
 OPT_ST_USB_META FBCommonAPI::m_stMetaAuthAdd = {0};
 
 char FBCommonAPI::m_szAuthKey[BUFFER_LEN_1K];        // 认证KEY（登录KEY）
+
+int FBCommonAPI::m_iKeyCount = 0;
 
 
 HINSTANCE g_hInstance;
@@ -113,15 +114,18 @@ LRESULT CALLBACK WndProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	int i = 0;
 
-	Sleep(1000);
+	Sleep(100);
 
 	switch(message)
 	{
 		// Maybe WinCE OS does not support PNP.
 		// When you use the PNP notifications, please make sure the WinCE OS supports it.
 	case WM_DEVICECHANGE:
+
 		if(wParam == DBT_DEVICEARRIVAL || wParam == DBT_DEVICEREMOVECOMPLETE)
 		{
+			CAPI_KEY_GetKeyCount(&(FBCommonAPI::m_iKeyCount));
+
 			//g_plgnObjVector[i]->ulResult = CAPI_KEY_GetMeta(g_plgnObjVector[i]->m_szAuthKey, OPE_USB_TARGET_SELF, &(g_plgnObjVector[i]->m_stMetaAuth));
 
 			for (i = 0; i < g_plgnObjVector.size(); i++)
@@ -252,6 +256,10 @@ m_plugin(plugin), m_host(host)
 
 	registerProperty("isrun", make_property(this,&FBCommonAPI::get_isrun));
 	registerProperty("ulResult", make_property(this,&FBCommonAPI::get_ulResult));
+	registerProperty("keyCount", make_property(this,&FBCommonAPI::get_keyCount));
+
+	
+
 	registerProperty("ulRetry", make_property(this,&FBCommonAPI::get_ulRetry));
 	registerProperty("signed_csr", make_property(this,&FBCommonAPI::get_signed_csr));
 	registerProperty("PublicKeyEX", make_property(this,&FBCommonAPI::get_PublicKeyEX));
@@ -438,6 +446,12 @@ unsigned int FBCommonAPI::get_ulResult()
 	return ulResult;
 }
 
+
+unsigned int FBCommonAPI::get_keyCount()
+{
+	return m_iKeyCount;
+}
+
 unsigned int FBCommonAPI::get_ulRetry()
 {
 	return m_ulRetry;
@@ -445,7 +459,7 @@ unsigned int FBCommonAPI::get_ulRetry()
 
 unsigned long FBCommonAPI::get_authKeyType()
 {
-	return m_stMetaAuth.ulUSBMetaManType;
+	return m_stMetaAuth.uiUSBMetaManType;
 }
 
 
@@ -1148,6 +1162,7 @@ void FBCommonAPI::ExecCommonFuncID(long ulFuncID, FB::VariantList aArrayArgIN, F
 	case 12:
 		{
 			ulResult = CAPI_KEY_GetMeta(m_szAuthKey, OPE_USB_TARGET_SELF, &m_stMetaAuth);
+			CAPI_KEY_GetKeyCount(&(FBCommonAPI::m_iKeyCount));
 
 			return;
 		}
@@ -1213,6 +1228,8 @@ void FBCommonAPI::ExecCommonFuncID(long ulFuncID, FB::VariantList aArrayArgIN, F
 	case 16:
 		{
 			ulResult = CAPI_KEY_SecureState(m_szAuthKey,OPE_USB_TARGET_SELF, &m_stMetaAuth);
+			CAPI_KEY_GetKeyCount(&(FBCommonAPI::m_iKeyCount));
+
 			return;
 		}
 		break;
