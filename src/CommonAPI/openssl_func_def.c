@@ -1491,9 +1491,17 @@ unsigned int OpenSSL_SM2GenCert(const unsigned char * pbCSR,unsigned int uiCSRLe
 	{
 		strBaseKeyUsage = "nonRepudiation,digitalSignature";
 	}
-	else
+	else if(1 == uiSignFlag)
 	{
 		strBaseKeyUsage = "keyEncipherment,dataEncipherment";
+	}
+	else if(2 == uiSignFlag)
+	{
+		strBaseKeyUsage = "dataEncipherment";
+	}
+	else if(3 == uiSignFlag)
+	{
+		strBaseKeyUsage = "keyEncipherment";
 	}
 
 	if((pktmp=X509_REQ_get_pubkey(req)) == NULL)
@@ -1671,9 +1679,17 @@ unsigned int OpenSSL_SM2GenCertEX(const unsigned char * pbCSR,unsigned int uiCSR
 	{
 		strBaseKeyUsage = "nonRepudiation,digitalSignature";
 	}
-	else
+	else if(1 == uiSignFlag)
 	{
 		strBaseKeyUsage = "keyEncipherment,dataEncipherment";
+	}
+	else if(2 == uiSignFlag)
+	{
+		strBaseKeyUsage = "dataEncipherment";
+	}
+	else if(3 == uiSignFlag)
+	{
+		strBaseKeyUsage = "keyEncipherment";
 	}
 
 	// �õ�req�еĹ�Կ

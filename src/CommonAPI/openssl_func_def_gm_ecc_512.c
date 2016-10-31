@@ -1365,9 +1365,17 @@ unsigned int OpenSSL_GMECC512GenCert(const unsigned char * pbCSR,unsigned int ui
 	{
 		strBaseKeyUsage = "nonRepudiation,digitalSignature";
 	}
-	else
+	else if(1 == uiSignFlag)
 	{
 		strBaseKeyUsage = "keyEncipherment,dataEncipherment";
+	}
+	else if(2 == uiSignFlag)
+	{
+		strBaseKeyUsage = "dataEncipherment";
+	}
+	else if(3 == uiSignFlag)
+	{
+		strBaseKeyUsage = "keyEncipherment";
 	}
 
 	if((pktmp=X509_REQ_get_pubkey(req)) == NULL)
@@ -1545,9 +1553,17 @@ unsigned int OpenSSL_GMECC512GenCertEX(const unsigned char * pbCSR,unsigned int 
 	{
 		strBaseKeyUsage = "nonRepudiation,digitalSignature";
 	}
-	else
+	else if(1 == uiSignFlag)
 	{
 		strBaseKeyUsage = "keyEncipherment,dataEncipherment";
+	}
+	else if(2 == uiSignFlag)
+	{
+		strBaseKeyUsage = "dataEncipherment";
+	}
+	else if(3 == uiSignFlag)
+	{
+		strBaseKeyUsage = "keyEncipherment";
 	}
 
 
