@@ -4,6 +4,7 @@
 #include "o_all_func_def.h"
 
 char DEFAULT_CONTAINER_SM2[] = "ContainerSM2";
+char DEFAULT_CONTAINER_ECC512[] = "ContainerECC512";
 char DEFAULT_APPLICATION[] = "DEFAULT_APPLICATION";
 char DEFAULT_FILE_NAME[] = "DEFAULT_FILE_NAME";
 
@@ -2247,3 +2248,765 @@ err:
 
 	return ulRet;
 }
+
+#if defined(GM_ECC_512_SUPPORT)
+// 生成密钥对512
+unsigned int CAPI_KEY_ECC512GenKeyPair(char * pszKeyOn,int ulKeyTarget, char * pszPIN, unsigned int * pulRetry)
+{
+	unsigned int ulRet = 0;
+	int ulKeyCount = 0;
+
+	char szDevNameLists[BUFFER_LEN_1K] = {0};
+	char szAppNameLists[BUFFER_LEN_1K] = {0};
+	char szConNameLists[BUFFER_LEN_1K];
+
+	ULONG ulDevNameLists = BUFFER_LEN_1K;
+	ULONG ulAppNameLists = BUFFER_LEN_1K;
+	ULONG ulConNameLists = BUFFER_LEN_1K;
+
+	HANDLE hDevSKF = NULL;
+	HANDLE hConSKF = NULL;
+	HANDLE hAppSKF = NULL;
+
+	ECCPUBLICKEYBLOB pubkeyBlob = {0};
+	// 枚举设备
+	ulRet = SKF_EnumDev(TRUE,szDevNameLists,&ulDevNameLists);
+
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "SKF_EnumDev");
+	FILE_LOG_NUMBER(file_log_name,(long)ulRet);
+
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "ulDevNameLists");
+	FILE_LOG_NUMBER(file_log_name,(long)ulDevNameLists);
+
+	if(ulRet)
+	{
+		goto err;
+	}
+
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "szDevNameLists");
+	FILE_LOG_STRING(file_log_name,szDevNameLists);
+
+	CAPI_GetMulStringCount(szDevNameLists, &ulKeyCount);
+
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "SKF_EnumDev");
+	FILE_LOG_NUMBER(file_log_name,(long)ulRet);
+
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "ulDevNameLists");
+	FILE_LOG_NUMBER(file_log_name,(long)ulDevNameLists);
+
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "szDevNameLists");
+	FILE_LOG_STRING(file_log_name,szDevNameLists);
+
+	if (0 == ulKeyCount)
+	{
+		ulRet = OPE_ERR_DEV_NUMBER_ZERO;  // 未插入设备
+		goto err;
+	}
+
+	if (OPE_USB_TARGET_SELF == ulKeyTarget)
+	{
+		if (1 != ulKeyCount)
+		{
+			ulRet = OPE_ERR_DEV_NUMBER_ERR;  // 设备个数不正确
+			goto err;
+		}
+
+		strcpy(pszKeyOn,szDevNameLists);
+	}
+	else
+	{
+		//初始化审计员|操作员
+		if (2 != ulKeyCount)
+		{
+			ulRet = OPE_ERR_DEV_NUMBER_ERR;  // 设备个数不正确
+			goto err;
+		}
+	}
+
+	// 打开设备
+	ulRet = CAPI_KEY_ConnectDev(szDevNameLists,pszKeyOn,ulKeyTarget,&hDevSKF);
+	if(ulRet)
+	{
+		goto err;
+	}
+
+
+	ulRet = SKF_EnumApplication(hDevSKF,szAppNameLists, &ulAppNameLists);
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "SKF_EnumApplication");
+	FILE_LOG_NUMBER(file_log_name,(long)ulRet);
+	if (ulAppNameLists < 2)
+	{
+		ulRet = OPE_ERR_OPEN_APPLICATION;
+		goto err;
+	}
+	else
+	{
+		ulRet = SKF_OpenApplication(hDevSKF, szAppNameLists,&hAppSKF);
+		FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "SKF_OpenApplication");
+		FILE_LOG_NUMBER(file_log_name,(long)ulRet);
+	}
+
+	ulRet = SKF_VerifyPIN(hAppSKF, 1, pszPIN,(ULONG *)pulRetry);
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "SKF_VerifyPIN");
+	FILE_LOG_NUMBER(file_log_name,(long)ulRet);
+	if(ulRet)
+	{
+		goto err;
+	}
+
+	ulRet = SKF_EnumContainer(hAppSKF,szConNameLists,&ulConNameLists);
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "SKF_EnumContainer");
+	FILE_LOG_NUMBER(file_log_name,(long)ulRet);
+	if(ulRet)
+	{
+		goto err;
+	}
+
+	if (NULL == strstr(szConNameLists,DEFAULT_CONTAINER_ECC512))
+	{
+		ulRet = SKF_CreateContainer(hAppSKF, DEFAULT_CONTAINER_ECC512, &hConSKF);
+		FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "SKF_CreateContainer");
+		FILE_LOG_NUMBER(file_log_name,(long)ulRet);
+	}
+	else
+	{
+		ulRet = SKF_OpenContainer(hAppSKF, DEFAULT_CONTAINER_ECC512, &hConSKF);
+		FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "SKF_OpenContainer");
+		FILE_LOG_NUMBER(file_log_name,(long)ulRet);
+	}
+
+	if(ulRet)
+	{
+		goto err;
+	}
+	// 生成签名公钥
+	ulRet = SKF_GenECCKeyPair(hConSKF, SGD_ECC_512,&pubkeyBlob);
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "SKF_GenECCKeyPair");
+	FILE_LOG_NUMBER(file_log_name,(long)ulRet);
+	if(ulRet)
+	{
+		goto err;
+	}
+
+	// 拷贝签名公钥
+
+err:
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "SKF_GenECCKeyPair");
+	FILE_LOG_NUMBER(file_log_name,(long)ulRet);
+	if (hConSKF)
+	{
+		SKF_CloseContainer(hConSKF);
+	}
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "SKF_GenECCKeyPair");
+	FILE_LOG_NUMBER(file_log_name,(long)ulRet);
+	if (hAppSKF)
+	{
+		SKF_CloseApplication(hAppSKF);
+	}
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "SKF_GenECCKeyPair");
+	FILE_LOG_NUMBER(file_log_name,(long)ulRet);
+	if (hDevSKF)
+	{
+		SKF_DisConnectDev(hDevSKF);
+	}
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "SKF_GenECCKeyPair");
+	FILE_LOG_NUMBER(file_log_name,(long)ulRet);
+
+	return ulRet;
+}
+// 数据签名512
+unsigned int CAPI_KEY_ECC512SignDigest(char * pszKeyOn,int ulKeyTarget, char * pszPIN, unsigned char *pbDigest, unsigned char * pbSigValue, unsigned int * pulRetry)
+{
+	unsigned int ulRet = 0;
+
+	char szDevNameLists[BUFFER_LEN_1K] = {0};
+	char szAppNameLists[BUFFER_LEN_1K] = {0};
+	char szConNameLists[BUFFER_LEN_1K] = {0};
+
+	HANDLE hDevSKF = NULL;
+	HANDLE hAppSKF = NULL;
+	HANDLE hConSKF = NULL;
+
+	ULONG ulDevNameLists = BUFFER_LEN_1K;
+	ULONG ulAppNameLists = BUFFER_LEN_1K;
+	ULONG ulConNameLists = BUFFER_LEN_1K;
+
+	ECCSIGNATUREBLOB stSigBlob = {0};
+
+	int ulKeyCount = 0;
+
+	ulRet = SKF_EnumDev(TRUE,szDevNameLists,&ulDevNameLists);
+
+	if(ulRet)
+	{
+		goto err;
+	}
+
+	CAPI_GetMulStringCount(szDevNameLists, &ulKeyCount);
+
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "SKF_EnumDev");
+	FILE_LOG_NUMBER(file_log_name,(long)ulRet);
+
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "ulDevNameLists");
+	FILE_LOG_NUMBER(file_log_name,(long)ulDevNameLists);
+
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "szDevNameLists");
+	FILE_LOG_STRING(file_log_name,szDevNameLists);
+
+	if (0 == ulKeyCount)
+	{
+		ulRet = OPE_ERR_DEV_NUMBER_ZERO;  // 未插入设备
+		goto err;
+	}
+
+	if (OPE_USB_TARGET_SELF == ulKeyTarget)
+	{
+		if (1 != ulKeyCount)
+		{
+			ulRet = OPE_ERR_DEV_NUMBER_ERR;  // 设备个数不正确
+			goto err;
+		}
+
+		strcpy(pszKeyOn,szDevNameLists);
+	}
+	else
+	{
+		//初始化审计员|操作员
+		if (2 != ulKeyCount)
+		{
+			ulRet = OPE_ERR_DEV_NUMBER_ERR;  // 设备个数不正确
+			goto err;
+		}
+	}
+
+	// 打开设备
+	ulRet = CAPI_KEY_ConnectDev(szDevNameLists,pszKeyOn,ulKeyTarget,&hDevSKF);
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "SKF_ConnectDev");
+	FILE_LOG_NUMBER(file_log_name,(long)ulRet);
+	if(ulRet)
+	{
+		goto err;
+	}
+
+	ulRet = SKF_EnumApplication(hDevSKF,szAppNameLists, &ulAppNameLists);
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "SKF_EnumApplication");
+	FILE_LOG_NUMBER(file_log_name,(long)ulRet);
+	if (ulAppNameLists < 2)
+	{
+		ulRet = OPE_ERR_OPEN_APPLICATION;
+		goto err;
+	}
+	else
+	{
+		ulRet = SKF_OpenApplication(hDevSKF, szAppNameLists,&hAppSKF);
+		FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "SKF_OpenApplication");
+		FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, szAppNameLists);
+		FILE_LOG_NUMBER(file_log_name,(long)ulRet);
+	}
+
+
+	if(ulRet)
+	{
+		goto err;
+	}
+
+
+	ulRet = SKF_VerifyPIN(hAppSKF, 1, pszPIN,(ULONG *)pulRetry);
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "SKF_VerifyPIN");
+	FILE_LOG_NUMBER(file_log_name,(long)ulRet);
+	if(ulRet)
+	{
+		goto err;
+	}
+
+
+	// 枚举容器
+	ulRet = SKF_EnumContainer(hAppSKF,szConNameLists,&ulConNameLists);
+	if(ulRet)
+	{
+		goto err;
+	}
+	// 创建或打开容器
+	if (NULL == strstr(szConNameLists,DEFAULT_CONTAINER_ECC512))
+	{
+		ulRet = SKF_CreateContainer(hAppSKF, DEFAULT_CONTAINER_ECC512, &hConSKF);
+	}
+	else
+	{
+		ulRet = SKF_OpenContainer(hAppSKF, DEFAULT_CONTAINER_ECC512, &hConSKF);
+	}
+
+	if(ulRet)
+	{
+		goto err;
+	}
+
+	ulRet = SKF_ECCSignData(hConSKF,pbDigest,64,&stSigBlob);
+	if(ulRet)
+	{
+		goto err;
+	}
+
+	memcpy(pbSigValue,stSigBlob.r, 64);
+	memcpy(pbSigValue + 64,stSigBlob.s, 64);
+
+err:
+
+	if(hConSKF)
+	{
+		SKF_CloseContainer(hConSKF);
+	}
+
+	if (hAppSKF)
+	{
+		SKF_CloseApplication(hAppSKF);
+	}
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
+	FILE_LOG_NUMBER(file_log_name,(long)ulRet);
+	if (hDevSKF)
+	{
+		SKF_DisConnectDev(hDevSKF);
+	}
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
+	FILE_LOG_NUMBER(file_log_name,(long)ulRet);
+
+	return ulRet;
+}
+
+// 导出公钥512
+unsigned int CAPI_KEY_ECC512ExportPK(char * pszKeyOn,int ulKeyTarget,unsigned int bIsSign, unsigned char * pbPK)
+{
+	unsigned int ulRet = 0;
+	int ulKeyCount = 0;
+
+	char szDevNameLists[BUFFER_LEN_1K] = {0};
+	char szAppNameLists[BUFFER_LEN_1K] = {0};
+	char szConNameLists[BUFFER_LEN_1K];
+
+	ULONG ulDevNameLists = BUFFER_LEN_1K;
+	ULONG ulAppNameLists = BUFFER_LEN_1K;
+	ULONG ulConNameLists = BUFFER_LEN_1K;
+
+	HANDLE hDevSKF = NULL;
+	HANDLE hConSKF = NULL;
+	HANDLE hAppSKF = NULL;
+
+	ECCPUBLICKEYBLOB pubkeyBlob = {0};
+
+	ULONG ulPubkeyBlobLen = sizeof(ECCPUBLICKEYBLOB);
+
+	// 枚举设备
+	ulRet = SKF_EnumDev(TRUE,szDevNameLists,&ulDevNameLists);
+
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "SKF_EnumDev");
+	FILE_LOG_NUMBER(file_log_name,(long)ulRet);
+
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "ulDevNameLists");
+	FILE_LOG_NUMBER(file_log_name,(long)ulDevNameLists);
+
+	if(ulRet)
+	{
+		goto err;
+	}
+
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "szDevNameLists");
+	FILE_LOG_STRING(file_log_name,szDevNameLists);
+
+	CAPI_GetMulStringCount(szDevNameLists, &ulKeyCount);
+
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "SKF_EnumDev");
+	FILE_LOG_NUMBER(file_log_name,(long)ulRet);
+
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "ulDevNameLists");
+	FILE_LOG_NUMBER(file_log_name,(long)ulDevNameLists);
+
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "szDevNameLists");
+	FILE_LOG_STRING(file_log_name,szDevNameLists);
+
+	if (0 == ulKeyCount)
+	{
+		ulRet = OPE_ERR_DEV_NUMBER_ZERO;  // 未插入设备
+		goto err;
+	}
+
+	if (OPE_USB_TARGET_SELF == ulKeyTarget)
+	{
+		if (1 != ulKeyCount)
+		{
+			ulRet = OPE_ERR_DEV_NUMBER_ERR;  // 设备个数不正确
+			goto err;
+		}
+
+		strcpy(pszKeyOn,szDevNameLists);
+	}
+	else
+	{
+		//初始化审计员|操作员
+		if (2 != ulKeyCount)
+		{
+			ulRet = OPE_ERR_DEV_NUMBER_ERR;  // 设备个数不正确
+			goto err;
+		}
+	}
+
+	// 打开设备
+	ulRet = CAPI_KEY_ConnectDev(szDevNameLists,pszKeyOn,ulKeyTarget,&hDevSKF);
+	if(ulRet)
+	{
+		goto err;
+	}
+
+	ulRet = SKF_EnumApplication(hDevSKF,szAppNameLists, &ulAppNameLists);
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "SKF_EnumApplication");
+	FILE_LOG_NUMBER(file_log_name,(long)ulRet);
+	if (ulAppNameLists < 2)
+	{
+		ulRet = OPE_ERR_OPEN_APPLICATION;
+	}
+	else
+	{
+		ulRet = SKF_OpenApplication(hDevSKF, szAppNameLists,&hAppSKF);
+		FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "SKF_OpenApplication");
+		FILE_LOG_NUMBER(file_log_name,(long)ulRet);
+	}
+
+	ulRet = SKF_EnumContainer(hAppSKF,szConNameLists,&ulConNameLists);
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "SKF_EnumContainer");
+	FILE_LOG_NUMBER(file_log_name,(long)ulRet);
+	if(ulRet)
+	{
+		goto err;
+	}
+
+	if (NULL == strstr(szConNameLists,DEFAULT_CONTAINER_ECC512))
+	{
+		ulRet = SKF_CreateContainer(hAppSKF, DEFAULT_CONTAINER_ECC512, &hConSKF);
+		FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "SKF_CreateContainer");
+		FILE_LOG_NUMBER(file_log_name,(long)ulRet);
+	}
+	else
+	{
+		ulRet = SKF_OpenContainer(hAppSKF, DEFAULT_CONTAINER_ECC512, &hConSKF);
+		FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "SKF_OpenContainer");
+		FILE_LOG_NUMBER(file_log_name,(long)ulRet);
+	}
+
+	if(ulRet)
+	{
+		goto err;
+	}
+	// 导出签名公钥
+	ulRet = SKF_ExportPublicKey(hConSKF, bIsSign,(BYTE *)&pubkeyBlob, &ulPubkeyBlobLen);
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "SKF_ExportPublicKey");
+	FILE_LOG_NUMBER(file_log_name,(long)ulRet);
+	if(ulRet)
+	{
+		goto err;
+	}
+
+	// 拷贝签名公钥
+	memcpy(pbPK, pubkeyBlob.XCoordinate, 64);
+	memcpy(pbPK+64, pubkeyBlob.YCoordinate, 64);
+
+err:
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "FREE");
+	FILE_LOG_NUMBER(file_log_name,(long)ulRet);
+	if (hConSKF)
+	{
+		SKF_CloseContainer(hConSKF);
+	}
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "FREE");
+	FILE_LOG_NUMBER(file_log_name,(long)ulRet);
+	if (hAppSKF)
+	{
+		SKF_CloseApplication(hAppSKF);
+	}
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "FREE");
+	FILE_LOG_NUMBER(file_log_name,(long)ulRet);
+	if (hDevSKF)
+	{
+		SKF_DisConnectDev(hDevSKF);
+	}
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, " ");
+	FILE_LOG_NUMBER(file_log_name,(long)ulRet);
+
+	return ulRet;
+}
+
+// 导入密钥对512
+unsigned int CAPI_KEY_ECC512ImportKeyPair(char * pszKeyOn,int ulKeyTarget,unsigned int bIsSign,unsigned char * pbKeyPair, char * pszPIN, unsigned int * pulRetry)
+{
+	char szDevNameLists[BUFFER_LEN_1K] = {0};
+	char szAppNameLists[BUFFER_LEN_1K] = {0};
+	char szConNameLists[BUFFER_LEN_1K];
+
+	ULONG ulDevNameLists = BUFFER_LEN_1K;
+	ULONG ulAppNameLists = BUFFER_LEN_1K;
+	ULONG ulConNameLists = BUFFER_LEN_1K;
+
+	HANDLE hDevSKF = NULL;
+	HANDLE hConSKF = NULL;
+	HANDLE hAppSKF = NULL;
+
+	unsigned int ulRet = 0;
+	int ulKeyCount = 0;
+
+	// 枚举设备
+	ulRet = SKF_EnumDev(TRUE,szDevNameLists,&ulDevNameLists);
+
+	if(ulRet)
+	{
+		goto err;
+	}
+
+	CAPI_GetMulStringCount(szDevNameLists, &ulKeyCount);
+
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "SKF_EnumDev");
+	FILE_LOG_NUMBER(file_log_name,(long)ulRet);
+
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "ulDevNameLists");
+	FILE_LOG_NUMBER(file_log_name,(long)ulDevNameLists);
+
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "szDevNameLists");
+	FILE_LOG_STRING(file_log_name,szDevNameLists);
+
+	if (0 == ulKeyCount)
+	{
+		ulRet = OPE_ERR_DEV_NUMBER_ZERO;  // 未插入设备
+		goto err;
+	}
+
+	if (OPE_USB_TARGET_SELF == ulKeyTarget)
+	{
+		if (1 != ulKeyCount)
+		{
+			ulRet = OPE_ERR_DEV_NUMBER_ERR;  // 设备个数不正确
+			goto err;
+		}
+
+		strcpy(pszKeyOn,szDevNameLists);
+	}
+	else
+	{
+		//初始化审计员|操作员
+		if (2 != ulKeyCount)
+		{
+			ulRet = OPE_ERR_DEV_NUMBER_ERR;  // 设备个数不正确
+			goto err;
+		}
+	}
+
+	// 打开设备
+	ulRet = CAPI_KEY_ConnectDev(szDevNameLists,pszKeyOn,ulKeyTarget,&hDevSKF);
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "SKF_ConnectDev");
+	FILE_LOG_NUMBER(file_log_name,(long)ulRet);
+	if(ulRet)
+	{
+		goto err;
+	}
+
+	ulRet = SKF_EnumApplication(hDevSKF,szAppNameLists, &ulAppNameLists);
+
+	// 设备认证或者打开一个应用
+	if (ulAppNameLists < 2)
+	{
+		ulRet = OPE_ERR_OPEN_APPLICATION;
+	}
+	else
+	{
+		ulRet = SKF_OpenApplication(hDevSKF, szAppNameLists,&hAppSKF);
+	}
+
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "hAppSKFN");
+	FILE_LOG_NUMBER(file_log_name,(long)hAppSKF);
+
+	// 验证密码
+	ulRet = SKF_VerifyPIN(hAppSKF, 1, pszPIN,(ULONG *)pulRetry);
+	if(ulRet)
+	{
+		goto err;
+	}
+
+	// 枚举容器
+	ulRet = SKF_EnumContainer(hAppSKF,szConNameLists,&ulConNameLists);
+	if(ulRet)
+	{
+		goto err;
+	}
+	// 创建或打开容器
+	if (NULL == strstr(szConNameLists,DEFAULT_CONTAINER_ECC512))
+	{
+		ulRet = SKF_CreateContainer(hAppSKF, DEFAULT_CONTAINER_ECC512, &hConSKF);
+	}
+	else
+	{
+		ulRet = SKF_OpenContainer(hAppSKF, DEFAULT_CONTAINER_ECC512, &hConSKF);
+	}
+
+	if(ulRet)
+	{
+		goto err;
+	}
+	// 导入数字信封格式的交换密钥对
+	ulRet = SKF_ImportECCKeyPair(hConSKF, (PENVELOPEDKEYBLOB)pbKeyPair);
+	if(ulRet)
+	{
+		goto err;
+	}
+
+err:
+	if (hConSKF)
+	{
+		SKF_CloseContainer(hConSKF);
+	}
+
+	if (hAppSKF)
+	{
+		SKF_CloseApplication(hAppSKF);
+	}
+
+	if (hDevSKF)
+	{
+		SKF_DisConnectDev(hDevSKF);
+	}
+
+	return ulRet;
+}
+
+// 导入证书512
+unsigned int CAPI_KEY_ECC512ImportCert(char * pszKeyOn,int ulKeyTarget, unsigned int bIsSign,unsigned char * pbCert,unsigned int ulCertLen, char * pszPIN, unsigned int * pulRetry)
+{
+	char szDevNameLists[BUFFER_LEN_1K] = {0};
+	char szAppNameLists[BUFFER_LEN_1K] = {0};
+	char szConNameLists[BUFFER_LEN_1K];
+
+	ULONG ulDevNameLists = BUFFER_LEN_1K;
+	ULONG ulAppNameLists = BUFFER_LEN_1K;
+	ULONG ulConNameLists = BUFFER_LEN_1K;
+
+	HANDLE hDevSKF = NULL;
+	HANDLE hConSKF = NULL;
+	HANDLE hAppSKF = NULL;
+
+	unsigned int ulRet = 0;
+	int ulKeyCount = 0;
+
+	// 枚举设备
+	ulRet = SKF_EnumDev(TRUE,szDevNameLists,&ulDevNameLists);
+
+	if(ulRet)
+	{
+		goto err;
+	}
+
+	CAPI_GetMulStringCount(szDevNameLists, &ulKeyCount);
+
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "SKF_EnumDev");
+	FILE_LOG_NUMBER(file_log_name,(long)ulRet);
+
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "ulDevNameLists");
+	FILE_LOG_NUMBER(file_log_name,(long)ulDevNameLists);
+
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "szDevNameLists");
+	FILE_LOG_STRING(file_log_name,szDevNameLists);
+
+	if (0 == ulKeyCount)
+	{
+		ulRet = OPE_ERR_DEV_NUMBER_ZERO;  // 未插入设备
+		goto err;
+	}
+
+	if (OPE_USB_TARGET_SELF == ulKeyTarget)
+	{
+		if (1 != ulKeyCount)
+		{
+			ulRet = OPE_ERR_DEV_NUMBER_ERR;  // 设备个数不正确
+			goto err;
+		}
+
+		strcpy(pszKeyOn,szDevNameLists);
+	}
+	else
+	{
+		//初始化审计员|操作员
+		if (2 != ulKeyCount)
+		{
+			ulRet = OPE_ERR_DEV_NUMBER_ERR;  // 设备个数不正确
+			goto err;
+		}
+	}
+
+	// 打开设备
+	ulRet = CAPI_KEY_ConnectDev(szDevNameLists,pszKeyOn,ulKeyTarget,&hDevSKF);
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "SKF_ConnectDev");
+	FILE_LOG_NUMBER(file_log_name,(long)ulRet);
+	if(ulRet)
+	{
+		goto err;
+	}
+
+	ulRet = SKF_EnumApplication(hDevSKF,szAppNameLists, &ulAppNameLists);
+
+	// 设备认证或者打开一个应用
+	if (ulAppNameLists < 2)
+	{
+		ulRet = OPE_ERR_OPEN_APPLICATION;
+	}
+	else
+	{
+		ulRet = SKF_OpenApplication(hDevSKF, szAppNameLists,&hAppSKF);
+	}
+
+	// 验证密码
+	ulRet = SKF_VerifyPIN(hAppSKF, 1, pszPIN,(ULONG *)pulRetry);
+	if(ulRet)
+	{
+		goto err;
+	}
+
+	// 枚举容器
+	ulRet = SKF_EnumContainer(hAppSKF,szConNameLists,&ulConNameLists);
+	if(ulRet)
+	{
+		goto err;
+	}
+	// 创建或打开容器
+	if (NULL == strstr(szConNameLists,DEFAULT_CONTAINER_ECC512))
+	{
+		ulRet = SKF_CreateContainer(hAppSKF, DEFAULT_CONTAINER_ECC512, &hConSKF);
+	}
+	else
+	{
+		ulRet = SKF_OpenContainer(hAppSKF, DEFAULT_CONTAINER_ECC512, &hConSKF);
+	}
+
+	if(ulRet)
+	{
+		goto err;
+	}
+	// 导入证书
+	ulRet = SKF_ImportCertificate(hConSKF, bIsSign,pbCert,ulCertLen);
+	if(ulRet)
+	{
+		goto err;
+	}
+err:
+	if (hConSKF)
+	{
+		SKF_CloseContainer(hConSKF);
+	}
+
+	if (hAppSKF)
+	{
+		SKF_CloseApplication(hAppSKF);
+	}
+
+	if (hDevSKF)
+	{
+		SKF_DisConnectDev(hDevSKF);
+	}
+
+	return ulRet;
+}
+
+#endif

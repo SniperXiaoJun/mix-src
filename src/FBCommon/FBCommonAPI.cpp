@@ -33,8 +33,17 @@ void GetArrayNumberOfIndex(FB::VariantList& variantList, int index, int * pValue
 
 DWORD WINAPI ThreadFuncSKFGenSM2KeyPair(LPVOID aThisClass);
 DWORD WINAPI ThreadFuncSKFImportSM2KeyPair(LPVOID aThisClass);
-DWORD WINAPI ThreadFuncSKFGenCSR(LPVOID aThisClass);
-DWORD WINAPI ThreadFuncSKFImportCerts(LPVOID aThisClass);
+DWORD WINAPI ThreadFuncSKFGenSM2CSR(LPVOID aThisClass);
+DWORD WINAPI ThreadFuncSKFImportSM2Certs(LPVOID aThisClass);
+
+#if defined(GM_ECC_512_SUPPORT)
+DWORD WINAPI ThreadFuncSKFGenECC512KeyPair(LPVOID aThisClass);
+DWORD WINAPI ThreadFuncSKFImportECC512KeyPair(LPVOID aThisClass);
+DWORD WINAPI ThreadFuncSKFGenECC512CSR(LPVOID aThisClass);
+DWORD WINAPI ThreadFuncSKFImportECC512Certs(LPVOID aThisClass);
+#endif
+
+
 DWORD WINAPI ThreadFuncSKFSignValidCode(LPVOID aThisClass);
 
 
@@ -486,7 +495,7 @@ bool FBCommonAPI::get_isrun()
 	return S_OK;
 }
 
-DWORD WINAPI ThreadFuncSKFGenCSR(LPVOID aThisClass)
+DWORD WINAPI ThreadFuncSKFGenSM2CSR(LPVOID aThisClass)
 {
 	FBCommonAPI * thisClass = (FBCommonAPI*)aThisClass;
 
@@ -688,7 +697,7 @@ err:
 }
 
 
-DWORD WINAPI ThreadFuncSKFImportCerts(LPVOID aThisClass)
+DWORD WINAPI ThreadFuncSKFImportSM2Certs(LPVOID aThisClass)
 {
 	FBCommonAPI * thisClass = (FBCommonAPI*)aThisClass;
 
@@ -785,7 +794,7 @@ void FBCommonAPI::InitArgsSKFSetUserPINAndUserInfo(FB::VariantList variantList)
 	ulResult = 0;
 }
 
-void FBCommonAPI::InitArgsSKFImportCerts(FB::VariantList variantList)
+void FBCommonAPI::InitArgsSKFImportSM2Certs(FB::VariantList variantList)
 {
 	int inBuffSize  = 0;
 
@@ -817,6 +826,9 @@ void FBCommonAPI::InitArgsSKFImportCerts(FB::VariantList variantList)
 
 	ulResult = 0;
 }
+
+
+
 
 
 void FBCommonAPI::InitArgsShowCert(FB::VariantList variantList)
@@ -1116,7 +1128,7 @@ void FBCommonAPI::ExecCommonFuncID(long ulFuncID, FB::VariantList aArrayArgIN, F
 				return;
 			}
 
-			hThrd=CreateThread(NULL,0,ThreadFuncSKFGenCSR,(LPVOID)this,0,&threadId);
+			hThrd=CreateThread(NULL,0,ThreadFuncSKFGenSM2CSR,(LPVOID)this,0,&threadId);
 		}
 
 		break;
@@ -1124,7 +1136,7 @@ void FBCommonAPI::ExecCommonFuncID(long ulFuncID, FB::VariantList aArrayArgIN, F
 		// 导入证书
 	case 10:
 		{
-			InitArgsSKFImportCerts(aArrayArgIN);
+			InitArgsSKFImportSM2Certs(aArrayArgIN);
 
 			if (0 != ulResult)
 			{
@@ -1139,7 +1151,7 @@ void FBCommonAPI::ExecCommonFuncID(long ulFuncID, FB::VariantList aArrayArgIN, F
 				return;
 			}
 
-			hThrd=CreateThread(NULL,0,ThreadFuncSKFImportCerts,(LPVOID)this,0,&threadId);
+			hThrd=CreateThread(NULL,0,ThreadFuncSKFImportSM2Certs,(LPVOID)this,0,&threadId);
 		}
 
 		break;
@@ -1361,6 +1373,89 @@ void FBCommonAPI::ExecCommonFuncID(long ulFuncID, FB::VariantList aArrayArgIN, F
 		}
 		break;
 
+
+#if defined(GM_ECC_512_SUPPORT)
+		// 生成ECC512密钥对
+	case 24:
+		{
+			InitArgsSKFSetUserPIN(aArrayArgIN);
+
+			if (0 != ulResult)
+			{
+				return;
+			}
+
+			hThrd=CreateThread(NULL,0,ThreadFuncSKFGenECC512KeyPair,(LPVOID)this,0,&threadId);
+		}
+		break;
+
+		// 导入ECC512密钥对
+	case 25:
+		{
+			::FILE_LOG_STRING(file_log_name,"InitArgsSKFImportECC512KeyPair 25");
+
+			InitArgsSKFImportECC512KeyPair(aArrayArgIN);
+
+			::FILE_LOG_STRING(file_log_name,"ExecCommonFuncID 25");
+
+			::FILE_LOG_NUMBER(file_log_name,ulResult);
+
+			if (0 != ulResult)
+			{
+				return;
+			}
+
+			hThrd=CreateThread(NULL,0,ThreadFuncSKFImportECC512KeyPair,(LPVOID)this,0,&threadId);
+		}
+
+		break;
+		// 生成ECC512证书请求
+	case 26:
+		{
+			InitArgsUserInfo(aArrayArgIN);
+
+			if (0 != ulResult)
+			{
+				return;
+			}
+
+			::FILE_LOG_STRING(file_log_name,"ExecCommonFuncID 9");
+			::FILE_LOG_NUMBER(file_log_name,ulResult);
+
+			if (0 != ulResult)
+			{
+				return;
+			}
+
+			hThrd=CreateThread(NULL,0,ThreadFuncSKFGenECC512CSR,(LPVOID)this,0,&threadId);
+		}
+
+		break;
+
+		// 导入证书
+	case 27:
+		{
+			InitArgsSKFImportECC512Certs(aArrayArgIN);
+
+			if (0 != ulResult)
+			{
+				return;
+			}
+
+			::FILE_LOG_STRING(file_log_name,"ExecCommonFuncID 10");
+			::FILE_LOG_NUMBER(file_log_name,ulResult);
+
+			if (0 != ulResult)
+			{
+				return;
+			}
+
+			hThrd=CreateThread(NULL,0,ThreadFuncSKFImportECC512Certs,(LPVOID)this,0,&threadId);
+		}
+
+		break;
+#endif
+
 		// 插拔KEY事件检测   用于登录
 	case 0xFF:
 		{
@@ -1403,3 +1498,246 @@ void FBCommonAPI::ExecCommonFuncID(long ulFuncID, FB::VariantList aArrayArgIN, F
 		break;
 	}
 }
+
+#if defined(GM_ECC_512_SUPPORT)
+
+#include "gm-ecc-512.h"
+
+void FBCommonAPI::InitArgsSKFImportECC512Certs(FB::VariantList variantList)
+{
+	int inBuffSize  = 0;
+
+	unsigned char data_value_cert_b64[BUFFER_LEN_1K * 4]; 
+	unsigned int data_len_cert_b64 = BUFFER_LEN_1K * 4;
+
+	GetArrayLength(variantList,&inBuffSize);
+
+	::FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__,"inBuffSize");
+	::FILE_LOG_NUMBER(file_log_name, inBuffSize);
+
+	if (3 != inBuffSize)
+	{
+		ulResult = OPE_ERR_INVALID_PARAM;
+		return;
+	}
+
+	GetArrayStrOfIndex(variantList,0, m_szPIN, &m_iPINLen);
+
+	GetArrayStrOfIndex(variantList,1, (char *)data_value_cert_b64,(int *) (&data_len_cert_b64));
+
+	m_iCertSIGNLen = modp_b64_decode((char *)m_szCertSIGN, (char *)data_value_cert_b64,data_len_cert_b64);
+
+	data_len_cert_b64 = BUFFER_LEN_1K * 4;
+
+	GetArrayStrOfIndex(variantList,2, (char *)data_value_cert_b64,(int *) (&data_len_cert_b64));
+
+	m_iCertEXLen = modp_b64_decode((char *)m_szCertEX, (char *)data_value_cert_b64,data_len_cert_b64);
+
+	ulResult = 0;
+}
+
+void FBCommonAPI::InitArgsSKFImportECC512KeyPair(FB::VariantList variantList)
+{
+	int inBuffSize  = 0;
+
+	unsigned char szEnvelopedKeyBlobB64[BUFFER_LEN_1K * 4]; 
+	unsigned int ulEnvelopedKeyBlobB64Len = BUFFER_LEN_1K * 4;
+	unsigned int ulEnvelopedKeyBlobLen = BUFFER_LEN_1K * 4;
+
+	GetArrayLength(variantList,&inBuffSize);
+
+	if (2 != inBuffSize)
+	{
+		ulResult = OPE_ERR_INVALID_PARAM;
+		return;
+	}
+
+	GetArrayStrOfIndex(variantList,0, m_szPIN, &m_iPINLen);
+	GetArrayStrOfIndex(variantList,1, (char *)szEnvelopedKeyBlobB64,(int *)(&ulEnvelopedKeyBlobB64Len));
+
+	ulEnvelopedKeyBlobLen = modp_b64_decode((char *)&m_stEnvelopedKeyBlobEX, (const char *)szEnvelopedKeyBlobB64,ulEnvelopedKeyBlobB64Len);
+
+	::FILE_LOG_STRING(file_log_name, "m_stEnvelopedKeyBlobEX");
+
+	::FILE_LOG_HEX(file_log_name, (const unsigned char *)&m_stEnvelopedKeyBlobEX,sizeof(OPST_SKF_ENVELOPEDKEYBLOB));
+
+	if (sizeof(OPST_SKF_ENVELOPEDKEYBLOB) != ulEnvelopedKeyBlobLen)
+	{
+		::FILE_LOG_STRING(file_log_name, "sizeof(OPST_SKF_ENVELOPEDKEYBLOB) != ulEnvelopedKeyBlobLen");
+		ulResult = OPE_ERR_INVALID_PARAM;
+		return;
+	}
+
+	ulResult = 0;
+}
+
+DWORD WINAPI ThreadFuncSKFGenECC512KeyPair(LPVOID aThisClass)
+{
+	FBCommonAPI * thisClass = (FBCommonAPI*)aThisClass;
+
+	thisClass->ulResult = CAPI_KEY_ECC512GenKeyPair(thisClass->m_szAuthKey, OPE_USB_TARGET_OTHER, thisClass->m_szPIN,(unsigned int *)&thisClass->m_ulRetry);
+
+	if (thisClass->ulResult)
+	{
+		goto err;
+	}
+
+	thisClass->ulResult = CAPI_KEY_ECC512ExportPK(thisClass->m_szAuthKey, OPE_USB_TARGET_OTHER, 1,thisClass->m_szPublicKeySIGN);
+
+err:
+
+
+	return 0;
+}
+
+DWORD WINAPI ThreadFuncSKFImportECC512KeyPair(LPVOID aThisClass)
+{
+	FBCommonAPI * thisClass = (FBCommonAPI*)aThisClass;
+
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "thisClass->m_szPIN");
+	FILE_LOG_STRING(file_log_name,thisClass->m_szPIN);
+
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "thisClass->m_szAuthKey");
+	FILE_LOG_STRING(file_log_name,thisClass->m_szAuthKey);
+
+	thisClass->ulResult = CAPI_KEY_ECC512ImportKeyPair(thisClass->m_szAuthKey, OPE_USB_TARGET_OTHER,0,
+		(unsigned char *)&(thisClass->m_stEnvelopedKeyBlobEX),thisClass->m_szPIN,(unsigned int *)&(thisClass->m_ulRetry));
+
+
+	if(thisClass->ulResult)
+	{
+		goto err;
+	}
+
+	thisClass->ulResult = CAPI_KEY_ECC512ExportPK(thisClass->m_szAuthKey, OPE_USB_TARGET_OTHER, 0,
+		thisClass->m_szPublicKeyEX);
+
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "thisClass->m_szPublicKeyEX");
+
+	FILE_LOG_HEX(file_log_name,thisClass->m_szPublicKeyEX,SM2_BYTES_LEN * 2);
+err:
+
+	return 0;
+}
+
+DWORD WINAPI ThreadFuncSKFGenECC512CSR(LPVOID aThisClass)
+{
+	FBCommonAPI * thisClass = (FBCommonAPI*)aThisClass;
+
+	unsigned int ulPublicKeyLen = 2 * GM_ECC_512_BYTES_LEN + 1;
+	unsigned char pbPublicKey[2 * GM_ECC_512_BYTES_LEN + 1] = {0};
+	unsigned char pbDigest[GM_ECC_512_BYTES_LEN] = {0};
+	unsigned int ulDigestLen = GM_ECC_512_BYTES_LEN;
+
+	unsigned char szX509content[BUFFER_LEN_1K * 4];
+	unsigned int ulX509ContentLen = BUFFER_LEN_1K * 4;
+
+	// 初始化
+	thisClass->ulResult = OpenSSL_Initialize();
+
+	if(thisClass->ulResult)
+	{
+		goto err;
+	}
+
+	thisClass->m_iCsrLen = BUFFER_LEN_1K * 4;
+
+	thisClass->ulResult = OpenSSL_GMECC512GenCSRWithPubkey(
+		&(thisClass->userInfo),
+		thisClass->m_szPublicKeySIGN,GM_ECC_512_BYTES_LEN,
+		thisClass->m_szPublicKeySIGN+GM_ECC_512_BYTES_LEN,GM_ECC_512_BYTES_LEN,
+		thisClass->m_szCsr, &(thisClass->m_iCsrLen)
+		);
+
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "thisClass->m_szCsr");
+	FILE_LOG_HEX(file_log_name, thisClass->m_szCsr, thisClass->m_iCsrLen);
+
+	// 签名证书请求
+	thisClass->m_iSignedCsrLen = BUFFER_LEN_1K * 4;
+
+	memcpy(pbPublicKey, "\x04", 1);
+	memcpy(pbPublicKey + 1 , thisClass->m_szPublicKeySIGN, SM2_BYTES_LEN * 2);
+
+
+	thisClass->ulResult = OpenSSL_GetX509Content(thisClass->m_szCsr, thisClass->m_iCsrLen,
+		X509_TYPE_CSR,
+		szX509content,&ulX509ContentLen
+		);
+
+	if(thisClass->ulResult)
+	{
+		goto err;
+	}
+
+	thisClass->ulResult = tcm_gmecc512_get_message_hash(
+		szX509content, ulX509ContentLen,
+		(unsigned char *)"1234567812345678", 16,
+		pbPublicKey, ulPublicKeyLen,pbDigest,&ulDigestLen);
+	if(thisClass->ulResult)
+	{
+		goto err;
+	}
+
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__,"pbPublicKey");
+	FILE_LOG_HEX(file_log_name,pbPublicKey, SM2_BYTES_LEN * 2 + 1);
+
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__,"pbDigest");
+	FILE_LOG_HEX(file_log_name,pbDigest, ulDigestLen);
+
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__,"m_szCsr");
+	FILE_LOG_HEX(file_log_name,thisClass->m_szCsr, thisClass->m_iCsrLen);
+
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__,"szX509content");
+	FILE_LOG_HEX(file_log_name,szX509content, ulX509ContentLen);
+
+	thisClass->ulResult= CAPI_KEY_ECC512SignDigest(thisClass->m_szAuthKey,OPE_USB_TARGET_OTHER,thisClass->m_szPIN,pbDigest,thisClass->m_szSigValue,(unsigned int *)&(thisClass->m_ulRetry)); 
+	if (thisClass->ulResult)
+	{
+		goto err;
+	}
+
+	thisClass->ulResult = OpenSSL_GMECC512SetX509SignValue(
+		thisClass->m_szCsr, thisClass->m_iCsrLen,
+		X509_TYPE_CSR,
+		thisClass->m_szSigValue,SM2_BYTES_LEN,
+		thisClass->m_szSigValue + SM2_BYTES_LEN, SM2_BYTES_LEN,
+		thisClass->m_szSignedCsr, &(thisClass->m_iSignedCsrLen)
+		);
+
+	if(thisClass->ulResult)
+	{
+		goto err;
+	}
+
+	::FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__,"RS");
+	::FILE_LOG_HEX(file_log_name, thisClass->m_szSigValue , SM2_BYTES_LEN + SM2_BYTES_LEN);
+
+err:
+
+	OpenSSL_Finalize();
+
+	return 0;
+}
+
+DWORD WINAPI ThreadFuncSKFImportECC512Certs(LPVOID aThisClass)
+{
+	FBCommonAPI * thisClass = (FBCommonAPI*)aThisClass;
+
+	thisClass->ulResult = CAPI_KEY_ECC512ImportCert(thisClass->m_szAuthKey, OPE_USB_TARGET_OTHER,1,
+		thisClass->m_szCertSIGN,thisClass->m_iCertSIGNLen,thisClass->m_szPIN,&(thisClass->m_ulRetry));
+	if(thisClass->ulResult)
+	{
+		goto err;
+	}
+	thisClass->ulResult = CAPI_KEY_ECC512ImportCert(thisClass->m_szAuthKey, OPE_USB_TARGET_OTHER,0,
+		thisClass->m_szCertEX,thisClass->m_iCertEXLen,thisClass->m_szPIN,&(thisClass->m_ulRetry));
+	if(thisClass->ulResult)
+	{
+		goto err;
+	}
+err:
+
+	return 0;
+}
+
+#endif

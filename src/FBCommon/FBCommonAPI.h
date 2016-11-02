@@ -52,9 +52,19 @@ public:
 	void InitArgsSKFSetUserPIN(FB::VariantList variantList);
 	void InitArgsSKFSetUserPINAndValidCode(FB::VariantList variantList);
 	// 初始化交换数字信封
+
+
 	void InitArgsSKFImportSM2KeyPair(FB::VariantList variantList);
-	void InitArgsSKFImportCerts(FB::VariantList variantList);
+	void InitArgsSKFImportSM2Certs(FB::VariantList variantList);
 	void InitArgsSKFSetUserPINAndUserInfo(FB::VariantList variantList);
+
+#if defined(GM_ECC_512_SUPPORT)
+	void InitArgsSKFImportECC512KeyPair(FB::VariantList variantList);
+	void InitArgsSKFImportECC512Certs(FB::VariantList variantList);
+#endif
+
+
+
 	void InitArgsShowCert(FB::VariantList variantList);
 
 	bool get_isrun();
