@@ -74,7 +74,7 @@ public:
 
 	std::string get_authKey();
 	std::string get_authKeyName();
-	unsigned long get_authKeyType();
+	unsigned int get_authKeyType();
 	std::string get_sigValue();
 
 	// 获取序列号
@@ -95,17 +95,17 @@ public:
 	FB_JSAPI_EVENT(usbevent, 2, (const FB::variant&, const int));
 	FB_JSAPI_EVENT(usbeventonoff, 2, (const FB::variant&, const int));
 
-	unsigned long ulResult;
+	unsigned int ulResult;
 	unsigned int m_ulRetry;
 
 	// 未签名的的证书请求
 	unsigned char m_szCsr[BUFFER_LEN_1K * 4]; 
-	unsigned long m_iCsrLen;
+	unsigned int m_iCsrLen;
 	unsigned char m_szSigValue[BUFFER_LEN_1K]; 
 	
 	// 签名的的证书请求
 	unsigned char m_szSignedCsr[BUFFER_LEN_1K * 4]; 
-	unsigned long m_iSignedCsrLen;
+	unsigned int m_iSignedCsrLen;
 
 	HANDLE hThrd; // 线程句柄
 	DWORD threadId;
@@ -126,19 +126,19 @@ public:
 
 	// 签名的的证书请求
 	unsigned char m_szSKFCsrSIGN[BUFFER_LEN_1K * 4]; 
-	unsigned long m_iSKFCsrSIGNLen;
+	unsigned int m_iSKFCsrSIGNLen;
 
 	// 签名证书
 	unsigned char m_szCertSIGN[BUFFER_LEN_1K * 4]; 
-	unsigned long m_iCertSIGNLen;
+	unsigned int m_iCertSIGNLen;
 
 	// 要显示的证书
 	unsigned char m_szCertShow[BUFFER_LEN_1K * 4]; 
-	unsigned long m_iCertShowLen;
+	unsigned int m_iCertShowLen;
 
 	// 交换证书
 	unsigned char m_szCertEX[BUFFER_LEN_1K * 4]; 
-	unsigned long m_iCertEXLen;
+	unsigned int m_iCertEXLen;
 
 	// 认证KEY
 	static OPT_ST_USB_META m_stMetaAuth;

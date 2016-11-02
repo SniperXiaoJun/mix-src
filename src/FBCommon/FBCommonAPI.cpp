@@ -457,7 +457,7 @@ unsigned int FBCommonAPI::get_ulRetry()
 	return m_ulRetry;
 }
 
-unsigned long FBCommonAPI::get_authKeyType()
+unsigned int FBCommonAPI::get_authKeyType()
 {
 	return m_stMetaAuth.uiUSBMetaManType;
 }
@@ -490,13 +490,13 @@ DWORD WINAPI ThreadFuncSKFGenCSR(LPVOID aThisClass)
 {
 	FBCommonAPI * thisClass = (FBCommonAPI*)aThisClass;
 
-	unsigned long ulPublicKeyLen = 2 * SM2_BYTES_LEN + 1;
+	unsigned int ulPublicKeyLen = 2 * SM2_BYTES_LEN + 1;
 	unsigned char pbPublicKey[2 * SM2_BYTES_LEN + 1] = {0};
 	unsigned char pbDigest[SM2_BYTES_LEN] = {0};
 	unsigned int ulDigestLen = SM2_BYTES_LEN;
 
 	unsigned char szX509content[BUFFER_LEN_1K * 4];
-	unsigned long ulX509ContentLen = BUFFER_LEN_1K * 4;
+	unsigned int ulX509ContentLen = BUFFER_LEN_1K * 4;
 
 	// ³õÊ¼»¯
 	thisClass->ulResult = OpenSSL_Initialize();
@@ -592,8 +592,8 @@ void FBCommonAPI::InitArgsSKFImportSM2KeyPair(FB::VariantList variantList)
 	int inBuffSize  = 0;
 
 	unsigned char szEnvelopedKeyBlobB64[BUFFER_LEN_1K * 4]; 
-	unsigned long ulEnvelopedKeyBlobB64Len = BUFFER_LEN_1K * 4;
-	unsigned long ulEnvelopedKeyBlobLen = BUFFER_LEN_1K * 4;
+	unsigned int ulEnvelopedKeyBlobB64Len = BUFFER_LEN_1K * 4;
+	unsigned int ulEnvelopedKeyBlobLen = BUFFER_LEN_1K * 4;
 
 	GetArrayLength(variantList,&inBuffSize);
 
@@ -778,9 +778,9 @@ void FBCommonAPI::InitArgsSKFSetUserPINAndUserInfo(FB::VariantList variantList)
 
 	GetArrayStrOfIndex(variantList,1, m_stMetaAuthAdd.szName, &ulNamelen);
 
-	GetArrayNumberOfIndex(variantList,2,(int *) &m_stMetaAuthAdd.ulUSBMetaManType);
+	GetArrayNumberOfIndex(variantList,2,(int *) &m_stMetaAuthAdd.uiUSBMetaManType);
 
-	m_stMetaAuthAdd.ulUSBMetaUseType = OPE_USB_META_USE_TYPE_AUTH;
+	m_stMetaAuthAdd.uiUSBMetaUseType = OPE_USB_META_USE_TYPE_AUTH;
 
 	ulResult = 0;
 }
@@ -790,7 +790,7 @@ void FBCommonAPI::InitArgsSKFImportCerts(FB::VariantList variantList)
 	int inBuffSize  = 0;
 
 	unsigned char data_value_cert_b64[BUFFER_LEN_1K * 4]; 
-	unsigned long data_len_cert_b64 = BUFFER_LEN_1K * 4;
+	unsigned int data_len_cert_b64 = BUFFER_LEN_1K * 4;
 
 	GetArrayLength(variantList,&inBuffSize);
 
@@ -824,7 +824,7 @@ void FBCommonAPI::InitArgsShowCert(FB::VariantList variantList)
 	int inBuffSize  = 0;
 
 	unsigned char data_value_cert_b64[BUFFER_LEN_1K * 4]; 
-	unsigned long data_len_cert_b64 = BUFFER_LEN_1K * 4;
+	unsigned int data_len_cert_b64 = BUFFER_LEN_1K * 4;
 
 	GetArrayLength(variantList,&inBuffSize);
 
@@ -988,61 +988,61 @@ void FBCommonAPI::InitArgsUserInfo(FB::VariantList aArrayArgIN)
 	memset(data_value,0,BUFFER_LEN_1K*2);
 	GetArrayWStrOfIndex(aArrayArgIN,0, data_value, &data_len);
 	UniToUTF8(data_value,userInfo.countryName);
-	userInfo.ulLenC = strlen(userInfo.countryName);
+	userInfo.uiLenC = strlen(userInfo.countryName);
 
 	data_len = BUFFER_LEN_1K;
 	memset(data_value,0,BUFFER_LEN_1K*2);
 	GetArrayWStrOfIndex(aArrayArgIN,1, data_value, &data_len);
 	UniToUTF8(data_value,userInfo.stateOrProvinceName);
-	userInfo.ulLenST = strlen(userInfo.stateOrProvinceName);
+	userInfo.uiLenST = strlen(userInfo.stateOrProvinceName);
 
 	data_len = BUFFER_LEN_1K;
 	memset(data_value,0,BUFFER_LEN_1K*2);
 	GetArrayWStrOfIndex(aArrayArgIN,2, data_value, &data_len);
 	UniToUTF8(data_value,userInfo.unstructuredName);
-	userInfo.ulLenUN = strlen(userInfo.unstructuredName);
+	userInfo.uiLenUN = strlen(userInfo.unstructuredName);
 
 	data_len = BUFFER_LEN_1K;
 	memset(data_value,0,BUFFER_LEN_1K*2);
 	GetArrayWStrOfIndex(aArrayArgIN,3, data_value, &data_len);
 	UniToUTF8(data_value,userInfo.localityName);
-	userInfo.ulLenL = strlen(userInfo.localityName);
+	userInfo.uiLenL = strlen(userInfo.localityName);
 
 	data_len = BUFFER_LEN_1K;
 	memset(data_value,0,BUFFER_LEN_1K*2);
 	GetArrayWStrOfIndex(aArrayArgIN,4, data_value, &data_len);
 	UniToUTF8(data_value,userInfo.organizationName);
-	userInfo.ulLenO = strlen(userInfo.organizationName);
+	userInfo.uiLenO = strlen(userInfo.organizationName);
 
 	data_len = BUFFER_LEN_1K;
 	memset(data_value,0,BUFFER_LEN_1K*2);
 	GetArrayWStrOfIndex(aArrayArgIN,5, data_value, &data_len);
 	UniToUTF8(data_value,userInfo.organizationalUnitName);
-	userInfo.ulLenOU = strlen(userInfo.organizationalUnitName);
+	userInfo.uiLenOU = strlen(userInfo.organizationalUnitName);
 
 	data_len = BUFFER_LEN_1K;
 	memset(data_value,0,BUFFER_LEN_1K*2);
 	GetArrayWStrOfIndex(aArrayArgIN,6, data_value, &data_len);
 	UniToUTF8(data_value,userInfo.commonName);
-	userInfo.ulLenCN = strlen(userInfo.commonName);
+	userInfo.uiLenCN = strlen(userInfo.commonName);
 
 	data_len = BUFFER_LEN_1K;
 	memset(data_value,0,BUFFER_LEN_1K*2);
 	GetArrayWStrOfIndex(aArrayArgIN,7, data_value, &data_len);
 	UniToUTF8(data_value,userInfo.emailAddress);
-	userInfo.ulLenEA = strlen(userInfo.emailAddress);
+	userInfo.uiLenEA = strlen(userInfo.emailAddress);
 
 	data_len = BUFFER_LEN_1K;
 	memset(data_value,0,BUFFER_LEN_1K*2);
 	GetArrayWStrOfIndex(aArrayArgIN,8, data_value, &data_len);
 	UniToUTF8(data_value,userInfo.challengePassword);
-	userInfo.ulLenCP = strlen(userInfo.challengePassword);
+	userInfo.uiLenCP = strlen(userInfo.challengePassword);
 
 	data_len = BUFFER_LEN_1K;
 	memset(data_value,0,BUFFER_LEN_1K*2);
 	GetArrayWStrOfIndex(aArrayArgIN,9, data_value, &data_len);
 	UniToUTF8(data_value,userInfo.idCardNumber);
-	userInfo.ulLenID = strlen(userInfo.idCardNumber);
+	userInfo.uiLenID = strlen(userInfo.idCardNumber);
 
 	GetArrayStrOfIndex(aArrayArgIN,10, m_szPIN, &m_iPINLen);
 	GetArrayNumberOfIndex(aArrayArgIN,11,&ulContype);
