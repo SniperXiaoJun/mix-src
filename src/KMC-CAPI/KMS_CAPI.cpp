@@ -3,7 +3,7 @@
 #include "o_all_type_def.h"
 #include "o_all_func_def.h"
 
-char DEFAULT_CONTAINER[] = "ContainerSM2";
+char DEFAULT_CONTAINER_SM2[] = "ContainerSM2";
 char DEFAULT_APPLICATION[] = "DEFAULT_APPLICATION";
 char DEFAULT_FILE_NAME[] = "DEFAULT_FILE_NAME";
 
@@ -269,13 +269,13 @@ unsigned int CAPI_KEY_SignDigest(char * pszKeyOn,int ulKeyTarget, char * pszPIN,
 		goto err;
 	}
 	// 创建或打开容器
-	if (ulConNameLists < 2)
+	if (NULL == strstr(szConNameLists,DEFAULT_CONTAINER_SM2))
 	{
-		ulRet = SKF_CreateContainer(hAppSKF, DEFAULT_CONTAINER, &hConSKF);
+		ulRet = SKF_CreateContainer(hAppSKF, DEFAULT_CONTAINER_SM2, &hConSKF);
 	}
 	else
 	{
-		ulRet = SKF_OpenContainer(hAppSKF, szConNameLists, &hConSKF);
+		ulRet = SKF_OpenContainer(hAppSKF, DEFAULT_CONTAINER_SM2, &hConSKF);
 	}
 
 	if(ulRet)
@@ -907,15 +907,15 @@ unsigned int CAPI_KEY_GenKeyPair(char * pszKeyOn, int ulKeyTarget,char * pszPIN,
 		goto err;
 	}
 
-	if (ulConNameLists < 2)
+	if (NULL == strstr(szConNameLists,DEFAULT_CONTAINER_SM2))
 	{
-		ulRet = SKF_CreateContainer(hAppSKF, DEFAULT_CONTAINER, &hConSKF);
+		ulRet = SKF_CreateContainer(hAppSKF, DEFAULT_CONTAINER_SM2, &hConSKF);
 		FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "SKF_CreateContainer");
 		FILE_LOG_NUMBER(file_log_name,(long)ulRet);
 	}
 	else
 	{
-		ulRet = SKF_OpenContainer(hAppSKF, szConNameLists, &hConSKF);
+		ulRet = SKF_OpenContainer(hAppSKF, DEFAULT_CONTAINER_SM2, &hConSKF);
 		FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "SKF_OpenContainer");
 		FILE_LOG_NUMBER(file_log_name,(long)ulRet);
 	}
@@ -1064,15 +1064,15 @@ unsigned int CAPI_KEY_ExportPK(char * pszKeyOn,int ulKeyTarget,unsigned int bIsS
 		goto err;
 	}
 
-	if (ulConNameLists < 2)
+	if (NULL == strstr(szConNameLists,DEFAULT_CONTAINER_SM2))
 	{
-		ulRet = SKF_CreateContainer(hAppSKF, DEFAULT_CONTAINER, &hConSKF);
+		ulRet = SKF_CreateContainer(hAppSKF, DEFAULT_CONTAINER_SM2, &hConSKF);
 		FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "SKF_CreateContainer");
 		FILE_LOG_NUMBER(file_log_name,(long)ulRet);
 	}
 	else
 	{
-		ulRet = SKF_OpenContainer(hAppSKF, szConNameLists, &hConSKF);
+		ulRet = SKF_OpenContainer(hAppSKF, DEFAULT_CONTAINER_SM2, &hConSKF);
 		FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "SKF_OpenContainer");
 		FILE_LOG_NUMBER(file_log_name,(long)ulRet);
 	}
@@ -1858,13 +1858,13 @@ unsigned int CAPI_KEY_ImportKeyPair(char * pszKeyOn,int ulKeyTarget, unsigned in
 		goto err;
 	}
 	// 创建或打开容器
-	if (ulConNameLists < 2)
+	if (NULL == strstr(szConNameLists,DEFAULT_CONTAINER_SM2))
 	{
-		ulRet = SKF_CreateContainer(hAppSKF, DEFAULT_CONTAINER, &hConSKF);
+		ulRet = SKF_CreateContainer(hAppSKF, DEFAULT_CONTAINER_SM2, &hConSKF);
 	}
 	else
 	{
-		ulRet = SKF_OpenContainer(hAppSKF, szConNameLists, &hConSKF);
+		ulRet = SKF_OpenContainer(hAppSKF, DEFAULT_CONTAINER_SM2, &hConSKF);
 	}
 
 	if(ulRet)
@@ -1994,13 +1994,13 @@ unsigned int CAPI_KEY_ImportCert(char * pszKeyOn,int ulKeyTarget, unsigned int b
 		goto err;
 	}
 	// 创建或打开容器
-	if (ulConNameLists < 2)
+	if (NULL == strstr(szConNameLists,DEFAULT_CONTAINER_SM2))
 	{
-		ulRet = SKF_CreateContainer(hAppSKF, DEFAULT_CONTAINER, &hConSKF);
+		ulRet = SKF_CreateContainer(hAppSKF, DEFAULT_CONTAINER_SM2, &hConSKF);
 	}
 	else
 	{
-		ulRet = SKF_OpenContainer(hAppSKF, szConNameLists, &hConSKF);
+		ulRet = SKF_OpenContainer(hAppSKF, DEFAULT_CONTAINER_SM2, &hConSKF);
 	}
 
 	if(ulRet)
