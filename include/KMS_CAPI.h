@@ -37,9 +37,23 @@ extern "C"
 	// 导出公钥
 	unsigned int CAPI_KEY_ExportPK(char * pszKeyOn,int ulKeyTarget,unsigned int bIsSign, unsigned char * pbPK);
 	// 导入密钥对
-	unsigned int CAPI_KEY_ImportKeyPair(char * pszKeyOn,int ulKeyTarget, unsigned char * pbKeyPair, char * pszPIN, unsigned int * pulRetry);
+	unsigned int CAPI_KEY_ImportKeyPair(char * pszKeyOn,int ulKeyTarget, unsigned int bIsSign, unsigned char * pbKeyPair, char * pszPIN, unsigned int * pulRetry);
 	// 导入证书
 	unsigned int CAPI_KEY_ImportCert(char * pszKeyOn,int ulKeyTarget, unsigned int bIsSign,unsigned char * pbCert,unsigned int ulCertLen, char * pszPIN, unsigned int * pulRetry);
+
+#if defined(GM_ECC_512_SUPPORT)
+	// 生成密钥对512
+	unsigned int CAPI_KEY_ECC512GenKeyPair(char * pszKeyOn,int ulKeyTarget, char * pszPIN, unsigned int * pulRetry);
+	// 数据签名512
+	unsigned int CAPI_KEY_ECC512SignDigest(char * pszKeyOn,int ulKeyTarget, char * pszPIN, unsigned char *pbDigest, unsigned char * pbSigValue, unsigned int * pulRetry);
+	// 导出公钥512
+	unsigned int CAPI_KEY_ECC512ExportPK(char * pszKeyOn,int ulKeyTarget,unsigned int bIsSign, unsigned char * pbPK);
+	// 导入密钥对512
+	unsigned int CAPI_KEY_ECC512ImportKeyPair(char * pszKeyOn,int ulKeyTarget,unsigned int bIsSign,unsigned char * pbKeyPair, char * pszPIN, unsigned int * pulRetry);
+	// 导入证书512
+	unsigned int CAPI_KEY_ECC512ImportCert(char * pszKeyOn,int ulKeyTarget, unsigned int bIsSign,unsigned char * pbCert,unsigned int ulCertLen, char * pszPIN, unsigned int * pulRetry);
+#endif
+
 	// 获取Key类型
 	unsigned int CAPI_KEY_GetMeta(char * pszKeyOn, int ulKeyTarget, OPT_ST_USB_META * pMeta);
 	// 检测目标Key是否存在

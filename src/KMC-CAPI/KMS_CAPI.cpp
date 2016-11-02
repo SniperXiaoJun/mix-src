@@ -1758,7 +1758,7 @@ err:
 }
 
 
-unsigned int CAPI_KEY_ImportKeyPair(char * pszKeyOn,int ulKeyTarget, unsigned char * pbKeyPair, char * pszPIN, unsigned int * pulRetry)
+unsigned int CAPI_KEY_ImportKeyPair(char * pszKeyOn,int ulKeyTarget, unsigned int bIsSign, unsigned char * pbKeyPair, char * pszPIN, unsigned int * pulRetry)
 {
 	char szDevNameLists[BUFFER_LEN_1K] = {0};
 	char szAppNameLists[BUFFER_LEN_1K] = {0};

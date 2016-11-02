@@ -667,7 +667,7 @@ DWORD WINAPI ThreadFuncSKFImportSM2KeyPair(LPVOID aThisClass)
 	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "thisClass->m_szAuthKey");
 	FILE_LOG_STRING(file_log_name,thisClass->m_szAuthKey);
 
-	thisClass->ulResult = CAPI_KEY_ImportKeyPair(thisClass->m_szAuthKey, OPE_USB_TARGET_OTHER,
+	thisClass->ulResult = CAPI_KEY_ImportKeyPair(thisClass->m_szAuthKey, OPE_USB_TARGET_OTHER,0,
 		(unsigned char *)&(thisClass->m_stEnvelopedKeyBlobEX),thisClass->m_szPIN,(unsigned int *)&(thisClass->m_ulRetry));
 
 
