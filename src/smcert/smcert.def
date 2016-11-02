@@ -1,0 +1,4 @@
+EXPORTS
+		WT_SetMyCert
+		WT_GetCertInfo
+		WT_ClearCert
