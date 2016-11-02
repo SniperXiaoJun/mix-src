@@ -660,10 +660,10 @@ int HexToTen(char *hex)
 static int UniToUTF8(wchar_t *strUnicode,char *szUtf8)
 {
 	//MessageBox(strUnicode);
-	int ilen = WideCharToMultiByte(CP_UTF8, 0, (LPCTSTR)strUnicode, -1, NULL, 0, NULL, NULL); 
+	int ilen = WideCharToMultiByte(CP_UTF8, 0, (wchar_t*)strUnicode, -1, NULL, 0, NULL, NULL); 
 	char *szUtf8Temp=new char[ilen + 1];
 	memset(szUtf8Temp, 0, ilen +1); 
-	WideCharToMultiByte (CP_UTF8, 0, (LPCTSTR)strUnicode, -1, szUtf8Temp, ilen, NULL,NULL); 
+	WideCharToMultiByte (CP_UTF8, 0, (wchar_t*)strUnicode, -1, szUtf8Temp, ilen, NULL,NULL); 
 	//size_t a = strlen(szUtf8Temp);
 	sprintf(szUtf8, "%s", szUtf8Temp);// 
 	delete[] szUtf8Temp; 
