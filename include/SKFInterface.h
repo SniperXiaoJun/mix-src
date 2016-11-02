@@ -22,6 +22,11 @@
 #define	SGD_SMS4_OFB	0x00000408		//SMS4算法OFB加密模式
 #define	SGD_SMS4_MAC	0x00000410		//SMS4算法MAC运算
 
+#define SGD_3DES_ECB	0x00000001  //3DES算法ECB加密模式
+
+#define	SGD_ZYJM_ECB	0x00000601		//ZYJM算法ECB模式
+#define	SGD_ZYJM_CBC	0x00000602		//ZYJM算法CBC模式
+
 //6.1.2	非对称密码算法标识
 //非对称密码算法标识仅定义了密码算法的类型，在使用非对称算法进行数字签名运算时，可将非对称密码算法标识符与密码杂凑算法
 //标识符进行"或"运算后使用，如"RSA with SHA1"可表示为SGD_RSA | SGD_SHA1，即0x00010002，"|"表示"或"运算。
@@ -31,6 +36,7 @@
 #define	SGD_SM2_1		0x00020100		//椭圆曲线签名算法
 #define	SGD_SM2_2		0x00020200		//椭圆曲线密钥交换协议
 #define	SGD_SM2_3		0x00020400		//椭圆曲线加密算法
+#define	SGD_ECC_512		0x00040100		//ECC512算法
 
 //6.1.3	密码杂凑算法标识
 //密码杂凑算法标识符可以在进行密码杂凑运算或计算MAC时应用，也可以与非对称密码算法标识符进行"或"运算后使用，表示签名运算
@@ -1185,6 +1191,28 @@ ULONG DEVAPI SKF_CloseHandle(HANDLE hHandle);
 //其他：	错误码。
 ULONG DEVAPI SKF_ECCDecrypt(HCONTAINER hContainer, BYTE *pbCiphertext, ULONG ulCiphertextLen, BYTE *pbPlaintext, ULONG *pulPlaintextLen);
 
+// ECC解密2
+//函数原型	ULONG DEVAPI SKF_ECCDecryptEx(HCONTAINER hContainer, PECCCIPHERBLOB pCipherText, BYTE *pbPlaintext, ULONG *pulPlaintextLen)
+//功能描述	ECC数据解密。用容器中解密私钥解密数据，解密后的结果存放到pbPlaintext中。
+//参数		hContainer		[IN] 密钥容器句柄。
+//			pCipherText		[IN] 待解密的数据。此参数为ECCCIPHERBLOB密文数据。
+//			pbPlaintext		[OUT] 解密后的明文，如果该参数为NULL，将由pulPlaintextLen返回所需要的内存空间大小。
+//			pulPlaintextLen	[IN OUT] 输入时表示pbPlaintext缓冲区的长度，输出时表示密文结果的长度。
+//返回值	SAR_OK：	成功。
+//其他：	错误码。
+ULONG DEVAPI SKF_ECCDecryptEx(HCONTAINER hContainer, PECCCIPHERBLOB pCipherText, BYTE *pbPlaintext, ULONG *pulPlaintextLen);
+
+
+// RSA解密
+//函数原型	ULONG DEVAPI SKF_RSAPriKeyOperation(HCONTAINER hContainer, BYTE *pbIn, ULONG ulInLen, BYTE *pbOut, ULONG *pulOutLen, BOOL bSignFlag)
+//参数		hContainer		[IN] 密钥容器句柄。
+//			pbIn			[IN] 输入数据。
+//			ulInLen			[IN] 输入数据长度。
+//			pbOut			[OUT] 输出数据。
+//			pulOutLen		[IN OUT] 输入时表示pbOut缓冲区的长度，输出时表示密文结果的长度。
+//			bSignFlag       [IN] 非0，表示使用签名密钥对；0，表示加密密钥对
+ULONG DEVAPI SKF_RSAPriKeyOperation(HCONTAINER hContainer, BYTE *pbIn, ULONG ulInLen, BYTE *pbOut, ULONG *pulOutLen, BOOL bSignFlag);
+
 
 // 获取应用安全状态
 //函数原型	ULONG DEVAPI SKF_GetSecureState (HAPPLICATION hApplication, ULONG *pulSecureState)
@@ -1194,6 +1222,32 @@ ULONG DEVAPI SKF_ECCDecrypt(HCONTAINER hContainer, BYTE *pbCiphertext, ULONG ulC
 //返回值	SAR_OK：	成功。
 //其他：	错误码。
 ULONG DEVAPI SKF_GetSecureState(HAPPLICATION hApplication, ULONG *pulSecureState);
+
+//7.6.20	ECC生成密钥协商参数并输出: 临时密钥对，使用固定值
+ULONG DEVAPI SKF_GenerateAgreementDataWithECCEx(HCONTAINER hContainer, ULONG ulAlgId,ECCPUBLICKEYBLOB*  pTempECCPubKeyBlob,BYTE* pbID, ULONG ulIDLen,HANDLE *phAgreementHandle);
+
+//7.6.21 ECC产生协商数据并计算会话密钥 扩展接口: 使用固定临时密钥对, 返回协商后的密钥
+ULONG DEVAPI SKF_GenerateAgreementDataAndKeyWithECCEx(HANDLE hContainer, ULONG ulAlgId,
+												ECCPUBLICKEYBLOB*  pSponsorECCPubKeyBlob, ECCPUBLICKEYBLOB*  pSponsorTempECCPubKeyBlob,
+												ECCPUBLICKEYBLOB*  pTempECCPubKeyBlob,
+												BYTE* pbID, ULONG ulIDLen, BYTE *pbSponsorID, ULONG ulSponsorIDLen,
+												BYTE *pbAgreementKey,
+												ULONG *pulAgreementKeyLen);
+
+//7.6.21 ECC产生协商数据并计算会话密钥 扩展接口: 输入B方临时密钥对, 返回协商后的密钥
+ULONG DEVAPI SKF_GenerateAgreementDataAndKeyWithECCEx2(HANDLE hContainer, ULONG ulAlgId,
+												ECCPUBLICKEYBLOB*  pSponsorECCPubKeyBlob, ECCPUBLICKEYBLOB*  pSponsorTempECCPubKeyBlob,
+												BYTE*  pbTempECCPair, // 数据格式：PubX(32字节) + PubY(32字节) + Pri(32字节)
+												BYTE* pbID, ULONG ulIDLen, BYTE *pbSponsorID, ULONG ulSponsorIDLen,
+												BYTE *pbAgreementKey,
+												ULONG *pulAgreementKeyLen);
+
+//7.6.22 ECC计算会话密钥 扩展接口: 返回协商后的密钥
+ULONG DEVAPI SKF_GenerateKeyWithECCEx(HANDLE hAgreementHandle,
+									ECCPUBLICKEYBLOB*  pECCPubKeyBlob,
+									ECCPUBLICKEYBLOB*  pTempECCPubKeyBlob,
+									BYTE* pbID, ULONG ulIDLen, 
+									BYTE *pbAgreementKey, ULONG *pulAgreementKeyLen);
 
 #ifdef __cplusplus
 }
