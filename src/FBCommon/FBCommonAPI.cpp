@@ -19,7 +19,7 @@
 #include "sm3.h"
 #include "sm2.h"
 #include "KMS_CAPI.h"
-#include "encodes_witch.h"
+#include "encode_switch.h"
 #include "WTF_Interface.h"
 
 static char DEFAULT_CONTAINER[] = "ContainerSM2";

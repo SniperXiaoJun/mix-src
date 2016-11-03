@@ -1,6 +1,6 @@
 
 
-#include "encodes_witch.h"
+#include "encode_switch.h"
 #include <windows.h>
 
 string GBKToUTF8(const std::string& strGBK) 
