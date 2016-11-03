@@ -384,6 +384,47 @@ extern "C" {
 	*/
 	COMMON_API void WTF_PrintErrorMsg();
 
+	/*
+	功能描述:	通过证书描述属性获取加密证书
+	*/
+	COMMON_API unsigned int __stdcall WTF_FindEnCertificateByCertDescProperty(
+		_In_ SK_CERT_DESC_PROPERTY * pCertDescProperty, _Out_ unsigned char * pbCert, _Inout_ unsigned int * pulCertLen
+		);
+
+	COMMON_API unsigned int __stdcall WTF_SM2GetAgreementKey(
+		_In_ SK_CERT_DESC_PROPERTY * pCertProperty, 
+		_In_ ULONG ulAlgId,
+		_Out_ ECCPUBLICKEYBLOB *pTempECCPubKeyBlobA, 
+		_In_ BYTE* pbIDA,
+		_In_ ULONG ulIDALen,
+		_In_ ECCPUBLICKEYBLOB *pECCPubKeyBlobB,
+		_In_ ECCPUBLICKEYBLOB *pTempECCPubKeyBlobB,
+		_In_ BYTE* pbIDB,
+		_In_ ULONG ulIDBLen,
+		_Out_ BYTE *pbAgreementKey, 
+		_Inout_ ULONG *pulAgreementKeyLen,
+		_In_ const char * pszPIN, 
+		_Inout_ ULONG * puiRetryCount);
+
+	COMMON_API unsigned int __stdcall WTF_SM2GetAgreementKeyEx(
+		_In_ BYTE* pbCert,
+		_In_ unsigned int ulCertLen,
+		_In_ int ulAlgId,
+		_Out_ BYTE* pbTempECCPubKeyBlobA,
+		_Inout_ int *pulTempECCPubKeyBlobALen,
+		_In_ BYTE* pbIDA,
+		_In_ int ulIDALen,
+		_In_ BYTE* pbECCPubKeyBlobB,
+		_In_ int  ulECCPubKeyBlobBLen,
+		_In_ BYTE* pbTempECCPubKeyBlobB,
+		_In_ int  ulTempECCPubKeyBlobBLen,
+		_In_ BYTE* pbIDB,
+		_In_ int ulIDBLen,
+		_Out_ BYTE *pbAgreementKey,
+		_Inout_ int *pulAgreementKeyLen,
+		_In_ const char * pszPIN,
+		_Inout_ int * puiRetryCount);
+
 #ifdef __cplusplus
 }
 #endif

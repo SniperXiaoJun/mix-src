@@ -45,6 +45,7 @@ typedef enum _EErr_SMC
 	EErr_SMC_NO_RIGHT,								// 没有权限
 	EErr_SMC_SET_CERT_CONTEXT_PROPERTY,				// 设置属性
 	EErr_SMC_INVALIDARG,                            // 参数错误
+	EErr_SMC_MEM_LES,                               // 内存不足
 	EErr_SMC_FAIL = -1,
 
 }EErr_SMC;
@@ -321,6 +322,52 @@ COMMON_API unsigned long WINAPI SMC_ImportUserCert(
 	BYTE * pbCert, 
 	unsigned long ulCertLen, 
 	SK_CERT_DESC_PROPERTY * pCertProperty
+	);
+
+
+/********* 
+新添加函数
+*********/
+
+/*
+说明：证书复制
+输入参数：pCertContext 原始证书上下文
+返回值：目标证书上下文
+注意：释放函数为SMC_CertFreeCertificateContext
+*/
+COMMON_API PCCERT_CONTEXT WINAPI SMC_CertDuplicateCertificateContext(
+	_In_ PCCERT_CONTEXT pCertContext
+	);
+
+/*
+说明：通过签名证书描述属性查找加密证书
+输入参数：pCertDescProperty 签名证书描述属性
+输出参数：目标证书
+返回值：
+注意：释放函数为SMC_CertFreeCertificateContext
+*/
+LONG WINAPI SMC_CertFindEnCertificateByCertDescProperty(
+	_In_ SK_CERT_DESC_PROPERTY * pCertDescProperty, _Out_ unsigned char * pbCert, _Inout_ unsigned int * pulCertLen
+	);
+
+/*
+说明：通过签名证书获取描述属性
+输入参数：原始证书
+输出参数：目标证书属性
+返回值：
+*/
+LONG WINAPI SMC_CertGetCertificateContextPropertyByCert(
+	_In_ unsigned char * pbSignCert, unsigned int ulSignCert, _Out_ SK_CERT_DESC_PROPERTY * pCertDescProperty
+	);
+
+/*
+说明：通过签名证书获取加密证书
+输入参数：原始证书
+输出参数：目标证书
+返回值：
+*/
+LONG WINAPI SMC_CertFindEnCertificateBySignCert(
+	_In_ unsigned char * pbSignCert, unsigned int ulSignCert, _Out_ unsigned char * pbCert, _Inout_ unsigned int * pulCertLen
 	);
 
 #ifdef __cplusplus
