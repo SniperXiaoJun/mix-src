@@ -10,6 +10,12 @@
 #include "SKFInterface.h"
 #pragma warning(disable:4996)
 
+#if USE_SELF_MUTEX
+#include "SDSCMutex.h"
+static char mutex_buffer[10] = "mutex";
+HANDLE hMutex = 0;
+#endif
+
 #define REG_ROOT_KEY HKEY_LOCAL_MACHINE
 #define REG_SUB_KEY_PREFIX "SOFTWARE\\Microsoft\\Cryptography\\Defaults\\SKF"
 #define REG_VALUE_PATH_KEYNAME "path"
@@ -22,13 +28,13 @@
 
 #define FUNC_NAME_INIT(FUNC_NAME_PREFIX,FUNC_NAME,FUNC_NAME_SUFFIX) (##FUNC_NAME_PREFIX##FUNC_NAME##FUNC_NAME_SUFFIX) = (pSKF_##FUNC_NAME)GetProcAddress(ghInst,"SKF_"#FUNC_NAME); \
 	if(!##FUNC_NAME_PREFIX##FUNC_NAME##FUNC_NAME_SUFFIX) \
-	{ \
+{ \
 	ulRet = EErr_SMC_DLL_PATH; \
 	goto err; \
-	}\
+}\
 	else \
-	{ \
-	} 
+{ \
+} 
 
 //#define FUNC_NAME_INIT_CONTINUE(FUNC_NAME_PREFIX,FUNC_NAME,FUNC_NAME_SUFFIX) (##FUNC_NAME_PREFIX##FUNC_NAME##FUNC_NAME_SUFFIX) = (pSKF_##FUNC_NAME)GetProcAddress(ghInst,"SKF_"#FUNC_NAME); \
 //	if(!##FUNC_NAME_PREFIX##FUNC_NAME##FUNC_NAME_SUFFIX) \
@@ -47,17 +53,17 @@
 #define FUNC_NAME_INIT_GetContainerType(FUNC_NAME_PREFIX,FUNC_NAME,FUNC_NAME_SUFFIX) \
 	(##FUNC_NAME_PREFIX##FUNC_NAME##FUNC_NAME_SUFFIX) = (pSKF_##FUNC_NAME)GetProcAddress(ghInst,"SKF_"#FUNC_NAME); \
 	if (!##FUNC_NAME_PREFIX##FUNC_NAME##FUNC_NAME_SUFFIX) \
-	{\
-		(##FUNC_NAME_PREFIX##FUNC_NAME##FUNC_NAME_SUFFIX) = (pSKF_##FUNC_NAME)GetProcAddress(ghInst,"SKF_GetContianerType"); \
-	}\
+{\
+	(##FUNC_NAME_PREFIX##FUNC_NAME##FUNC_NAME_SUFFIX) = (pSKF_##FUNC_NAME)GetProcAddress(ghInst,"SKF_GetContianerType"); \
+}\
 	if(!##FUNC_NAME_PREFIX##FUNC_NAME##FUNC_NAME_SUFFIX) \
-	{ \
+{ \
 	ulRet = EErr_SMC_DLL_PATH; \
 	goto err; \
-	}\
+}\
 	else \
-	{ \
-	} 
+{ \
+} 
 
 //#define FUNC_NAME_INIT_CONTINUE_GetContainerType(FUNC_NAME_PREFIX,FUNC_NAME,FUNC_NAME_SUFFIX) \
 //	(##FUNC_NAME_PREFIX##FUNC_NAME##FUNC_NAME_SUFFIX) = (pSKF_##FUNC_NAME)GetProcAddress(ghInst,"SKF_"#FUNC_NAME); \
@@ -104,11 +110,11 @@ typedef ULONG (DEVAPI *pSKF_GenerateAgreementDataWithECC)(HCONTAINER hContainer,
 typedef ULONG(DEVAPI *pSKF_GenerateAgreementDataWithECCEx)(HCONTAINER hContainer, ULONG ulAlgId, ECCPUBLICKEYBLOB*  pTempECCPubKeyBlob, BYTE* pbID, ULONG ulIDLen, HANDLE *phAgreementHandle);
 
 typedef ULONG(DEVAPI *pSKF_GenerateAgreementDataAndKeyWithECCEx)(HANDLE hContainer, ULONG ulAlgId,
-																ECCPUBLICKEYBLOB*  pSponsorECCPubKeyBlob, ECCPUBLICKEYBLOB*  pSponsorTempECCPubKeyBlob,
-																ECCPUBLICKEYBLOB*  pTempECCPubKeyBlob,
-																BYTE* pbID, ULONG ulIDLen, BYTE *pbSponsorID, ULONG ulSponsorIDLen,
-																BYTE *pbAgreementKey,
-																ULONG *pulAgreementKeyLen);
+	ECCPUBLICKEYBLOB*  pSponsorECCPubKeyBlob, ECCPUBLICKEYBLOB*  pSponsorTempECCPubKeyBlob,
+	ECCPUBLICKEYBLOB*  pTempECCPubKeyBlob,
+	BYTE* pbID, ULONG ulIDLen, BYTE *pbSponsorID, ULONG ulSponsorIDLen,
+	BYTE *pbAgreementKey,
+	ULONG *pulAgreementKeyLen);
 
 //7.6.22 ECC计算会话密钥 扩展接口: 返回协商后的密钥
 typedef ULONG (DEVAPI *pSKF_GenerateKeyWithECCEx)(HANDLE hAgreementHandle,
@@ -323,7 +329,7 @@ unsigned int __stdcall WTF_EnumDev(char * pszDevsName,unsigned int *puiDevsNameL
 	{
 		goto err;
 	}
-	
+
 	for (pCertContent = (SK_CERT_CONTENT *)data_value;pCertContent < data_value + data_len;)
 	{
 		ulOutLen += strlen(pCertContent->stProperty.szCommonName) + 1;
@@ -335,7 +341,7 @@ unsigned int __stdcall WTF_EnumDev(char * pszDevsName,unsigned int *puiDevsNameL
 	{
 		ulOutLen += 1;
 	}
-	
+
 
 	// 赋�?
 	pCertContent = (SK_CERT_CONTENT *)data_value;
@@ -449,7 +455,7 @@ unsigned int __stdcall WTF_EnumCert(const char *pszDevName,void * pvCertsValue,u
 		unsigned int ulLenTmp = 0;
 		char * pTmp = (char *)malloc(BUFFER_LEN_1K * BUFFER_LEN_1K);
 		char * pszDeviceName = NULL;
-		
+
 		// find pszDevName's szDeviceName
 		for (pCertContent = (SK_CERT_CONTENT *)data_value;pCertContent < data_value + data_len;)
 		{
@@ -537,6 +543,9 @@ unsigned int __stdcall WTF_ChangePIN(const char *pszDevName,unsigned int ulPINTy
 
 	SK_CERT_CONTENT * pCertContent = NULL;
 
+	DEVHANDLE hDev = NULL;
+	HAPPLICATION hAPP = NULL;
+
 	data_value = malloc(BUFFER_LEN_1K * BUFFER_LEN_1K);
 
 	memset(data_value, 0, data_len);
@@ -554,7 +563,7 @@ unsigned int __stdcall WTF_ChangePIN(const char *pszDevName,unsigned int ulPINTy
 		{
 			break;
 		}
-		
+
 		pCertContent = (BYTE *)pCertContent + pCertContent->nValueLen + sizeof(SK_CERT_CONTENT) ;
 	}
 
@@ -564,7 +573,7 @@ unsigned int __stdcall WTF_ChangePIN(const char *pszDevName,unsigned int ulPINTy
 		goto err;
 	}
 
-	
+
 	ulRet = WTF_ReadSKFPath(pCertContent->stProperty.szSKFName, dllPathValue, &dllPathLen);
 
 	if (0 != ulRet)
@@ -596,14 +605,24 @@ unsigned int __stdcall WTF_ChangePIN(const char *pszDevName,unsigned int ulPINTy
 	FUNC_NAME_INIT_GetContainerType(func_, GetContainerType,);
 
 	{
-		DEVHANDLE hDev = NULL;
-		HAPPLICATION hAPP = NULL;
-
 		ulRet = func_ConnectDev(pCertContent->stProperty.szDeviceName, &hDev);
 		if (0 != ulRet)
 		{
 			goto err;
 		}
+
+#if USE_SELF_MUTEX
+		if(ulRet=SDSCWaitMutex(mutex_buffer,INFINITE,&hMutex))
+		{
+			goto err;
+		}
+#else
+		ulRet = func_LockDev(hDev,0xFFFFFFFF);
+		if (0 != ulRet)
+		{
+			goto err;
+		}
+#endif
 
 		ulRet = func_OpenApplication(hDev,pCertContent->stProperty.szApplicationName,&hAPP);
 		if (0 != ulRet)
@@ -622,17 +641,38 @@ unsigned int __stdcall WTF_ChangePIN(const char *pszDevName,unsigned int ulPINTy
 		{
 			goto err;
 		}
-		ulRet = func_DisConnectDev(hDev);
+
+#if USE_SELF_MUTEX
+		SDSCReleaseMutex(hMutex);
+#else
+		func_UnlockDev(hDev);
+#endif
+
+		ulRet = func_DisConnectDev(hDev);hDev = NULL;
 		if (0 != ulRet)
 		{
 			goto err;
 		}
 	}
 
-	FreeLibrary(ghInst);//释放Dll函数
-	ghInst = NULL;
-	
 err:
+
+	if(hDev)
+	{
+#if USE_SELF_MUTEX
+		SDSCReleaseMutex(hMutex);
+#else
+		func_UnlockDev(hDev);
+#endif
+		func_DisConnectDev(hDev);hDev = NULL;
+	}
+
+	if(ghInst)
+	{
+		FreeLibrary(ghInst);//释放Dll函数
+		ghInst = NULL;
+	}
+
 	if (data_value)
 	{
 		free(data_value);
@@ -654,6 +694,9 @@ unsigned int __stdcall WTF_VerifyPIN(const char *pszDevName,unsigned int ulPINTy
 
 	SK_CERT_CONTENT * pCertContent = NULL;
 
+	DEVHANDLE hDev = NULL;
+	HAPPLICATION hAPP = NULL;
+
 	data_value = malloc(BUFFER_LEN_1K * BUFFER_LEN_1K);
 
 	memset(data_value, 0, data_len);
@@ -713,14 +756,25 @@ unsigned int __stdcall WTF_VerifyPIN(const char *pszDevName,unsigned int ulPINTy
 	FUNC_NAME_INIT_GetContainerType(func_, GetContainerType,);
 
 	{
-		DEVHANDLE hDev = NULL;
-		HAPPLICATION hAPP = NULL;
 
 		ulRet = func_ConnectDev(pCertContent->stProperty.szDeviceName, &hDev);
 		if (0 != ulRet)
 		{
 			goto err;
 		}
+
+#if USE_SELF_MUTEX
+		if(ulRet=SDSCWaitMutex(mutex_buffer,INFINITE,&hMutex))
+		{
+			goto err;
+		}
+#else
+		ulRet = func_LockDev(hDev,0xFFFFFFFF);
+		if (0 != ulRet)
+		{
+			goto err;
+		}
+#endif
 
 		ulRet = func_OpenApplication(hDev,pCertContent->stProperty.szApplicationName,&hAPP);
 		if (0 != ulRet)
@@ -739,17 +793,38 @@ unsigned int __stdcall WTF_VerifyPIN(const char *pszDevName,unsigned int ulPINTy
 		{
 			goto err;
 		}
-		ulRet = func_DisConnectDev(hDev);
+
+#if USE_SELF_MUTEX
+		SDSCReleaseMutex(hMutex);
+#else
+		func_UnlockDev(hDev);
+#endif
+
+		ulRet = func_DisConnectDev(hDev);hDev = NULL;
 		if (0 != ulRet)
 		{
 			goto err;
 		}
 	}
 
-	FreeLibrary(ghInst);//释放Dll函数
-	ghInst = NULL;
 
 err:
+	if(hDev)
+	{
+#if USE_SELF_MUTEX
+		SDSCReleaseMutex(hMutex);
+#else
+		func_UnlockDev(hDev);
+#endif
+		func_DisConnectDev(hDev);hDev = NULL;
+	}
+
+	if(ghInst)
+	{
+		FreeLibrary(ghInst);//释放Dll函数
+		ghInst = NULL;
+	}
+
 	if (data_value)
 	{
 		free(data_value);
@@ -765,6 +840,9 @@ unsigned int __stdcall WTF_ChangePINByCertProperty(SK_CERT_DESC_PROPERTY * pCert
 
 	unsigned int dllPathLen = BUFFER_LEN_1K;
 	char dllPathValue[BUFFER_LEN_1K] = {0};
+
+	DEVHANDLE hDev = NULL;
+	HAPPLICATION hAPP = NULL;
 
 	ulRet = WTF_ReadSKFPath(pCertProperty->szSKFName, dllPathValue, &dllPathLen);
 
@@ -797,14 +875,26 @@ unsigned int __stdcall WTF_ChangePINByCertProperty(SK_CERT_DESC_PROPERTY * pCert
 	FUNC_NAME_INIT_GetContainerType(func_, GetContainerType,);
 
 	{
-		DEVHANDLE hDev = NULL;
-		HAPPLICATION hAPP = NULL;
+
 
 		ulRet = func_ConnectDev(pCertProperty->szDeviceName, &hDev);
 		if (0 != ulRet)
 		{
 			goto err;
 		}
+
+#if USE_SELF_MUTEX
+		if(ulRet=SDSCWaitMutex(mutex_buffer,INFINITE,&hMutex))
+		{
+			goto err;
+		}
+#else
+		ulRet = func_LockDev(hDev,0xFFFFFFFF);
+		if (0 != ulRet)
+		{
+			goto err;
+		}
+#endif
 
 		ulRet = func_OpenApplication(hDev,pCertProperty->szApplicationName,&hAPP);
 		if (0 != ulRet)
@@ -823,17 +913,38 @@ unsigned int __stdcall WTF_ChangePINByCertProperty(SK_CERT_DESC_PROPERTY * pCert
 		{
 			goto err;
 		}
-		ulRet = func_DisConnectDev(hDev);
+
+#if USE_SELF_MUTEX
+		SDSCReleaseMutex(hMutex);
+#else
+		func_UnlockDev(hDev);
+#endif
+
+		ulRet = func_DisConnectDev(hDev);hDev = NULL;
 		if (0 != ulRet)
 		{
 			goto err;
 		}
 	}
 
-	FreeLibrary(ghInst);//释放Dll函数
-	ghInst = NULL;
-
 err:
+
+	if(hDev)
+	{
+#if USE_SELF_MUTEX
+		SDSCReleaseMutex(hMutex);
+#else
+		func_UnlockDev(hDev);
+#endif
+		func_DisConnectDev(hDev);hDev = NULL;
+	}
+
+	if(ghInst)
+	{
+		FreeLibrary(ghInst);//释放Dll函数
+		ghInst = NULL;
+	}
+
 
 	return ulRet;
 }
@@ -845,6 +956,9 @@ unsigned int __stdcall WTF_GetDevInfoByCertProperty(SK_CERT_DESC_PROPERTY * pCer
 
 	unsigned int dllPathLen = BUFFER_LEN_1K;
 	char dllPathValue[BUFFER_LEN_1K] = {0};
+
+	DEVHANDLE hDev = NULL;
+	HAPPLICATION hAPP = NULL;
 
 	// 读取路径
 	ulRet = WTF_ReadSKFPath(pCertProperty->szSKFName, dllPathValue, &dllPathLen);
@@ -880,8 +994,7 @@ unsigned int __stdcall WTF_GetDevInfoByCertProperty(SK_CERT_DESC_PROPERTY * pCer
 
 	// 获取设备信息
 	{
-		DEVHANDLE hDev = NULL;
-		HAPPLICATION hAPP = NULL;
+
 
 		ulRet = func_ConnectDev(pCertProperty->szDeviceName, &hDev);
 		if (0 != ulRet)
@@ -889,18 +1002,54 @@ unsigned int __stdcall WTF_GetDevInfoByCertProperty(SK_CERT_DESC_PROPERTY * pCer
 			goto err;
 		}
 
-		ulRet = func_GetDevInfo(hDev,pDevInfo);
-
-		if (hDev)
+#if USE_SELF_MUTEX
+		if(ulRet=SDSCWaitMutex(mutex_buffer,INFINITE,&hMutex))
 		{
-			func_DisConnectDev(hDev);
+			goto err;
+		}
+#else
+		ulRet = func_LockDev(hDev,0xFFFFFFFF);
+		if (0 != ulRet)
+		{
+			goto err;
+		}
+#endif
+
+		ulRet = func_GetDevInfo(hDev,pDevInfo);
+		if (0 != ulRet)
+		{
+			goto err;
+		}
+
+		if(hDev)
+		{
+#if USE_SELF_MUTEX
+			SDSCReleaseMutex(hMutex);
+#else
+			func_UnlockDev(hDev);
+#endif
+			ulRet = func_DisConnectDev(hDev);hDev = NULL;
 		}
 	}
 
-	FreeLibrary(ghInst);//释放Dll函数
-	ghInst = NULL;
 
 err:
+
+	if(hDev)
+	{
+#if USE_SELF_MUTEX
+		SDSCReleaseMutex(hMutex);
+#else
+		func_UnlockDev(hDev);
+#endif
+		func_DisConnectDev(hDev);hDev = NULL;
+	}
+
+	if(ghInst)
+	{
+		FreeLibrary(ghInst);//释放Dll函数
+		ghInst = NULL;
+	}
 
 	return ulRet;
 }
@@ -912,6 +1061,9 @@ unsigned int __stdcall WTF_VerifyPINByCertProperty(SK_CERT_DESC_PROPERTY * pCert
 
 	unsigned int dllPathLen = BUFFER_LEN_1K;
 	char dllPathValue[BUFFER_LEN_1K] = {0};
+
+	DEVHANDLE hDev = NULL;
+	HAPPLICATION hAPP = NULL;
 
 	ulRet = WTF_ReadSKFPath(pCertProperty->szSKFName, dllPathValue, &dllPathLen);
 
@@ -944,14 +1096,26 @@ unsigned int __stdcall WTF_VerifyPINByCertProperty(SK_CERT_DESC_PROPERTY * pCert
 	FUNC_NAME_INIT_GetContainerType(func_, GetContainerType,);
 
 	{
-		DEVHANDLE hDev = NULL;
-		HAPPLICATION hAPP = NULL;
+
 
 		ulRet = func_ConnectDev(pCertProperty->szDeviceName, &hDev);
 		if (0 != ulRet)
 		{
 			goto err;
 		}
+
+#if USE_SELF_MUTEX
+		if(ulRet=SDSCWaitMutex(mutex_buffer,INFINITE,&hMutex))
+		{
+			goto err;
+		}
+#else
+		ulRet = func_LockDev(hDev,0xFFFFFFFF);
+		if (0 != ulRet)
+		{
+			goto err;
+		}
+#endif
 
 		ulRet = func_OpenApplication(hDev,pCertProperty->szApplicationName,&hAPP);
 		if (0 != ulRet)
@@ -970,160 +1134,40 @@ unsigned int __stdcall WTF_VerifyPINByCertProperty(SK_CERT_DESC_PROPERTY * pCert
 		{
 			goto err;
 		}
-		ulRet = func_DisConnectDev(hDev);
+
+#if USE_SELF_MUTEX
+		SDSCReleaseMutex(hMutex);
+#else
+		func_UnlockDev(hDev);
+#endif
+
+		ulRet = func_DisConnectDev(hDev);hDev = NULL;
 		if (0 != ulRet)
 		{
 			goto err;
 		}
 	}
 
-	FreeLibrary(ghInst);//释放Dll函数
-	ghInst = NULL;
-
 err:
+
+	if(hDev)
+	{
+#if USE_SELF_MUTEX
+		SDSCReleaseMutex(hMutex);
+#else
+		func_UnlockDev(hDev);
+#endif
+		func_DisConnectDev(hDev);hDev = NULL;
+	}
+
+	if(ghInst)
+	{
+		FreeLibrary(ghInst);//释放Dll函数
+		ghInst = NULL;
+	}
 
 	return ulRet;
 }
-
-
-//unsigned int __stdcall WTF_SM2SignData(const char * pszDevName, const char * pszPIN, BYTE *pbData, ULONG  ulDataLen, PECCSIGNATUREBLOB pSignature,unsigned int * puiRetryCount)
-//{
-//	unsigned int ulRet = 0;
-//
-//	char * data_value;
-//	unsigned int data_len = BUFFER_LEN_1K * BUFFER_LEN_1K;
-//
-//	unsigned int dllPathLen = BUFFER_LEN_1K;
-//	char dllPathValue[BUFFER_LEN_1K] = {0};
-//
-//	char * str_dll_reg = NULL;
-//
-//	SK_CERT_CONTENT * pCertContent = NULL;
-//
-//	data_value = malloc(BUFFER_LEN_1K * BUFFER_LEN_1K);
-//
-//	memset(data_value, 0, data_len);
-//
-//	ulRet = WTF_EnumCertInternal(NULL,data_value,&data_len,CERT_ALG_SM2_FLAG,CERT_SIGN_FLAG,0,0);
-//
-//	if(ulRet)
-//	{
-//		goto err;
-//	}
-//
-//	for (pCertContent = (SK_CERT_CONTENT *)data_value;pCertContent < data_value + data_len;)
-//	{
-//		if (0 == strcmp(pCertContent->stProperty.szCommonName,pszDevName))
-//		{
-//			break;
-//		}
-//
-//		pCertContent = (BYTE *)pCertContent + pCertContent->nValueLen + sizeof(SK_CERT_CONTENT) ;
-//	}
-//
-//	if (pCertContent >= data_value + data_len)
-//	{
-//		ulRet = EErr_SMC_DLL_REG_PATH;
-//		goto err;
-//	}
-//
-//	ulRet = WTF_ReadSKFPath(pCertContent->stProperty.szSKFName, dllPathValue, &dllPathLen);
-//
-//	if (0 != ulRet)
-//	{
-//		ulRet = EErr_SMC_DLL_REG_PATH;
-//		goto err;
-//	}
-//
-//	ghInst=LoadLibraryA(dllPathValue);//动态加载Dll
-//
-//	if (!ghInst)
-//	{
-//		ulRet = EErr_SMC_DLL_PATH;
-//		goto err;
-//	}
-//
-//	FUNC_NAME_INIT(func_, EnumDev,);
-//	FUNC_NAME_INIT(func_, ConnectDev,);
-//	FUNC_NAME_INIT(func_, DisConnectDev,);
-//	FUNC_NAME_INIT(func_, ChangePIN,);
-//	FUNC_NAME_INIT(func_, OpenApplication,);
-//	FUNC_NAME_INIT(func_, CloseApplication,);
-//	FUNC_NAME_INIT(func_, EnumApplication,);
-//	FUNC_NAME_INIT(func_, ExportCertificate,);
-//	FUNC_NAME_INIT(func_, EnumContainer,);
-//	FUNC_NAME_INIT(func_, OpenContainer,);
-//	FUNC_NAME_INIT(func_, CloseContainer,);
-//	FUNC_NAME_INIT(func_, VerifyPIN,);
-//	FUNC_NAME_INIT_GetContainerType(func_, GetContainerType,);
-//
-//	FUNC_NAME_INIT(func_, ECCSignData,);
-//
-//	{
-//		DEVHANDLE hDev = NULL;
-//		HAPPLICATION hAPP = NULL;
-//		HCONTAINER hCon = NULL;
-//
-//		ulRet = func_ConnectDev(pCertContent->stProperty.szDeviceName, &hDev);
-//		if (0 != ulRet)
-//		{
-//			goto err;
-//		}
-//
-//		ulRet = func_OpenApplication(hDev,pCertContent->stProperty.szApplicationName,&hAPP);
-//		if (0 != ulRet)
-//		{
-//			goto err;
-//		}
-//
-//		ulRet = func_VerifyPIN(hAPP, 1, pszPIN, puiRetryCount);
-//		if (0 != ulRet)
-//		{
-//			goto err;
-//		}
-//
-//		ulRet = func_OpenContainer(hAPP, pCertContent->stProperty.szContainerName, &hCon);
-//		if (0 != ulRet)
-//		{
-//			goto err;
-//		}
-//
-//		ulRet = func_ECCSignData(hCon,pbData,ulDataLen,pSignature);
-//		if (0 != ulRet)
-//		{
-//			goto err;
-//		}
-//
-//		ulRet = func_CloseContainer(hCon);
-//		if (0 != ulRet)
-//		{
-//			goto err;
-//		}
-//
-//		ulRet = func_CloseApplication(hAPP);
-//		if (0 != ulRet)
-//		{
-//			goto err;
-//		}
-//		ulRet = func_DisConnectDev(hDev);
-//		if (0 != ulRet)
-//		{
-//			goto err;
-//		}
-//	}
-//
-//	FreeLibrary(ghInst);//释放Dll函数
-//	ghInst = NULL;
-//
-//err:
-//	if (data_value)
-//	{
-//		free(data_value);
-//		data_value = NULL;
-//	}
-//
-//	return ulRet;
-//}
 
 unsigned int __stdcall WTF_SM2SignDigest(SK_CERT_DESC_PROPERTY * pCertProperty, const char * pszPIN, BYTE *pbData, unsigned int ulDataLen, PECCSIGNATUREBLOB pSignature,unsigned int * puiRetryCount)
 {
@@ -1132,6 +1176,9 @@ unsigned int __stdcall WTF_SM2SignDigest(SK_CERT_DESC_PROPERTY * pCertProperty, 
 
 	unsigned int dllPathLen = BUFFER_LEN_1K;
 	char dllPathValue[BUFFER_LEN_1K] = {0};
+	DEVHANDLE hDev = NULL;
+	HAPPLICATION hAPP = NULL;
+	HCONTAINER hCon = NULL;
 
 	ulRet = WTF_ReadSKFPath(pCertProperty->szSKFName, dllPathValue, &dllPathLen);
 
@@ -1165,15 +1212,26 @@ unsigned int __stdcall WTF_SM2SignDigest(SK_CERT_DESC_PROPERTY * pCertProperty, 
 	FUNC_NAME_INIT(func_, ECCSignData,);
 
 	{
-		DEVHANDLE hDev = NULL;
-		HAPPLICATION hAPP = NULL;
-		HCONTAINER hCon = NULL;
+
 
 		ulRet = func_ConnectDev(pCertProperty->szDeviceName, &hDev);
 		if (0 != ulRet)
 		{
 			goto err;
 		}
+
+#if USE_SELF_MUTEX
+		if(ulRet=SDSCWaitMutex(mutex_buffer,INFINITE,&hMutex))
+		{
+			goto err;
+		}
+#else
+		ulRet = func_LockDev(hDev,0xFFFFFFFF);
+		if (0 != ulRet)
+		{
+			goto err;
+		}
+#endif
 
 		ulRet = func_OpenApplication(hDev,pCertProperty->szApplicationName,&hAPP);
 		if (0 != ulRet)
@@ -1210,134 +1268,40 @@ unsigned int __stdcall WTF_SM2SignDigest(SK_CERT_DESC_PROPERTY * pCertProperty, 
 		{
 			goto err;
 		}
-		ulRet = func_DisConnectDev(hDev);
+
+#if USE_SELF_MUTEX
+		SDSCReleaseMutex(hMutex);
+#else
+		func_UnlockDev(hDev);
+#endif
+
+		ulRet = func_DisConnectDev(hDev);hDev = NULL;
 		if (0 != ulRet)
 		{
 			goto err;
 		}
 	}
 
-	FreeLibrary(ghInst);//释放Dll函数
-	ghInst = NULL;
-
 err:
+
+	if(hDev)
+	{
+#if USE_SELF_MUTEX
+		SDSCReleaseMutex(hMutex);
+#else
+		func_UnlockDev(hDev);
+#endif
+		func_DisConnectDev(hDev);hDev = NULL;
+	}
+
+	if(ghInst)
+	{
+		FreeLibrary(ghInst);//释放Dll函数
+		ghInst = NULL;
+	}
 
 	return ulRet;
 }
-
-
-
-//unsigned int __stdcall WTF_SM2Verify(const char * pszDevName, ECCPUBLICKEYBLOB* pECCPubKeyBlob, BYTE *pbData, ULONG  ulDataLen, PECCSIGNATUREBLOB pSignature)
-//{
-//	unsigned int ulRet = 0;
-//
-//	char * data_value;
-//	unsigned int data_len = BUFFER_LEN_1K * BUFFER_LEN_1K;
-//
-//	unsigned int dllPathLen = BUFFER_LEN_1K;
-//	char dllPathValue[BUFFER_LEN_1K] = {0};
-//
-//	char * str_dll_reg = NULL;
-//
-//	SK_CERT_CONTENT * pCertContent = NULL;
-//
-//	data_value = malloc(BUFFER_LEN_1K * BUFFER_LEN_1K);
-//
-//	memset(data_value, 0, data_len);
-//
-//	ulRet = WTF_EnumCertInternal(NULL,data_value,&data_len,CERT_ALG_SM2_FLAG,CERT_SIGN_FLAG,0,0);
-//
-//	if(ulRet)
-//	{
-//		goto err;
-//	}
-//
-//	for (pCertContent = (SK_CERT_CONTENT *)data_value;pCertContent < data_value + data_len;)
-//	{
-//		if (0 == strcmp(pCertContent->stProperty.szCommonName,pszDevName))
-//		{
-//			break;
-//		}
-//
-//		pCertContent = (BYTE *)pCertContent + pCertContent->nValueLen + sizeof(SK_CERT_CONTENT) ;
-//	}
-//
-//	if (pCertContent >= data_value + data_len)
-//	{
-//		ulRet = EErr_SMC_DLL_REG_PATH;
-//		goto err;
-//	}
-//
-//	ulRet = WTF_ReadSKFPath(pCertContent->stProperty.szSKFName, dllPathValue, &dllPathLen);
-//
-//	if (0 != ulRet)
-//	{
-//		ulRet = EErr_SMC_DLL_REG_PATH;
-//		goto err;
-//	}
-//
-//	ghInst=LoadLibraryA(dllPathValue);//动态加载Dll
-//
-//	if (!ghInst)
-//	{
-//		ulRet = EErr_SMC_DLL_PATH;
-//		goto err;
-//	}
-//
-//	FUNC_NAME_INIT(func_, EnumDev,);
-//	FUNC_NAME_INIT(func_, ConnectDev,);
-//	FUNC_NAME_INIT(func_, DisConnectDev,);
-//	FUNC_NAME_INIT(func_, ChangePIN,);
-//	FUNC_NAME_INIT(func_, OpenApplication,);
-//	FUNC_NAME_INIT(func_, CloseApplication,);
-//	FUNC_NAME_INIT(func_, EnumApplication,);
-//	FUNC_NAME_INIT(func_, ExportCertificate,);
-//	FUNC_NAME_INIT(func_, EnumContainer,);
-//	FUNC_NAME_INIT(func_, OpenContainer,);
-//	FUNC_NAME_INIT(func_, CloseContainer,);
-//	FUNC_NAME_INIT(func_, VerifyPIN,);
-//	FUNC_NAME_INIT_GetContainerType(func_, GetContainerType,);
-//	//FUNC_NAME_INIT(func_, ECCVerify,);
-//
-//	FUNC_NAME_INIT(func_, ExtECCVerify,);
-//
-//	{
-//		DEVHANDLE hDev = NULL;
-//
-//		ulRet = func_ConnectDev(pCertContent->stProperty.szDeviceName, &hDev);
-//		if (0 != ulRet)
-//		{
-//			goto err;
-//		}
-//
-//		ulRet = func_ExtECCVerify(hDev,pECCPubKeyBlob,pbData,ulDataLen,pSignature);
-//		//ulRet = func_ECCVerify(hDev,pECCPubKeyBlob,pbData,ulDataLen,pSignature);
-//		if (0 != ulRet)
-//		{
-//			goto err;
-//		}
-//
-//		ulRet = func_DisConnectDev(hDev);
-//		if (0 != ulRet)
-//		{
-//			goto err;
-//		}
-//	}
-//
-//	FreeLibrary(ghInst);//释放Dll函数
-//	ghInst = NULL;
-//
-//err:
-//	if (data_value)
-//	{
-//		free(data_value);
-//		data_value = NULL;
-//	}
-//
-//	return ulRet;
-//}
-
-
 
 unsigned int __stdcall WTF_SM2VerifyDigest(ECCPUBLICKEYBLOB* pECCPubKeyBlob, BYTE *pbData, ULONG  ulDataLen, PECCSIGNATUREBLOB pSignature)
 {
@@ -1458,7 +1422,7 @@ err:
 		free(data_value);
 		data_value = NULL;
 	}
-	
+
 	return ulRet;
 }
 
@@ -1567,7 +1531,7 @@ unsigned int __stdcall WTF_VerifyCert(unsigned int ulFlag,unsigned int ulAlgType
 						{
 							goto err;
 						}
-					
+
 					}
 
 					ulRet = CertVerifySubjectCertificateContext(certContext_IN, certContext_OUT,&dwFlags);
@@ -1631,7 +1595,7 @@ unsigned int __stdcall WTF_VerifyCert(unsigned int ulFlag,unsigned int ulAlgType
 				}
 
 				// 打开存储�?		
-				
+
 				hCertStore = SMC_CertOpenStore(0,CERT_SYSTEM_STORE_CURRENT_USER, DEFAULT_SMC_STORE_SM2_ROOT_ID);
 
 				if (NULL == hCertStore)
@@ -1655,7 +1619,7 @@ unsigned int __stdcall WTF_VerifyCert(unsigned int ulFlag,unsigned int ulAlgType
 					{
 						// 验证上级证书
 						ulRet = WTF_VerifyCert(ulFlag,ulAlgType, certContext_OUT->pbCertEncoded,certContext_OUT->cbCertEncoded);
-					
+
 						if (ulRet)
 						{
 							goto err;
@@ -1762,7 +1726,7 @@ unsigned int __stdcall WTF_VerifyRootCert(unsigned int ulFlag,unsigned int ulAlg
 
 				DWORD  dwFlags = CERT_STORE_SIGNATURE_FLAG ;
 
-				
+
 				ulRet = CertVerifySubjectCertificateContext(certContext_IN, certContext_IN,&dwFlags);
 				if(TRUE != ulRet)
 				{
@@ -1873,7 +1837,7 @@ unsigned int __stdcall WTF_CertGetProperty(BYTE* pbCert, unsigned int ulCertLen,
 		CERT_NAME_BLOB subjectBlob;
 		SYSTEMTIME sysTime;
 		char szTime[128] = {0};
-		
+
 		pCertContext = CertCreateCertificateContext(X509_ASN_ENCODING, pbCert, ulCertLen);
 
 		if (NULL == pCertContext)
@@ -1887,7 +1851,7 @@ unsigned int __stdcall WTF_CertGetProperty(BYTE* pbCert, unsigned int ulCertLen,
 		snBlob = pCertContext->pCertInfo->SerialNumber; // 证书SN
 		issuerBlob = pCertContext->pCertInfo->Issuer; // 证书颁发�?
 		subjectBlob = pCertContext->pCertInfo->Subject; // 证书主题
-		
+
 		// 证书有效起始日期
 		memset(&sysTime, 0, sizeof(sysTime));
 		FileTimeToSystemTime(&pCertContext->pCertInfo->NotBefore, &sysTime);
@@ -1909,7 +1873,7 @@ unsigned int __stdcall WTF_CertGetProperty(BYTE* pbCert, unsigned int ulCertLen,
 err:
 
 	return ulRet;
-	
+
 }
 
 #include "Cryptuiapi.h"
@@ -1993,7 +1957,7 @@ COMMON_API unsigned int __stdcall WTF_ClearStore(unsigned int ulStoreID)
 				WTF_PrintErrorMsg();
 				break;
 			}
-			
+
 		}
 	}while(certContext_OUT);
 
@@ -2063,7 +2027,7 @@ COMMON_API unsigned int __stdcall WTF_ImportCaCert(BYTE * pbCert, unsigned int u
 
 	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "ulRet");
 	FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, ulRet);
-		
+
 	descProperty_IN = (SK_CERT_DESC_PROPERTY * )malloc(sizeof(SK_CERT_DESC_PROPERTY));
 
 	ulRet = SMC_CertCreateSMCStores();
@@ -2111,7 +2075,7 @@ COMMON_API unsigned int __stdcall WTF_ImportCaCert(BYTE * pbCert, unsigned int u
 				// string
 				);
 		}
-		
+
 	}
 
 	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "ulRet");
@@ -2143,7 +2107,7 @@ COMMON_API unsigned int __stdcall WTF_ImportCaCert(BYTE * pbCert, unsigned int u
 
 	// 设置属�?
 	ulRet = SMC_CertSetCertificateContextProperty(certContext_IN, CERT_DESC_PROP_ID,CERT_STORE_NO_CRYPT_RELEASE_FLAG, descProperty_IN);
-	
+
 	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "ulRet");
 	FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, ulRet);
 	if (!ulRet)
@@ -2151,7 +2115,7 @@ COMMON_API unsigned int __stdcall WTF_ImportCaCert(BYTE * pbCert, unsigned int u
 		WTF_PrintErrorMsg();
 		ulRet = EErr_SMC_SET_CERT_CONTEXT_PROPERTY;
 		goto err;
-		
+
 	}
 
 	// 保存证书
@@ -2163,7 +2127,7 @@ COMMON_API unsigned int __stdcall WTF_ImportCaCert(BYTE * pbCert, unsigned int u
 	{
 		// err message 
 		WTF_PrintErrorMsg();
-		
+
 		if (0x80070005 == GetLastError())
 		{
 			ulRet = EErr_SMC_NO_RIGHT;
@@ -2173,7 +2137,7 @@ COMMON_API unsigned int __stdcall WTF_ImportCaCert(BYTE * pbCert, unsigned int u
 			ulRet = EErr_SMC_ADD_CERT_TO_STORE;
 		}
 
-		
+
 		goto err;
 	}
 	else
@@ -2201,6 +2165,7 @@ err:
 
 	return ulRet;
 }
+
 
 
 unsigned int __stdcall WTF_EnumCertInternalBySKF(const char * pszSKFName, void * pvCertsValue,unsigned int *puiCertsLen, unsigned int ulKeyFlag, unsigned int ulSignFlag,unsigned int ulVerifyFlag, unsigned int ulFilterFlag)
@@ -2231,6 +2196,11 @@ unsigned int __stdcall WTF_EnumCertInternalBySKF(const char * pszSKFName, void *
 	unsigned int ulOutLen = 0;
 
 	SK_CERT_CONTENT * pCertContent = NULL;
+
+	DEVHANDLE hDev = NULL;
+
+
+
 
 	pTmp = (char *)malloc(BUFFER_LEN_1K * 4);
 	data_value = (char *)malloc(BUFFER_LEN_1K * BUFFER_LEN_1K);
@@ -2280,9 +2250,8 @@ unsigned int __stdcall WTF_EnumCertInternalBySKF(const char * pszSKFName, void *
 
 	for(ptrDev = szDevs; (ptrDev < szDevs + ulDevSize) && *ptrDev != 0;)
 	{
-		DEVHANDLE hDev = NULL;
-
 		DEVINFO devInfo;
+		hDev = NULL;
 
 		ulRet = func_ConnectDev(ptrDev, &hDev);
 		if (0 != ulRet)
@@ -2290,11 +2259,18 @@ unsigned int __stdcall WTF_EnumCertInternalBySKF(const char * pszSKFName, void *
 			goto err;
 		}
 
+#if USE_SELF_MUTEX
+		if(ulRet=SDSCWaitMutex(mutex_buffer,INFINITE,&hMutex))
+		{
+			goto err;
+		}
+#else
 		ulRet = func_LockDev(hDev,0xFFFFFFFF);
 		if (0 != ulRet)
 		{
 			goto err;
 		}
+#endif
 
 		//ulRet = func_GetDevInfo(hDev,&devInfo);
 		//if (0 != ulRet)
@@ -2307,7 +2283,11 @@ unsigned int __stdcall WTF_EnumCertInternalBySKF(const char * pszSKFName, void *
 		ulRet = func_EnumApplication(hDev, szAppNames, &ulAppsSize);
 		if (0 != ulRet)
 		{
+#if USE_SELF_MUTEX
+			SDSCReleaseMutex(hMutex);
+#else
 			func_UnlockDev(hDev);
+#endif
 			goto err;
 		}
 
@@ -2318,21 +2298,33 @@ unsigned int __stdcall WTF_EnumCertInternalBySKF(const char * pszSKFName, void *
 			ulRet = func_OpenApplication(hDev,ptrApp,&hAPP);
 			if (0 != ulRet)
 			{
+#if USE_SELF_MUTEX
+				SDSCReleaseMutex(hMutex);
+#else
 				func_UnlockDev(hDev);
+#endif
 				goto err;
 			}
 
 			ulRet = func_EnumContainer(hAPP,szConNames,&ulConSize);
 			if (0 != ulRet)
 			{
+#if USE_SELF_MUTEX
+				SDSCReleaseMutex(hMutex);
+#else
 				func_UnlockDev(hDev);
+#endif
 				goto err;
 			}
 
 			if (0 == ulConSize)
 			{
 				ulRet = EErr_SMC_DLL_PATH;
+#if USE_SELF_MUTEX
+				SDSCReleaseMutex(hMutex);
+#else
 				func_UnlockDev(hDev);
+#endif
 				goto err;
 			}
 
@@ -2344,7 +2336,11 @@ unsigned int __stdcall WTF_EnumCertInternalBySKF(const char * pszSKFName, void *
 				ulRet = func_OpenContainer(hAPP, ptrContainer, &hCon);
 				if (ulRet)
 				{
+#if USE_SELF_MUTEX
+					SDSCReleaseMutex(hMutex);
+#else
 					func_UnlockDev(hDev);
+#endif
 					goto err;
 				}
 
@@ -2352,7 +2348,11 @@ unsigned int __stdcall WTF_EnumCertInternalBySKF(const char * pszSKFName, void *
 				ulRet = func_GetContainerType(hCon, &ulContainerType);
 				if (ulRet)
 				{
+#if USE_SELF_MUTEX
+					SDSCReleaseMutex(hMutex);
+#else
 					func_UnlockDev(hDev);
+#endif
 					goto err;
 				}
 
@@ -2536,7 +2536,11 @@ unsigned int __stdcall WTF_EnumCertInternalBySKF(const char * pszSKFName, void *
 				ulRet = func_CloseContainer(hCon);
 				if (ulRet)
 				{
+#if USE_SELF_MUTEX
+					SDSCReleaseMutex(hMutex);
+#else
 					func_UnlockDev(hDev);
+#endif
 					goto err;
 				}
 
@@ -2556,9 +2560,13 @@ unsigned int __stdcall WTF_EnumCertInternalBySKF(const char * pszSKFName, void *
 			ptrApp += 1;
 		}
 
-		func_UnlockDev(hDev);
 
-		ulRet = func_DisConnectDev(hDev);
+#if USE_SELF_MUTEX
+		SDSCReleaseMutex(hMutex);
+#else
+		func_UnlockDev(hDev);
+#endif
+		ulRet = func_DisConnectDev(hDev);hDev = NULL;
 		if (0 != ulRet)
 		{
 			goto err;
@@ -2568,8 +2576,7 @@ unsigned int __stdcall WTF_EnumCertInternalBySKF(const char * pszSKFName, void *
 		ptrDev += 1;
 	}
 
-	FreeLibrary(ghInst);//释放Dll函数
-	ghInst = NULL;
+
 
 
 	if (* puiCertsLen < ulOutLen || (NULL == pvCertsValue))
@@ -2596,8 +2603,24 @@ unsigned int __stdcall WTF_EnumCertInternalBySKF(const char * pszSKFName, void *
 		* puiCertsLen = ulOutLen;
 	}
 
-
 err:
+	if(hDev)
+	{
+#if USE_SELF_MUTEX
+		SDSCReleaseMutex(hMutex);
+#else
+		func_UnlockDev(hDev);
+#endif
+		func_DisConnectDev(hDev);hDev = NULL;
+	}
+
+	if(ghInst)
+	{
+		FreeLibrary(ghInst);//释放Dll函数
+		ghInst = NULL;
+	}
+
+
 	if (pTmp)
 	{
 		free(pTmp);
@@ -2633,6 +2656,10 @@ unsigned int __stdcall WTF_EnumCertInternalByProperty(SK_CERT_DESC_PROPERTY * pC
 	unsigned int ulOutLen = 0;
 
 	SK_CERT_CONTENT * pCertContent = NULL;
+
+	DEVHANDLE hDev = NULL;
+
+	DEVINFO devInfo;
 
 	pTmp = (char *)malloc(BUFFER_LEN_1K * 4);
 	data_value = (char *)malloc(BUFFER_LEN_1K * BUFFER_LEN_1K);
@@ -2671,18 +2698,29 @@ unsigned int __stdcall WTF_EnumCertInternalByProperty(SK_CERT_DESC_PROPERTY * pC
 	pCertContent = (SK_CERT_CONTENT * )data_value;
 	i = 0;
 	ulOutLen = 0;
-	
+
 	// dev
 	{
-		DEVHANDLE hDev = NULL;
 
-		DEVINFO devInfo;
 
 		ulRet = func_ConnectDev(pCertProperty->szDeviceName, &hDev);
 		if (0 != ulRet)
 		{
 			goto err;
 		}
+
+#if USE_SELF_MUTEX
+		if(ulRet=SDSCWaitMutex(mutex_buffer,INFINITE,&hMutex))
+		{
+			goto err;
+		}
+#else
+		ulRet = func_LockDev(hDev,0xFFFFFFFF);
+		if (0 != ulRet)
+		{
+			goto err;
+		}
+#endif
 
 		// app
 		{
@@ -2921,17 +2959,20 @@ unsigned int __stdcall WTF_EnumCertInternalByProperty(SK_CERT_DESC_PROPERTY * pC
 
 		}
 
-		ulRet = func_DisConnectDev(hDev);
+
+#if USE_SELF_MUTEX
+		SDSCReleaseMutex(hMutex);
+#else
+		func_UnlockDev(hDev);
+#endif
+
+		ulRet = func_DisConnectDev(hDev);hDev = NULL;
 		if (0 != ulRet)
 		{
 			goto err;
 		}
 
 	}
-
-	FreeLibrary(ghInst);//释放Dll函数
-	ghInst = NULL;
-
 
 	if (* puiCertsLen < ulOutLen || (NULL == pvCertsValue))
 	{
@@ -2959,6 +3000,24 @@ unsigned int __stdcall WTF_EnumCertInternalByProperty(SK_CERT_DESC_PROPERTY * pC
 
 
 err:
+
+	if(hDev)
+	{
+#if USE_SELF_MUTEX
+		SDSCReleaseMutex(hMutex);
+#else
+		func_UnlockDev(hDev);
+#endif
+		func_DisConnectDev(hDev);hDev = NULL;
+	}
+
+	if(ghInst)
+	{
+		FreeLibrary(ghInst);//释放Dll函数
+		ghInst = NULL;
+	}
+
+
 	if (pTmp)
 	{
 		free(pTmp);
@@ -2993,7 +3052,7 @@ unsigned int __stdcall WTF_IsSM2RootCert(BYTE* pbCert, unsigned int ulCertLen,un
 		ulRet = EErr_SMC_CREATE_CERT_CONTEXT;
 		goto err;
 	}
-	
+
 	// 打开存储区		
 	hCertStore = SMC_CertOpenStore(0,CERT_SYSTEM_STORE_CURRENT_USER, DEFAULT_SMC_STORE_SM2_ROOT_ID);
 
@@ -3177,13 +3236,13 @@ unsigned int __stdcall WTF_FindSKFDriver(const char * pszSKFName, char * szVersi
 	}
 
 	sprintf(szVersion,"%d.%d.%d.%d",HIWORD(pFileInfo->dwFileVersionMS), LOWORD(pFileInfo->dwFileVersionMS), HIWORD(pFileInfo->dwFileVersionLS),LOWORD(pFileInfo->dwFileVersionLS));
-	
+
 err:
 	FreeLibrary(ghInst);//释放Dll函数
 
 	ghInst = NULL;
 
-	
+
 	if (pbVersionInfo)
 	{
 		free(pbVersionInfo);
@@ -3195,7 +3254,7 @@ err:
 
 
 void WTF_PrintErrorMsg()
-// err message 
+	// err message 
 {
 	LPVOID lpMsgBuf = NULL;
 
@@ -3231,6 +3290,10 @@ unsigned int __stdcall WTF_FindEnCertificateByCertDescProperty(
 	unsigned int dllPathLen = BUFFER_LEN_1K;
 	char dllPathValue[BUFFER_LEN_1K] = {0};
 
+	DEVHANDLE hDev = NULL;
+	HAPPLICATION hAPP = NULL;
+	HCONTAINER hCon = NULL;
+
 	ulRet = WTF_ReadSKFPath(pCertProperty->szSKFName, dllPathValue, &dllPathLen);
 
 	if (0 != ulRet)
@@ -3263,15 +3326,26 @@ unsigned int __stdcall WTF_FindEnCertificateByCertDescProperty(
 	FUNC_NAME_INIT(func_, ECCSignData,);
 
 	{
-		DEVHANDLE hDev = NULL;
-		HAPPLICATION hAPP = NULL;
-		HCONTAINER hCon = NULL;
+
 
 		ulRet = func_ConnectDev(pCertProperty->szDeviceName, &hDev);
 		if (0 != ulRet)
 		{
 			goto err;
 		}
+
+#if USE_SELF_MUTEX
+		if(ulRet=SDSCWaitMutex(mutex_buffer,INFINITE,&hMutex))
+		{
+			goto err;
+		}
+#else
+		ulRet = func_LockDev(hDev,0xFFFFFFFF);
+		if (0 != ulRet)
+		{
+			goto err;
+		}
+#endif
 
 		ulRet = func_OpenApplication(hDev,pCertProperty->szApplicationName,&hAPP);
 		if (0 != ulRet)
@@ -3298,17 +3372,32 @@ unsigned int __stdcall WTF_FindEnCertificateByCertDescProperty(
 		{
 			goto err;
 		}
-		ulRet = func_DisConnectDev(hDev);
+		ulRet = func_DisConnectDev(hDev);hDev = NULL;
 		if (0 != ulRet)
 		{
 			goto err;
 		}
 	}
 
-	FreeLibrary(ghInst);//释放Dll函数
-	ghInst = NULL;
+
 
 err:
+	if(hDev)
+	{
+#if USE_SELF_MUTEX
+		SDSCReleaseMutex(hMutex);
+#else
+		func_UnlockDev(hDev);
+#endif
+		func_DisConnectDev(hDev);hDev = NULL;
+	}
+
+	if(ghInst)
+	{
+		FreeLibrary(ghInst);//释放Dll函数
+		ghInst = NULL;
+	}
+
 
 	return ulRet;
 }
@@ -3335,6 +3424,11 @@ COMMON_API unsigned int __stdcall WTF_SM2GetAgreementKey(
 
 	unsigned int dllPathLen = BUFFER_LEN_1K;
 	char dllPathValue[BUFFER_LEN_1K] = {0};
+
+	DEVHANDLE hDev = NULL;
+	HAPPLICATION hAPP = NULL;
+	HCONTAINER hCon = NULL;
+	HANDLE hAgreementHandle = NULL;
 
 	ulRet = WTF_ReadSKFPath(pCertProperty->szSKFName, dllPathValue, &dllPathLen);
 
@@ -3371,18 +3465,26 @@ COMMON_API unsigned int __stdcall WTF_SM2GetAgreementKey(
 	FUNC_NAME_INIT(func_, GenerateAgreementDataWithECC,);
 	FUNC_NAME_INIT(func_, GenerateAgreementDataWithECCEx, );
 	FUNC_NAME_INIT(func_, GenerateAgreementDataAndKeyWithECCEx, );
-	
-	{
-		DEVHANDLE hDev = NULL;
-		HAPPLICATION hAPP = NULL;
-		HCONTAINER hCon = NULL;
-		HANDLE hAgreementHandle = NULL;
 
+	{
 		ulRet = func_ConnectDev(pCertProperty->szDeviceName, &hDev);
 		if (0 != ulRet)
 		{
 			goto err;
 		}
+
+#if USE_SELF_MUTEX
+		if(ulRet=SDSCWaitMutex(mutex_buffer,INFINITE,&hMutex))
+		{
+			goto err;
+		}
+#else
+		ulRet = func_LockDev(hDev,0xFFFFFFFF);
+		if (0 != ulRet)
+		{
+			goto err;
+		}
+#endif
 
 		ulRet = func_OpenApplication(hDev,pCertProperty->szApplicationName,&hAPP);
 		if (0 != ulRet)
@@ -3434,17 +3536,37 @@ COMMON_API unsigned int __stdcall WTF_SM2GetAgreementKey(
 		{
 			goto err;
 		}
-		ulRet = func_DisConnectDev(hDev);
+
+#if USE_SELF_MUTEX
+		SDSCReleaseMutex(hMutex);
+#else
+		func_UnlockDev(hDev);
+#endif
+
+		ulRet = func_DisConnectDev(hDev);hDev = NULL;
 		if (0 != ulRet)
 		{
 			goto err;
 		}
 	}
 
-	FreeLibrary(ghInst);//释放Dll函数
-	ghInst = NULL;
-
 err:
+
+	if(hDev)
+	{
+#if USE_SELF_MUTEX
+		SDSCReleaseMutex(hMutex);
+#else
+		func_UnlockDev(hDev);
+#endif
+		func_DisConnectDev(hDev);hDev = NULL;
+	}
+
+	if(ghInst)
+	{
+		FreeLibrary(ghInst);//释放Dll函数
+		ghInst = NULL;
+	}
 
 	return ulRet;
 }
@@ -3476,7 +3598,7 @@ COMMON_API unsigned int __stdcall WTF_SM2GetAgreementKeyEx(
 	ECCPUBLICKEYBLOB  pTemp = { 0 };
 
 	unsigned int		uiRet = 0;
-	
+
 	unsigned int		uiECCBitLen = 256;
 	unsigned int		uiECCLen = uiECCBitLen/8;
 
@@ -3497,13 +3619,13 @@ COMMON_API unsigned int __stdcall WTF_SM2GetAgreementKeyEx(
 	memcpy(pTempECCPubKeyBlobB.YCoordinate + 64 - uiECCLen, pbTempECCPubKeyBlobB + 1 + uiECCLen, uiECCLen);
 
 	uiRet = WTF_SM2GetAgreementKey(&pCertProperty, ulAlgId, &pTempECCPubKeyBlobA, pbIDA, ulIDALen,
-									&pECCPubKeyBlobB, &pTempECCPubKeyBlobB, pbIDB, ulIDBLen, 
-									pbAgreementKey, pulAgreementKeyLen, pszPIN, puiRetryCount);
+		&pECCPubKeyBlobB, &pTempECCPubKeyBlobB, pbIDB, ulIDBLen, 
+		pbAgreementKey, pulAgreementKeyLen, pszPIN, puiRetryCount);
 	if (0 != uiRet)
 	{
 		return uiRet;
 	}
-	
+
 	if (NULL == pbTempECCPubKeyBlobA)
 	{
 		*pulTempECCPubKeyBlobALen = 0x41;
@@ -3520,6 +3642,6 @@ COMMON_API unsigned int __stdcall WTF_SM2GetAgreementKeyEx(
 	memcpy(pbTempECCPubKeyBlobA, "\x04", 1);
 	memcpy(pbTempECCPubKeyBlobA + 1, pTempECCPubKeyBlobA.XCoordinate + 64 - uiECCLen, uiECCLen);
 	memcpy(pbTempECCPubKeyBlobA + 1 + uiECCLen, pTempECCPubKeyBlobA.YCoordinate + 64 - uiECCLen, uiECCLen);
-	
+
 	return uiRet;
 }
