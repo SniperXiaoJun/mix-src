@@ -1249,6 +1249,20 @@ ULONG DEVAPI SKF_GenerateKeyWithECCEx(HANDLE hAgreementHandle,
 									BYTE* pbID, ULONG ulIDLen, 
 									BYTE *pbAgreementKey, ULONG *pulAgreementKeyLen);
 
+
+
+
+ULONG DEVAPI SKF_ImportECCSignKeyPair(HCONTAINER hContainer, PECCPUBLICKEYBLOB pECCPublicKeyBlob, PECCPRIVATEKEYBLOB pECCPrivateKeyBlob);
+
+
+ULONG DEVAPI SKF_ExtGenECCKeyPair(DEVHANDLE hDev, ULONG ulBitsLen, PECCPUBLICKEYBLOB pECCPublicKeyBlob, PECCPRIVATEKEYBLOB pECCPrivateKeyBlob);
+
+ULONG DEVAPI SKF_ImportECCExchangeKeyPair(HCONTAINER hContainer, PENVELOPEDKEYBLOB pEnvelopedKeyBlob);
+
+ULONG DEVAPI SKF_ImportExchangeCertificate(HCONTAINER hContainer, BYTE* pbCert, ULONG ulCertLen);
+
+ULONG DEVAPI SKF_ImportHMACKey(HAPPLICATION hApplication, BYTE* pbLabel, ULONG ulLabelLen, BYTE* pbID, ULONG ulIDLen, BYTE* pbKey, ULONG ulKeyLen);
+
 #ifdef __cplusplus
 }
 #endif
