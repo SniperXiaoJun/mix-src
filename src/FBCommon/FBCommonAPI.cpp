@@ -278,6 +278,9 @@ m_plugin(plugin), m_host(host)
 	registerProperty("PublicKeyENECC512", make_property(this,&FBCommonAPI::get_PublicKeyENECC512));
 	registerProperty("PublicKeyEXECC512", make_property(this,&FBCommonAPI::get_PublicKeyEXECC512));
 	registerProperty("PublicKeySIGNECC512", make_property(this,&FBCommonAPI::get_PublicKeySIGNECC512));
+
+	registerProperty("ulKeyState", make_property(this,&FBCommonAPI::get_ulKeyState));
+
 #endif
 
 
@@ -1465,11 +1468,42 @@ void FBCommonAPI::ExecCommonFuncID(long ulFuncID, FB::VariantList aArrayArgIN, F
 
 	case 28:
 		{
-			 CAPI_KEY_ExportPK(m_szAuthKey, OPE_USB_TARGET_OTHER, 1,m_szPublicKeySIGN);
-			 CAPI_KEY_ExportPK(m_szAuthKey, OPE_USB_TARGET_OTHER, 0,m_szPublicKeyEX);
-			 CAPI_KEY_ExportPK(m_szAuthKey, OPE_USB_TARGET_OTHER, 1,m_szPublicKeySIGNECC512);
-			 CAPI_KEY_ExportPK(m_szAuthKey, OPE_USB_TARGET_OTHER, 0,m_szPublicKeyENECC512);
-			 CAPI_KEY_ExportPK(m_szAuthKey, OPE_USB_TARGET_OTHER, 2,m_szPublicKeyEXECC512);
+			memset(m_szPublicKeySIGN,0, 64);
+			memset(m_szPublicKeyEX,0,64);
+			memset(m_szPublicKeySIGNECC512,0,128);
+			memset(m_szPublicKeyENECC512,0, 128);
+			memset(m_szPublicKeyEXECC512,0, 128);
+
+			unsigned char zero_buffer[64] = {0};
+
+			CAPI_KEY_ExportPK(m_szAuthKey, OPE_USB_TARGET_OTHER, 1,m_szPublicKeySIGN);
+			CAPI_KEY_ExportPK(m_szAuthKey, OPE_USB_TARGET_OTHER, 0,m_szPublicKeyEX);
+			CAPI_KEY_ExportPK(m_szAuthKey, OPE_USB_TARGET_OTHER, 1,m_szPublicKeySIGNECC512);
+			CAPI_KEY_ExportPK(m_szAuthKey, OPE_USB_TARGET_OTHER, 0,m_szPublicKeyENECC512);
+			CAPI_KEY_ExportPK(m_szAuthKey, OPE_USB_TARGET_OTHER, 2,m_szPublicKeyEXECC512);
+
+			ulKeyState = 0;
+
+			if(0 != memcmp(zero_buffer, m_szPublicKeySIGN, 64))
+			{
+				ulKeyState |= (1);
+			}
+			if(0 != memcmp(zero_buffer, m_szPublicKeySIGN, 64))
+			{
+				ulKeyState |= (1>>1);
+			}
+			if(0 != memcmp(zero_buffer, m_szPublicKeySIGN, 64))
+			{
+				ulKeyState |= (1>>2);
+			}
+			if(0 != memcmp(zero_buffer, m_szPublicKeySIGN, 64))
+			{
+				ulKeyState |= (1>>3);
+			}
+			if(0 != memcmp(zero_buffer, m_szPublicKeySIGN, 64))
+			{
+				ulKeyState |= (1>>4);
+			}
 		}
 
 		break;
@@ -1878,6 +1912,9 @@ std::string FBCommonAPI::get_signed_csrECC512()
 	return strB64;
 }
 
-
+unsigned int FBCommonAPI::get_ulKeyState()
+{
+	return ulKeyState;
+}
 
 #endif

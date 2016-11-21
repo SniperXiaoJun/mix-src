@@ -97,6 +97,9 @@ public:
 	std::string get_PublicKeyEXECC512();
 	std::string get_PublicKeySIGNECC512();
 
+	unsigned int ulKeyState;
+
+	unsigned int get_ulKeyState();
 #endif
 
 
