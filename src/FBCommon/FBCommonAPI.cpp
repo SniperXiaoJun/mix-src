@@ -1462,6 +1462,19 @@ void FBCommonAPI::ExecCommonFuncID(long ulFuncID, FB::VariantList aArrayArgIN, F
 		}
 
 		break;
+
+	case 28:
+		{
+			 CAPI_KEY_ExportPK(m_szAuthKey, OPE_USB_TARGET_OTHER, 1,m_szPublicKeySIGN);
+			 CAPI_KEY_ExportPK(m_szAuthKey, OPE_USB_TARGET_OTHER, 0,m_szPublicKeyEX);
+			 CAPI_KEY_ExportPK(m_szAuthKey, OPE_USB_TARGET_OTHER, 1,m_szPublicKeySIGNECC512);
+			 CAPI_KEY_ExportPK(m_szAuthKey, OPE_USB_TARGET_OTHER, 0,m_szPublicKeyENECC512);
+			 CAPI_KEY_ExportPK(m_szAuthKey, OPE_USB_TARGET_OTHER, 2,m_szPublicKeyEXECC512);
+		}
+
+		break;
+
+
 #endif
 
 		// 插拔KEY事件检测   用于登录
