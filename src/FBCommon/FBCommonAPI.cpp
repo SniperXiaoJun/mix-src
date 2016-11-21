@@ -266,19 +266,23 @@ m_plugin(plugin), m_host(host)
 	registerProperty("isrun", make_property(this,&FBCommonAPI::get_isrun));
 	registerProperty("ulResult", make_property(this,&FBCommonAPI::get_ulResult));
 	registerProperty("keyCount", make_property(this,&FBCommonAPI::get_keyCount));
-
-	
-
 	registerProperty("ulRetry", make_property(this,&FBCommonAPI::get_ulRetry));
+
+
 	registerProperty("signed_csr", make_property(this,&FBCommonAPI::get_signed_csr));
 	registerProperty("PublicKeyEX", make_property(this,&FBCommonAPI::get_PublicKeyEX));
 	registerProperty("PublicKeySIGN", make_property(this,&FBCommonAPI::get_PublicKeySIGN));
 
+#if defined(GM_ECC_512_SUPPORT)
+	registerProperty("signed_csrECC512", make_property(this,&FBCommonAPI::get_signed_csrECC512));
+	registerProperty("PublicKeyENECC512", make_property(this,&FBCommonAPI::get_PublicKeyENECC512));
+	registerProperty("PublicKeyEXECC512", make_property(this,&FBCommonAPI::get_PublicKeyEXECC512));
+	registerProperty("PublicKeySIGNECC512", make_property(this,&FBCommonAPI::get_PublicKeySIGNECC512));
+#endif
+
 
 	registerProperty("authKey", make_property(this,&FBCommonAPI::get_authKey));
-
 	registerProperty("authKeyName", make_property(this,&FBCommonAPI::get_authKeyName));
-
 	registerProperty("authKeyType", make_property(this,&FBCommonAPI::get_authKeyType));
 
 	registerProperty("sigValue", make_property(this,&FBCommonAPI::get_sigValue));
@@ -357,6 +361,8 @@ std::string FBCommonAPI::get_signed_csr()
 	return strB64;
 }
 
+
+
 std::string FBCommonAPI::get_sigValue()
 {
 	// TODO: 在此添加实现代码
@@ -426,6 +432,8 @@ std::string FBCommonAPI::get_PublicKeySIGN()
 
 	return strB64;
 }
+
+
 
 
 std::string FBCommonAPI::get_authKey()
@@ -1515,7 +1523,7 @@ void FBCommonAPI::InitArgsSKFImportECC512Certs(FB::VariantList variantList)
 	::FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__,"inBuffSize");
 	::FILE_LOG_NUMBER(file_log_name, inBuffSize);
 
-	if (3 != inBuffSize)
+	if (4 != inBuffSize)
 	{
 		ulResult = OPE_ERR_INVALID_PARAM;
 		return;
@@ -1525,13 +1533,20 @@ void FBCommonAPI::InitArgsSKFImportECC512Certs(FB::VariantList variantList)
 
 	GetArrayStrOfIndex(variantList,1, (char *)data_value_cert_b64,(int *) (&data_len_cert_b64));
 
-	m_iCertSIGNLen = modp_b64_decode((char *)m_szCertSIGN, (char *)data_value_cert_b64,data_len_cert_b64);
+	m_iCertSIGNLen = modp_b64_decode((char *)m_szCertSIGNECC512, (char *)data_value_cert_b64,data_len_cert_b64);
 
 	data_len_cert_b64 = BUFFER_LEN_1K * 4;
 
 	GetArrayStrOfIndex(variantList,2, (char *)data_value_cert_b64,(int *) (&data_len_cert_b64));
 
-	m_iCertEXLen = modp_b64_decode((char *)m_szCertEX, (char *)data_value_cert_b64,data_len_cert_b64);
+	m_iCertEXLen = modp_b64_decode((char *)m_szCertENECC512, (char *)data_value_cert_b64,data_len_cert_b64);
+
+
+	data_len_cert_b64 = BUFFER_LEN_1K * 4;
+
+	GetArrayStrOfIndex(variantList,3, (char *)data_value_cert_b64,(int *) (&data_len_cert_b64));
+
+	m_iCertEXLen = modp_b64_decode((char *)m_szCertEXECC512, (char *)data_value_cert_b64,data_len_cert_b64);
 
 	ulResult = 0;
 }
@@ -1546,20 +1561,41 @@ void FBCommonAPI::InitArgsSKFImportECC512KeyPair(FB::VariantList variantList)
 
 	GetArrayLength(variantList,&inBuffSize);
 
-	if (2 != inBuffSize)
+	if (3 != inBuffSize)
 	{
 		ulResult = OPE_ERR_INVALID_PARAM;
 		return;
 	}
 
 	GetArrayStrOfIndex(variantList,0, m_szPIN, &m_iPINLen);
+
+	// 加密
 	GetArrayStrOfIndex(variantList,1, (char *)szEnvelopedKeyBlobB64,(int *)(&ulEnvelopedKeyBlobB64Len));
 
-	ulEnvelopedKeyBlobLen = modp_b64_decode((char *)&m_stEnvelopedKeyBlobEX, (const char *)szEnvelopedKeyBlobB64,ulEnvelopedKeyBlobB64Len);
+	ulEnvelopedKeyBlobLen = modp_b64_decode((char *)&m_stEnvelopedKeyBlobENECC512, (const char *)szEnvelopedKeyBlobB64,ulEnvelopedKeyBlobB64Len);
 
-	::FILE_LOG_STRING(file_log_name, "m_stEnvelopedKeyBlobEX");
+	::FILE_LOG_STRING(file_log_name, "m_stEnvelopedKeyBlobEXECC512");
 
-	::FILE_LOG_HEX(file_log_name, (const unsigned char *)&m_stEnvelopedKeyBlobEX,sizeof(OPST_SKF_ENVELOPEDKEYBLOB));
+	::FILE_LOG_HEX(file_log_name, (const unsigned char *)&m_stEnvelopedKeyBlobENECC512,sizeof(OPST_SKF_ENVELOPEDKEYBLOB));
+
+	if (sizeof(OPST_SKF_ENVELOPEDKEYBLOB) != ulEnvelopedKeyBlobLen)
+	{
+		::FILE_LOG_STRING(file_log_name, "sizeof(OPST_SKF_ENVELOPEDKEYBLOB) != ulEnvelopedKeyBlobLen");
+		ulResult = OPE_ERR_INVALID_PARAM;
+		return;
+	}
+
+	
+	//交换
+	ulEnvelopedKeyBlobB64Len = BUFFER_LEN_1K * 4;
+
+	GetArrayStrOfIndex(variantList,2, (char *)szEnvelopedKeyBlobB64,(int *)(&ulEnvelopedKeyBlobB64Len));
+
+	ulEnvelopedKeyBlobLen = modp_b64_decode((char *)&m_stEnvelopedKeyBlobEXECC512, (const char *)szEnvelopedKeyBlobB64,ulEnvelopedKeyBlobB64Len);
+
+	::FILE_LOG_STRING(file_log_name, "m_stEnvelopedKeyBlobEXECC512");
+
+	::FILE_LOG_HEX(file_log_name, (const unsigned char *)&m_stEnvelopedKeyBlobEXECC512,sizeof(OPST_SKF_ENVELOPEDKEYBLOB));
 
 	if (sizeof(OPST_SKF_ENVELOPEDKEYBLOB) != ulEnvelopedKeyBlobLen)
 	{
@@ -1582,7 +1618,7 @@ DWORD WINAPI ThreadFuncSKFGenECC512KeyPair(LPVOID aThisClass)
 		goto err;
 	}
 
-	thisClass->ulResult = CAPI_KEY_ECC512ExportPK(thisClass->m_szAuthKey, OPE_USB_TARGET_OTHER, 1,thisClass->m_szPublicKeySIGN);
+	thisClass->ulResult = CAPI_KEY_ECC512ExportPK(thisClass->m_szAuthKey, OPE_USB_TARGET_OTHER, 1,thisClass->m_szPublicKeySIGNECC512);
 
 err:
 
@@ -1610,7 +1646,13 @@ DWORD WINAPI ThreadFuncSKFImportECC512KeyPair(LPVOID aThisClass)
 	}
 
 	thisClass->ulResult = CAPI_KEY_ECC512ExportPK(thisClass->m_szAuthKey, OPE_USB_TARGET_OTHER, 0,
-		thisClass->m_szPublicKeyEX);
+		thisClass->m_szPublicKeyENECC512);
+
+
+	thisClass->ulResult = CAPI_KEY_ECC512ExportPK(thisClass->m_szAuthKey, OPE_USB_TARGET_OTHER, 2,
+		thisClass->m_szPublicKeyEXECC512);
+
+
 
 	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "thisClass->m_szPublicKeyEX");
 
@@ -1644,9 +1686,9 @@ DWORD WINAPI ThreadFuncSKFGenECC512CSR(LPVOID aThisClass)
 
 	thisClass->ulResult = OpenSSL_GMECC512GenCSRWithPubkey(
 		&(thisClass->userInfo),
-		thisClass->m_szPublicKeySIGN,GM_ECC_512_BYTES_LEN,
-		thisClass->m_szPublicKeySIGN+GM_ECC_512_BYTES_LEN,GM_ECC_512_BYTES_LEN,
-		thisClass->m_szCsr, &(thisClass->m_iCsrLen)
+		thisClass->m_szPublicKeySIGNECC512,GM_ECC_512_BYTES_LEN,
+		thisClass->m_szPublicKeySIGNECC512+GM_ECC_512_BYTES_LEN,GM_ECC_512_BYTES_LEN,
+		thisClass->m_szCsrECC512, &(thisClass->m_iCsrLenECC512)
 		);
 
 	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "thisClass->m_szCsr");
@@ -1656,10 +1698,10 @@ DWORD WINAPI ThreadFuncSKFGenECC512CSR(LPVOID aThisClass)
 	thisClass->m_iSignedCsrLen = BUFFER_LEN_1K * 4;
 
 	memcpy(pbPublicKey, "\x04", 1);
-	memcpy(pbPublicKey + 1 , thisClass->m_szPublicKeySIGN, SM2_BYTES_LEN * 2);
+	memcpy(pbPublicKey + 1 , thisClass->m_szPublicKeySIGNECC512, 64 * 2);
 
 
-	thisClass->ulResult = OpenSSL_GetX509Content(thisClass->m_szCsr, thisClass->m_iCsrLen,
+	thisClass->ulResult = OpenSSL_GetX509Content(thisClass->m_szCsrECC512, thisClass->m_iCsrLenECC512,
 		X509_TYPE_CSR,
 		szX509content,&ulX509ContentLen
 		);
@@ -1701,7 +1743,7 @@ DWORD WINAPI ThreadFuncSKFGenECC512CSR(LPVOID aThisClass)
 		X509_TYPE_CSR,
 		thisClass->m_szSigValue,SM2_BYTES_LEN,
 		thisClass->m_szSigValue + SM2_BYTES_LEN, SM2_BYTES_LEN,
-		thisClass->m_szSignedCsr, &(thisClass->m_iSignedCsrLen)
+		thisClass->m_szSignedCsrECC512, &(thisClass->m_iSignedCsrLenECC512)
 		);
 
 	if(thisClass->ulResult)
@@ -1735,9 +1777,94 @@ DWORD WINAPI ThreadFuncSKFImportECC512Certs(LPVOID aThisClass)
 	{
 		goto err;
 	}
+
+	thisClass->ulResult = CAPI_KEY_ECC512ImportCert(thisClass->m_szAuthKey, OPE_USB_TARGET_OTHER,2,
+		thisClass->m_szCertEX,thisClass->m_iCertEXLen,thisClass->m_szPIN,&(thisClass->m_ulRetry));
+	if(thisClass->ulResult)
+	{
+		goto err;
+	}
 err:
 
 	return 0;
 }
+
+std::string FBCommonAPI::get_PublicKeyEXECC512()
+{
+	std::string strB64;
+	long pb64_len = modp_b64_encode_len(64 * 2);
+	char * pb64_data = (char *)malloc(pb64_len);
+
+	pb64_len = modp_b64_encode(pb64_data, (char *)m_szPublicKeyEXECC512,64 * 2);
+
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "pb64_data");
+	FILE_LOG_STRING(file_log_name,pb64_data);
+
+	strB64 = std::string(pb64_data,pb64_len);
+
+	free(pb64_data);
+
+	return strB64;
+}
+
+std::string FBCommonAPI::get_PublicKeyENECC512()
+{
+	std::string strB64;
+	long pb64_len = modp_b64_encode_len(64 * 2);
+	char * pb64_data = (char *)malloc(pb64_len);
+
+	pb64_len = modp_b64_encode(pb64_data, (char *)m_szPublicKeyENECC512,64 * 2);
+
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "pb64_data");
+	FILE_LOG_STRING(file_log_name,pb64_data);
+
+	strB64 = std::string(pb64_data,pb64_len);
+
+	free(pb64_data);
+
+	return strB64;
+}
+
+std::string FBCommonAPI::get_PublicKeySIGNECC512()
+{
+	// TODO: 在此添加实现代码
+	std::string strB64;
+	long pb64_len = modp_b64_encode_len(64 * 2);
+	char * pb64_data = (char *)malloc(pb64_len);
+
+	pb64_len = modp_b64_encode(pb64_data, (char *)m_szPublicKeySIGN,64 * 2);
+
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "pb64_data");
+	FILE_LOG_STRING(file_log_name,pb64_data);
+
+	strB64 = std::string(pb64_data,pb64_len);
+
+	free(pb64_data);
+
+	return strB64;
+}
+
+
+std::string FBCommonAPI::get_signed_csrECC512()
+{
+	// TODO: 在此添加实现代码
+	std::string strB64;
+	long pb64_len = modp_b64_encode_len(m_iSignedCsrLenECC512);
+
+	char * pb64_data = (char *)malloc(pb64_len);
+
+	pb64_len = modp_b64_encode(pb64_data, (char *)m_szSignedCsrECC512,m_iSignedCsrLenECC512);
+
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "pb64_data");
+	FILE_LOG_STRING(file_log_name,pb64_data);
+
+	strB64 = std::string(pb64_data,pb64_len);
+
+	free(pb64_data);
+
+	return strB64;
+}
+
+
 
 #endif

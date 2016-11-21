@@ -2696,7 +2696,17 @@ unsigned int CAPI_KEY_ECC512ExportPK(char * pszKeyOn,int ulKeyTarget,unsigned in
 		goto err;
 	}
 	// 导出签名公钥
-	ulRet = SKF_ExportPublicKey(hConSKF, bIsSign,(BYTE *)&pubkeyBlob, &ulPubkeyBlobLen);
+
+	if (2 == bIsSign)
+	{
+		// 需要修改
+		ulRet = SKF_ExportPublicKey(hConSKF, bIsSign,(BYTE *)&pubkeyBlob, &ulPubkeyBlobLen);
+	}
+	else
+	{
+		ulRet = SKF_ExportPublicKey(hConSKF, bIsSign,(BYTE *)&pubkeyBlob, &ulPubkeyBlobLen);
+	}
+
 	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "SKF_ExportPublicKey");
 	FILE_LOG_NUMBER(file_log_name,(long)ulRet);
 	if(ulRet)
@@ -2984,8 +2994,17 @@ unsigned int CAPI_KEY_ECC512ImportCert(char * pszKeyOn,int ulKeyTarget, unsigned
 	{
 		goto err;
 	}
+
+	if (bIsSign == 2)
+	{
+		ulRet = SKF_ImportExchangeCertificate(hConSKF, pbCert,ulCertLen);
+	}
+	else
+	{
+		ulRet = SKF_ImportCertificate(hConSKF, bIsSign,pbCert,ulCertLen);
+	}
+
 	// 导入证书
-	ulRet = SKF_ImportCertificate(hConSKF, bIsSign,pbCert,ulCertLen);
 	if(ulRet)
 	{
 		goto err;

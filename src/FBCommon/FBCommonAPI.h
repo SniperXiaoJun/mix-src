@@ -61,8 +61,43 @@ public:
 #if defined(GM_ECC_512_SUPPORT)
 	void InitArgsSKFImportECC512KeyPair(FB::VariantList variantList);
 	void InitArgsSKFImportECC512Certs(FB::VariantList variantList);
-#endif
 
+
+	// ECC512未签名的的证书请求
+	unsigned char m_szCsrECC512[BUFFER_LEN_1K * 4]; 
+	unsigned int m_iCsrLenECC512;
+
+	// ECC512签名的的证书请求
+	unsigned char m_szSignedCsrECC512[BUFFER_LEN_1K * 4]; 
+	unsigned int m_iSignedCsrLenECC512;
+
+	////////////////////////////////////////////////////////////////////////
+	// 版本ECC512用国密接口
+	unsigned char m_szPublicKeySIGNECC512[64 * 2];  // 签名公钥
+	unsigned char m_szPublicKeyENECC512[64 * 2];	// 加密公钥
+	unsigned char m_szPublicKeyEXECC512[64 * 2];	// 交换公钥
+
+	OPST_SKF_ENVELOPEDKEYBLOB m_stEnvelopedKeyBlobEXECC512;   // 交换密钥数字信封
+	OPST_SKF_ENVELOPEDKEYBLOB m_stEnvelopedKeyBlobENECC512;   // 加密密钥数字信封
+
+	// ECC512签名证书
+	unsigned char m_szCertSIGNECC512[BUFFER_LEN_1K * 4]; 
+	unsigned int m_iCertSIGNLenECC512;
+
+	// ECC512交换证书
+	unsigned char m_szCertEXECC512[BUFFER_LEN_1K * 4]; 
+	unsigned int m_iCertEXLenECC512; 
+
+	// ECC512加密证书
+	unsigned char m_szCertENECC512[BUFFER_LEN_1K * 4]; 
+	unsigned int m_iCertENLenECC512; 
+
+	std::string get_signed_csrECC512();
+	std::string get_PublicKeyENECC512();
+	std::string get_PublicKeyEXECC512();
+	std::string get_PublicKeySIGNECC512();
+
+#endif
 
 
 	void InitArgsShowCert(FB::VariantList variantList);
@@ -75,16 +110,20 @@ public:
 	unsigned int get_keyCount();
 
 	std::string get_PublicKeySIGN();
-
 	std::string get_signed_csr();
-
 	std::string get_PublicKeyEX();
+
+
+
+
 
 	std::string get_testString();
 
 	std::string get_authKey();
 	std::string get_authKeyName();
 	unsigned int get_authKeyType();
+
+	// 验证码签名(中间值签名)
 	std::string get_sigValue();
 
 	// 获取序列号
@@ -133,10 +172,6 @@ public:
 	unsigned char m_szPublicKeySIGN[SM2_BYTES_LEN * 2]; // 签名公钥
 	unsigned char m_szPublicKeyEX[SM2_BYTES_LEN * 2];	// 交换公钥
 	OPST_SKF_ENVELOPEDKEYBLOB m_stEnvelopedKeyBlobEX;   // 交换密钥数字信封
-
-	// 签名的的证书请求
-	unsigned char m_szSKFCsrSIGN[BUFFER_LEN_1K * 4]; 
-	unsigned int m_iSKFCsrSIGNLen;
 
 	// 签名证书
 	unsigned char m_szCertSIGN[BUFFER_LEN_1K * 4]; 
