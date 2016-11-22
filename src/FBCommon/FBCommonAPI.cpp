@@ -1490,19 +1490,19 @@ void FBCommonAPI::ExecCommonFuncID(long ulFuncID, FB::VariantList aArrayArgIN, F
 			}
 			if(0 != memcmp(zero_buffer, m_szPublicKeySIGN, 64))
 			{
-				ulKeyState |= (1>>1);
+				ulKeyState |= (1<<1);
 			}
 			if(0 != memcmp(zero_buffer, m_szPublicKeySIGN, 64))
 			{
-				ulKeyState |= (1>>2);
+				ulKeyState |= (1<<2);
 			}
 			if(0 != memcmp(zero_buffer, m_szPublicKeySIGN, 64))
 			{
-				ulKeyState |= (1>>3);
+				ulKeyState |= (1<<3);
 			}
 			if(0 != memcmp(zero_buffer, m_szPublicKeySIGN, 64))
 			{
-				ulKeyState |= (1>>4);
+				ulKeyState |= (1<<4);
 			}
 		}
 
