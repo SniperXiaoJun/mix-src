@@ -1478,9 +1478,9 @@ void FBCommonAPI::ExecCommonFuncID(long ulFuncID, FB::VariantList aArrayArgIN, F
 
 			CAPI_KEY_ExportPK(m_szAuthKey, OPE_USB_TARGET_OTHER, 1,m_szPublicKeySIGN);
 			CAPI_KEY_ExportPK(m_szAuthKey, OPE_USB_TARGET_OTHER, 0,m_szPublicKeyEX);
-			CAPI_KEY_ExportPK(m_szAuthKey, OPE_USB_TARGET_OTHER, 1,m_szPublicKeySIGNECC512);
-			CAPI_KEY_ExportPK(m_szAuthKey, OPE_USB_TARGET_OTHER, 0,m_szPublicKeyENECC512);
-			CAPI_KEY_ExportPK(m_szAuthKey, OPE_USB_TARGET_OTHER, 2,m_szPublicKeyEXECC512);
+			CAPI_KEY_ECC512ExportPK(m_szAuthKey, OPE_USB_TARGET_OTHER, 1,m_szPublicKeySIGNECC512);
+			CAPI_KEY_ECC512ExportPK(m_szAuthKey, OPE_USB_TARGET_OTHER, 0,m_szPublicKeyENECC512);
+			CAPI_KEY_ECC512ExportPK(m_szAuthKey, OPE_USB_TARGET_OTHER, 2,m_szPublicKeyEXECC512);
 
 			ulKeyState = 0;
 
@@ -1488,19 +1488,19 @@ void FBCommonAPI::ExecCommonFuncID(long ulFuncID, FB::VariantList aArrayArgIN, F
 			{
 				ulKeyState |= (1);
 			}
-			if(0 != memcmp(zero_buffer, m_szPublicKeySIGN, 64))
+			if(0 != memcmp(zero_buffer, m_szPublicKeyEX, 64))
 			{
 				ulKeyState |= (1<<1);
 			}
-			if(0 != memcmp(zero_buffer, m_szPublicKeySIGN, 64))
+			if(0 != memcmp(zero_buffer, m_szPublicKeySIGNECC512, 64))
 			{
 				ulKeyState |= (1<<2);
 			}
-			if(0 != memcmp(zero_buffer, m_szPublicKeySIGN, 64))
+			if(0 != memcmp(zero_buffer, m_szPublicKeyENECC512, 64))
 			{
 				ulKeyState |= (1<<3);
 			}
-			if(0 != memcmp(zero_buffer, m_szPublicKeySIGN, 64))
+			if(0 != memcmp(zero_buffer, m_szPublicKeyEXECC512, 64))
 			{
 				ulKeyState |= (1<<4);
 			}
@@ -1879,7 +1879,7 @@ std::string FBCommonAPI::get_PublicKeySIGNECC512()
 	long pb64_len = modp_b64_encode_len(64 * 2);
 	char * pb64_data = (char *)malloc(pb64_len);
 
-	pb64_len = modp_b64_encode(pb64_data, (char *)m_szPublicKeySIGN,64 * 2);
+	pb64_len = modp_b64_encode(pb64_data, (char *)m_szPublicKeySIGNECC512,64 * 2);
 
 	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "pb64_data");
 	FILE_LOG_STRING(file_log_name,pb64_data);
