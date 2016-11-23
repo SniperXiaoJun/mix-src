@@ -1430,7 +1430,7 @@ void FBCommonAPI::ExecCommonFuncID(long ulFuncID, FB::VariantList aArrayArgIN, F
 				return;
 			}
 
-			::FILE_LOG_STRING(file_log_name,"ExecCommonFuncID 9");
+			::FILE_LOG_STRING(file_log_name,"ExecCommonFuncID 26");
 			::FILE_LOG_NUMBER(file_log_name,ulResult);
 
 			if (0 != ulResult)
@@ -1703,15 +1703,28 @@ DWORD WINAPI ThreadFuncSKFImportECC512KeyPair(LPVOID aThisClass)
 	thisClass->ulResult = CAPI_KEY_ECC512ExportPK(thisClass->m_szAuthKey, OPE_USB_TARGET_OTHER, 0,
 		thisClass->m_szPublicKeyENECC512);
 
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "thisClass->m_szPublicKeyEX");
+
+	FILE_LOG_HEX(file_log_name,thisClass->m_szPublicKeyENECC512,64 * 2);
+
+	if(thisClass->ulResult)
+	{
+		goto err;
+	}
+
 
 	thisClass->ulResult = CAPI_KEY_ECC512ExportPK(thisClass->m_szAuthKey, OPE_USB_TARGET_OTHER, 2,
 		thisClass->m_szPublicKeyEXECC512);
-
-
-
 	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "thisClass->m_szPublicKeyEX");
 
-	FILE_LOG_HEX(file_log_name,thisClass->m_szPublicKeyEX,SM2_BYTES_LEN * 2);
+	FILE_LOG_HEX(file_log_name,thisClass->m_szPublicKeyEXECC512,64 * 2);
+
+	if(thisClass->ulResult)
+	{
+		goto err;
+	}
+
+
 err:
 
 	return 0;
@@ -1746,8 +1759,12 @@ DWORD WINAPI ThreadFuncSKFGenECC512CSR(LPVOID aThisClass)
 		thisClass->m_szCsrECC512, &(thisClass->m_iCsrLenECC512)
 		);
 
-	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "thisClass->m_szCsr");
-	FILE_LOG_HEX(file_log_name, thisClass->m_szCsr, thisClass->m_iCsrLen);
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "thisClass->m_szCsrECC512");
+	FILE_LOG_HEX(file_log_name, thisClass->m_szCsrECC512, thisClass->m_iCsrLenECC512);
+	if(thisClass->ulResult)
+	{
+		goto err;
+	}
 
 	// 签名证书请求
 	thisClass->m_iSignedCsrLen = BUFFER_LEN_1K * 4;
@@ -1776,13 +1793,10 @@ DWORD WINAPI ThreadFuncSKFGenECC512CSR(LPVOID aThisClass)
 	}
 
 	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__,"pbPublicKey");
-	FILE_LOG_HEX(file_log_name,pbPublicKey, SM2_BYTES_LEN * 2 + 1);
+	FILE_LOG_HEX(file_log_name,pbPublicKey, 64 * 2 + 1);
 
 	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__,"pbDigest");
 	FILE_LOG_HEX(file_log_name,pbDigest, ulDigestLen);
-
-	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__,"m_szCsr");
-	FILE_LOG_HEX(file_log_name,thisClass->m_szCsr, thisClass->m_iCsrLen);
 
 	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__,"szX509content");
 	FILE_LOG_HEX(file_log_name,szX509content, ulX509ContentLen);
@@ -1793,11 +1807,13 @@ DWORD WINAPI ThreadFuncSKFGenECC512CSR(LPVOID aThisClass)
 		goto err;
 	}
 
+	thisClass->m_iSignedCsrLenECC512 = 4096;
+
 	thisClass->ulResult = OpenSSL_GMECC512SetX509SignValue(
 		thisClass->m_szCsr, thisClass->m_iCsrLen,
 		X509_TYPE_CSR,
-		thisClass->m_szSigValue,SM2_BYTES_LEN,
-		thisClass->m_szSigValue + SM2_BYTES_LEN, SM2_BYTES_LEN,
+		thisClass->m_szSigValue,GM_ECC_512_BYTES_LEN,
+		thisClass->m_szSigValue + GM_ECC_512_BYTES_LEN, GM_ECC_512_BYTES_LEN,
 		thisClass->m_szSignedCsrECC512, &(thisClass->m_iSignedCsrLenECC512)
 		);
 
@@ -1807,7 +1823,10 @@ DWORD WINAPI ThreadFuncSKFGenECC512CSR(LPVOID aThisClass)
 	}
 
 	::FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__,"RS");
-	::FILE_LOG_HEX(file_log_name, thisClass->m_szSigValue , SM2_BYTES_LEN + SM2_BYTES_LEN);
+	::FILE_LOG_HEX(file_log_name, thisClass->m_szSigValue , 128);
+
+	::FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__,"thisClass->m_szSignedCsrECC512");
+	::FILE_LOG_HEX(file_log_name, thisClass->m_szSignedCsrECC512 , thisClass->m_iSignedCsrLenECC512);
 
 err:
 
