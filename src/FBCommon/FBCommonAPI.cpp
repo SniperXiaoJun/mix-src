@@ -1453,7 +1453,7 @@ void FBCommonAPI::ExecCommonFuncID(long ulFuncID, FB::VariantList aArrayArgIN, F
 				return;
 			}
 
-			::FILE_LOG_STRING(file_log_name,"ExecCommonFuncID 10");
+			::FILE_LOG_STRING(file_log_name,"ExecCommonFuncID 27");
 			::FILE_LOG_NUMBER(file_log_name,ulResult);
 
 			if (0 != ulResult)
@@ -1580,20 +1580,20 @@ void FBCommonAPI::InitArgsSKFImportECC512Certs(FB::VariantList variantList)
 
 	GetArrayStrOfIndex(variantList,1, (char *)data_value_cert_b64,(int *) (&data_len_cert_b64));
 
-	m_iCertSIGNLen = modp_b64_decode((char *)m_szCertSIGNECC512, (char *)data_value_cert_b64,data_len_cert_b64);
+	m_iCertSIGNLenECC512 = modp_b64_decode((char *)m_szCertSIGNECC512, (char *)data_value_cert_b64,data_len_cert_b64);
 
 	data_len_cert_b64 = BUFFER_LEN_1K * 4;
 
 	GetArrayStrOfIndex(variantList,2, (char *)data_value_cert_b64,(int *) (&data_len_cert_b64));
 
-	m_iCertEXLen = modp_b64_decode((char *)m_szCertENECC512, (char *)data_value_cert_b64,data_len_cert_b64);
+	m_iCertENLenECC512 = modp_b64_decode((char *)m_szCertENECC512, (char *)data_value_cert_b64,data_len_cert_b64);
 
 
 	data_len_cert_b64 = BUFFER_LEN_1K * 4;
 
 	GetArrayStrOfIndex(variantList,3, (char *)data_value_cert_b64,(int *) (&data_len_cert_b64));
 
-	m_iCertEXLen = modp_b64_decode((char *)m_szCertEXECC512, (char *)data_value_cert_b64,data_len_cert_b64);
+	m_iCertEXLenECC512 = modp_b64_decode((char *)m_szCertEXECC512, (char *)data_value_cert_b64,data_len_cert_b64);
 
 	ulResult = 0;
 }
@@ -1810,7 +1810,7 @@ DWORD WINAPI ThreadFuncSKFGenECC512CSR(LPVOID aThisClass)
 	thisClass->m_iSignedCsrLenECC512 = 4096;
 
 	thisClass->ulResult = OpenSSL_GMECC512SetX509SignValue(
-		thisClass->m_szCsr, thisClass->m_iCsrLen,
+		thisClass->m_szCsrECC512, thisClass->m_iCsrLenECC512,
 		X509_TYPE_CSR,
 		thisClass->m_szSigValue,GM_ECC_512_BYTES_LEN,
 		thisClass->m_szSigValue + GM_ECC_512_BYTES_LEN, GM_ECC_512_BYTES_LEN,
@@ -1840,20 +1840,20 @@ DWORD WINAPI ThreadFuncSKFImportECC512Certs(LPVOID aThisClass)
 	FBCommonAPI * thisClass = (FBCommonAPI*)aThisClass;
 
 	thisClass->ulResult = CAPI_KEY_ECC512ImportCert(thisClass->m_szAuthKey, OPE_USB_TARGET_OTHER,1,
-		thisClass->m_szCertSIGN,thisClass->m_iCertSIGNLen,thisClass->m_szPIN,&(thisClass->m_ulRetry));
+		thisClass->m_szCertSIGNECC512,thisClass->m_iCertSIGNLenECC512,thisClass->m_szPIN,&(thisClass->m_ulRetry));
 	if(thisClass->ulResult)
 	{
 		goto err;
 	}
 	thisClass->ulResult = CAPI_KEY_ECC512ImportCert(thisClass->m_szAuthKey, OPE_USB_TARGET_OTHER,0,
-		thisClass->m_szCertEX,thisClass->m_iCertEXLen,thisClass->m_szPIN,&(thisClass->m_ulRetry));
+		thisClass->m_szCertENECC512,thisClass->m_iCertENLenECC512,thisClass->m_szPIN,&(thisClass->m_ulRetry));
 	if(thisClass->ulResult)
 	{
 		goto err;
 	}
 
 	thisClass->ulResult = CAPI_KEY_ECC512ImportCert(thisClass->m_szAuthKey, OPE_USB_TARGET_OTHER,2,
-		thisClass->m_szCertEX,thisClass->m_iCertEXLen,thisClass->m_szPIN,&(thisClass->m_ulRetry));
+		thisClass->m_szCertEXECC512,thisClass->m_iCertEXLenECC512,thisClass->m_szPIN,&(thisClass->m_ulRetry));
 	if(thisClass->ulResult)
 	{
 		goto err;
