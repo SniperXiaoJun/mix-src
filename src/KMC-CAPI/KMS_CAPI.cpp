@@ -113,6 +113,27 @@ unsigned int CAPI_GetMulStringCount(char * pszMulString, int * pulCount)
 }
 
 
+char * CAPI_KEY_GetSubStringPtr(char * pszMulString, char * pszSubString)
+{
+	char * ptr = pszMulString;
+
+	for (ptr = pszMulString;*ptr;)
+	{
+		if (strstr(ptr,pszSubString))
+		{
+			return ptr;
+		}
+
+		ptr += strlen(ptr);
+		ptr++;
+	}
+
+	return NULL;
+}
+
+
+
+
 ULONG CAPI_KEY_ConnectDev(char * pszDevList, char * pszKeyOn, int ulKeyTarget, HANDLE * phDevSKF)
 {
 	if (OPE_USB_TARGET_SELF == ulKeyTarget)
@@ -270,7 +291,7 @@ unsigned int CAPI_KEY_SignDigest(char * pszKeyOn,int ulKeyTarget, char * pszPIN,
 		goto err;
 	}
 	// 创建或打开容器
-	if (NULL == strstr(szConNameLists,DEFAULT_CONTAINER_SM2))
+	if (NULL == CAPI_KEY_GetSubStringPtr(szConNameLists,DEFAULT_CONTAINER_SM2))
 	{
 		ulRet = SKF_CreateContainer(hAppSKF, DEFAULT_CONTAINER_SM2, &hConSKF);
 	}
@@ -908,7 +929,7 @@ unsigned int CAPI_KEY_GenKeyPair(char * pszKeyOn, int ulKeyTarget,char * pszPIN,
 		goto err;
 	}
 
-	if (NULL == strstr(szConNameLists,DEFAULT_CONTAINER_SM2))
+	if (NULL == CAPI_KEY_GetSubStringPtr(szConNameLists,DEFAULT_CONTAINER_SM2))
 	{
 		ulRet = SKF_CreateContainer(hAppSKF, DEFAULT_CONTAINER_SM2, &hConSKF);
 		FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "SKF_CreateContainer");
@@ -1065,7 +1086,7 @@ unsigned int CAPI_KEY_ExportPK(char * pszKeyOn,int ulKeyTarget,unsigned int bIsS
 		goto err;
 	}
 
-	if (NULL == strstr(szConNameLists,DEFAULT_CONTAINER_SM2))
+	if (NULL == CAPI_KEY_GetSubStringPtr(szConNameLists,DEFAULT_CONTAINER_SM2))
 	{
 		ulRet = SKF_CreateContainer(hAppSKF, DEFAULT_CONTAINER_SM2, &hConSKF);
 		FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "SKF_CreateContainer");
@@ -1859,7 +1880,7 @@ unsigned int CAPI_KEY_ImportKeyPair(char * pszKeyOn,int ulKeyTarget, unsigned in
 		goto err;
 	}
 	// 创建或打开容器
-	if (NULL == strstr(szConNameLists,DEFAULT_CONTAINER_SM2))
+	if (NULL == CAPI_KEY_GetSubStringPtr(szConNameLists,DEFAULT_CONTAINER_SM2))
 	{
 		ulRet = SKF_CreateContainer(hAppSKF, DEFAULT_CONTAINER_SM2, &hConSKF);
 	}
@@ -1995,7 +2016,7 @@ unsigned int CAPI_KEY_ImportCert(char * pszKeyOn,int ulKeyTarget, unsigned int b
 		goto err;
 	}
 	// 创建或打开容器
-	if (NULL == strstr(szConNameLists,DEFAULT_CONTAINER_SM2))
+	if (NULL == CAPI_KEY_GetSubStringPtr(szConNameLists,DEFAULT_CONTAINER_SM2))
 	{
 		ulRet = SKF_CreateContainer(hAppSKF, DEFAULT_CONTAINER_SM2, &hConSKF);
 	}
@@ -2362,7 +2383,7 @@ unsigned int CAPI_KEY_ECC512GenKeyPair(char * pszKeyOn,int ulKeyTarget, char * p
 		goto err;
 	}
 
-	if (NULL == strstr(szConNameLists,DEFAULT_CONTAINER_ECC512))
+	if (NULL == CAPI_KEY_GetSubStringPtr(szConNameLists,DEFAULT_CONTAINER_ECC512))
 	{
 		ulRet = SKF_CreateContainer(hAppSKF, DEFAULT_CONTAINER_ECC512, &hConSKF);
 		FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "SKF_CreateContainer");
@@ -2527,7 +2548,7 @@ unsigned int CAPI_KEY_ECC512SignDigest(char * pszKeyOn,int ulKeyTarget, char * p
 		goto err;
 	}
 	// 创建或打开容器
-	if (NULL == strstr(szConNameLists,DEFAULT_CONTAINER_ECC512))
+	if (NULL == CAPI_KEY_GetSubStringPtr(szConNameLists,DEFAULT_CONTAINER_ECC512))
 	{
 		ulRet = SKF_CreateContainer(hAppSKF, DEFAULT_CONTAINER_ECC512, &hConSKF);
 	}
@@ -2678,7 +2699,7 @@ unsigned int CAPI_KEY_ECC512ExportPK(char * pszKeyOn,int ulKeyTarget,unsigned in
 		goto err;
 	}
 
-	if (NULL == strstr(szConNameLists,DEFAULT_CONTAINER_ECC512))
+	if (NULL == CAPI_KEY_GetSubStringPtr(szConNameLists,DEFAULT_CONTAINER_ECC512))
 	{
 		ulRet = SKF_CreateContainer(hAppSKF, DEFAULT_CONTAINER_ECC512, &hConSKF);
 		FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "SKF_CreateContainer");
@@ -2700,7 +2721,7 @@ unsigned int CAPI_KEY_ECC512ExportPK(char * pszKeyOn,int ulKeyTarget,unsigned in
 	if (2 == bIsSign)
 	{
 		// 需要修改
-		ulRet = SKF_ExportPublicKey(hConSKF, bIsSign,(BYTE *)&pubkeyBlob, &ulPubkeyBlobLen);
+		ulRet = SKF_ExportECCExchangePubKey(hConSKF, &pubkeyBlob);
 	}
 	else
 	{
@@ -2844,7 +2865,7 @@ unsigned int CAPI_KEY_ECC512ImportKeyPair(char * pszKeyOn,int ulKeyTarget,unsign
 		goto err;
 	}
 	// 创建或打开容器
-	if (NULL == strstr(szConNameLists,DEFAULT_CONTAINER_ECC512))
+	if (NULL == CAPI_KEY_GetSubStringPtr(szConNameLists,DEFAULT_CONTAINER_ECC512))
 	{
 		ulRet = SKF_CreateContainer(hAppSKF, DEFAULT_CONTAINER_ECC512, &hConSKF);
 	}
@@ -2858,7 +2879,17 @@ unsigned int CAPI_KEY_ECC512ImportKeyPair(char * pszKeyOn,int ulKeyTarget,unsign
 		goto err;
 	}
 	// 导入数字信封格式的交换密钥对
-	ulRet = SKF_ImportECCKeyPair(hConSKF, (PENVELOPEDKEYBLOB)pbKeyPair);
+	if(2 == bIsSign)
+	{
+		// 导入交换密钥对
+		ulRet = SKF_ImportECCExchangeKeyPair(hConSKF, (PENVELOPEDKEYBLOB)pbKeyPair);
+	}
+	else
+	{
+		ulRet = SKF_ImportECCKeyPair(hConSKF, (PENVELOPEDKEYBLOB)pbKeyPair);
+
+	}
+
 	if(ulRet)
 	{
 		goto err;
@@ -2981,7 +3012,7 @@ unsigned int CAPI_KEY_ECC512ImportCert(char * pszKeyOn,int ulKeyTarget, unsigned
 		goto err;
 	}
 	// 创建或打开容器
-	if (NULL == strstr(szConNameLists,DEFAULT_CONTAINER_ECC512))
+	if (NULL == CAPI_KEY_GetSubStringPtr(szConNameLists,DEFAULT_CONTAINER_ECC512))
 	{
 		ulRet = SKF_CreateContainer(hAppSKF, DEFAULT_CONTAINER_ECC512, &hConSKF);
 	}
