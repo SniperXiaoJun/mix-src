@@ -3346,9 +3346,9 @@ unsigned int OpenSSL_GMECC512GenExportEnvelopedKey(
 	unsigned int x_data_len = GM_ECC_512_BYTES_LEN;
 	unsigned int y_data_len = GM_ECC_512_BYTES_LEN;
 
-	unsigned char en_value[1+32*3+16] = {0};
+	unsigned char en_value[1+64*2+32+16] = {0};
 
-	unsigned int en_len = 1+32*3+16;
+	unsigned int en_len = 1+64*2+32+16;
 
 	unsigned int sm4_key_len = 16;
 	unsigned char sm4_key_value[16];
@@ -3372,13 +3372,13 @@ unsigned int OpenSSL_GMECC512GenExportEnvelopedKey(
 
 
 	keyBlob.Version = 1;
-	keyBlob.uiBits = ECC_MAX_XCOORDINATE_BITS_LEN / 2;
+	keyBlob.uiBits = 512;
 	keyBlob.uiSymmAlgID = SGD_SMS4_ECB;
 
 	// 公钥赋值
-	keyBlob.PubKey.BitLen = ECCref_MAX_BITS;
-	memcpy(keyBlob.PubKey.XCoordinate + ECCref_MAX_LEN,x_data_value,ECCref_MAX_LEN);
-	memcpy(keyBlob.PubKey.YCoordinate + ECCref_MAX_LEN,y_data_value,ECCref_MAX_LEN);
+	keyBlob.PubKey.BitLen = 512;
+	memcpy(keyBlob.PubKey.XCoordinate,x_data_value,GM_ECC_512_BYTES_LEN);
+	memcpy(keyBlob.PubKey.YCoordinate,y_data_value,GM_ECC_512_BYTES_LEN);
 
 	rv = OpenSSL_GMECC512Encrypt(pbPublicKeyX,GM_ECC_512_BYTES_LEN,pbPublicKeyY,GM_ECC_512_BYTES_LEN,sm4_key_value,sm4_key_len,en_value,&en_len);
 	if(0 != rv)
@@ -3387,12 +3387,12 @@ unsigned int OpenSSL_GMECC512GenExportEnvelopedKey(
 	}
 
 	keyBlob.ECCCipherBlob.CipherLen = 16;
-	memcpy(keyBlob.ECCCipherBlob.HASH,en_value+1+32*2+16,ECCref_MAX_LEN);
-	memcpy(keyBlob.ECCCipherBlob.XCoordinate + ECCref_MAX_LEN,en_value+1,ECCref_MAX_LEN);
-	memcpy(keyBlob.ECCCipherBlob.YCoordinate + ECCref_MAX_LEN,en_value+1+32,ECCref_MAX_LEN);
-	memcpy(keyBlob.ECCCipherBlob.Cipher,en_value+1+32*2,16);
+	memcpy(keyBlob.ECCCipherBlob.HASH,en_value+1+64*2+16,32);
+	memcpy(keyBlob.ECCCipherBlob.XCoordinate,en_value+1,GM_ECC_512_BYTES_LEN);
+	memcpy(keyBlob.ECCCipherBlob.YCoordinate,en_value+1+64,GM_ECC_512_BYTES_LEN);
+	memcpy(keyBlob.ECCCipherBlob.Cipher,en_value+1+64*2,16);
 
-	sm4_crypt_ecb(&ctx,SM4_ENCRYPT,GM_ECC_512_BYTES_LEN,prv_data_value,keyBlob.cbEncryptedPriKey+GM_ECC_512_BYTES_LEN);
+	sm4_crypt_ecb(&ctx,SM4_ENCRYPT,GM_ECC_512_BYTES_LEN,prv_data_value,keyBlob.cbEncryptedPriKey);
 
 	if (pbOUT == NULL || *puiOUTLen == 0)
 	{
@@ -3425,9 +3425,9 @@ COMMON_API unsigned int OpenSSL_GMECC512RestoreExportEnvelopedKey(
 {
 	unsigned int rv = -1;
 
-	unsigned char en_value[1+32*3+16] = {0};
+	unsigned char en_value[1+64*2+32+16] = {0};
 
-	unsigned int en_len = 1+32*3+16;
+	unsigned int en_len = 1+64*2+32+16;
 
 	unsigned int sm4_key_len = 16;
 	unsigned char sm4_key_value[16];
@@ -3440,10 +3440,10 @@ COMMON_API unsigned int OpenSSL_GMECC512RestoreExportEnvelopedKey(
 	//
 	en_value[0] = 0x04;
 
-	memcpy(en_value+1+32*2+16,keyBlob.ECCCipherBlob.HASH,ECCref_MAX_LEN);
-	memcpy(en_value+1,keyBlob.ECCCipherBlob.XCoordinate + ECCref_MAX_LEN,ECCref_MAX_LEN);
-	memcpy(en_value+1+32,keyBlob.ECCCipherBlob.YCoordinate + ECCref_MAX_LEN,ECCref_MAX_LEN);
-	memcpy(en_value+1+32*2,keyBlob.ECCCipherBlob.Cipher,16);
+	memcpy(en_value+1+64*2+16,keyBlob.ECCCipherBlob.HASH,32);
+	memcpy(en_value+1,keyBlob.ECCCipherBlob.XCoordinate,GM_ECC_512_BYTES_LEN);
+	memcpy(en_value+1+64,keyBlob.ECCCipherBlob.YCoordinate,GM_ECC_512_BYTES_LEN);
+	memcpy(en_value+1+64*2,keyBlob.ECCCipherBlob.Cipher,16);
 
 	rv = OpenSSL_GMECC512Decrypt(pbOldPrivateKey,GM_ECC_512_BYTES_LEN,en_value,en_len,sm4_key_value,&sm4_key_len);
 	if(0 != rv)
@@ -3458,10 +3458,10 @@ COMMON_API unsigned int OpenSSL_GMECC512RestoreExportEnvelopedKey(
 	}
 
 	keyBlob.ECCCipherBlob.CipherLen = 16;
-	memcpy(keyBlob.ECCCipherBlob.HASH,en_value+1+32*2+16,ECCref_MAX_LEN);
-	memcpy(keyBlob.ECCCipherBlob.XCoordinate + ECCref_MAX_LEN,en_value+1,ECCref_MAX_LEN);
-	memcpy(keyBlob.ECCCipherBlob.YCoordinate + ECCref_MAX_LEN,en_value+1+32,ECCref_MAX_LEN);
-	memcpy(keyBlob.ECCCipherBlob.Cipher,en_value+1+32*2,16);
+	memcpy(keyBlob.ECCCipherBlob.HASH,en_value+1+64*2+16,32);
+	memcpy(keyBlob.ECCCipherBlob.XCoordinate,en_value+1,GM_ECC_512_BYTES_LEN);
+	memcpy(keyBlob.ECCCipherBlob.YCoordinate,en_value+1+64,GM_ECC_512_BYTES_LEN);
+	memcpy(keyBlob.ECCCipherBlob.Cipher,en_value+1+64*2,16);
 
 	if (pbOUT == NULL || *puiOUTLen == 0)
 	{
