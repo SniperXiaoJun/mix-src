@@ -1658,7 +1658,7 @@ DWORD WINAPI ThreadFuncSKFGenECC512KeyPair(LPVOID aThisClass)
 {
 	FBCommonAPI * thisClass = (FBCommonAPI*)aThisClass;
 
-	thisClass->ulResult = CAPI_KEY_ECC512GenKeyPair(thisClass->m_szAuthKey, OPE_USB_TARGET_OTHER, thisClass->m_szPIN,(unsigned int *)&thisClass->m_ulRetry);
+	thisClass->ulResult = CAPI_KEY_ECC512GenKeyPair(thisClass->m_szAuthKey, OPE_USB_TARGET_OTHER,1, thisClass->m_szPIN,(unsigned int *)&thisClass->m_ulRetry);
 
 	if (thisClass->ulResult)
 	{
