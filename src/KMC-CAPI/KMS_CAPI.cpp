@@ -2,6 +2,7 @@
 #include "FILE_LOG.h"
 #include "o_all_type_def.h"
 #include "o_all_func_def.h"
+#include <string.h>
 
 char DEFAULT_CONTAINER_SM2[] = "ContainerSM2";
 char DEFAULT_CONTAINER_ECC512[] = "ContainerECC512";
@@ -27,7 +28,8 @@ ULONG CAPI_KEY_DevAuth(HANDLE hDevSKF)
 {
 	// 第一步设备认证
 	unsigned char	bRandom[16], bAuthData[16];
-	unsigned long	ulRandomLen, ulAuthDataLen;
+	unsigned long	ulRandomLen;
+	ULONG ulAuthDataLen;
 	BLOCKCIPHERPARAM EncryptParam;
 	unsigned char	bSymKey[16];
 	HANDLE			hSymKey=NULL;
@@ -1439,6 +1441,7 @@ err:
 
 unsigned int CAPI_KEY_SecureState(char * pszKeyOn,int ulKeyTarget, OPT_ST_USB_META * pstMeta)
 {
+#if defined(WIN32) || defined(WINDOWS)
 	unsigned int ulRet = -1;
 
 	char * ptrDevName = NULL;
@@ -1613,6 +1616,10 @@ err_continue:
 err:
 
 	return ulRet;
+#else
+	return 0;
+#endif
+	
 }
 
 
@@ -3088,6 +3095,10 @@ unsigned int CAPI_KEY_ECC512ConvertCipher(char * pszKeyOn,int ulKeyTarget, unsig
 
 	unsigned int ulRet = 0;
 	int ulKeyCount = 0;
+	
+	HANDLE hSessionKey = NULL;
+	ECCPUBLICKEYBLOB pk;
+
 
 	// 枚举设备
 	ulRet = SKF_EnumDev(TRUE,szDevNameLists,&ulDevNameLists);
@@ -3183,15 +3194,11 @@ unsigned int CAPI_KEY_ECC512ConvertCipher(char * pszKeyOn,int ulKeyTarget, unsig
 		goto err;
 	}
 
-	HANDLE hSessionKey = NULL;
-
 	ulRet = SKF_UnwrapKey(hConSKF,(ECCCIPHERBLOB*)pbIn, SGD_SMS4_ECB,&hSessionKey);
 	if(ulRet)
 	{
 		goto err;
 	}
-
-	ECCPUBLICKEYBLOB pk;
 
 	pk.BitLen = 512;
 	memcpy(pk.XCoordinate,pbPK,64);
