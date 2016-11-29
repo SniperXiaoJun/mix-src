@@ -948,6 +948,27 @@ extern "C" {
 	// GM_ECC_512 end 
 #endif
 
+#if defined(GM_ECC_512_SUPPORT_SKF)
+
+	COMMON_API unsigned int SKF_GMECC512SignCert(
+		const unsigned char *pbX509Cert,  unsigned int uiX509CertLen, 
+		const unsigned char *pbPublicKeyX, unsigned int uiPublicKeyXLen,
+		const unsigned char *pbPublicKeyY, unsigned int uiPublicKeyYLen,
+		const char * pbPIN,unsigned int ulKeyTarget, unsigned int *pulRetry,
+		unsigned char * pbX509CertSigned,  unsigned int * puiX509CertSignedLen
+		);
+
+	COMMON_API unsigned int SKF_GMECC512SignCRL(
+		const unsigned char *pbCRL, unsigned int uiCRLLen,unsigned int uiAlg,
+		const unsigned char *pbPublicKeyX, unsigned int uiPublicKeyXLen,
+		const unsigned char *pbPublicKeyY, unsigned int uiPublicKeyYLen,
+		const char * pbPIN,unsigned int ulKeyTarget, unsigned int *pulRetry,
+		unsigned char *pbCRLSigned, unsigned int * puiCRLSignedLen
+		);
+#endif
+
+
+
 	COMMON_API unsigned int OpenSSL_SM2GenPFX(const char *password,const char *nickname, 
 		const unsigned char *pbPrivateKey, unsigned int uiPrivateKeyLen, 
 		const unsigned char * pbPublicKeyX, unsigned int uiPublicKeyXLen, 

@@ -3155,7 +3155,8 @@ unsigned int CAPI_KEY_ECC512ConvertCipher(char * pszKeyOn,int ulKeyTarget, unsig
 	}
 
 	ulRet = SKF_EnumApplication(hDevSKF,szAppNameLists, &ulAppNameLists);
-
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "SKF_EnumApplication");
+	FILE_LOG_NUMBER(file_log_name,(long)ulRet);
 	// 设备认证或者打开一个应用
 	if (ulAppNameLists < 2)
 	{
@@ -3165,9 +3166,21 @@ unsigned int CAPI_KEY_ECC512ConvertCipher(char * pszKeyOn,int ulKeyTarget, unsig
 	{
 		ulRet = SKF_OpenApplication(hDevSKF, szAppNameLists,&hAppSKF);
 	}
+	
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "SKF_OpenApplication");
+	FILE_LOG_NUMBER(file_log_name,(long)ulRet);
+	
+	if(ulRet)
+	{
+		goto err;
+	}
+	
 
 	// 验证密码
 	ulRet = SKF_VerifyPIN(hAppSKF, 1, pszPIN,(ULONG *)pulRetry);
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "SKF_VerifyPIN");
+	FILE_LOG_NUMBER(file_log_name,(long)ulRet);
+	
 	if(ulRet)
 	{
 		goto err;
@@ -3175,6 +3188,8 @@ unsigned int CAPI_KEY_ECC512ConvertCipher(char * pszKeyOn,int ulKeyTarget, unsig
 
 	// 枚举容器
 	ulRet = SKF_EnumContainer(hAppSKF,szConNameLists,&ulConNameLists);
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "SKF_EnumContainer");
+	FILE_LOG_NUMBER(file_log_name,(long)ulRet);
 	if(ulRet)
 	{
 		goto err;
@@ -3188,6 +3203,8 @@ unsigned int CAPI_KEY_ECC512ConvertCipher(char * pszKeyOn,int ulKeyTarget, unsig
 	{
 		ulRet = SKF_OpenContainer(hAppSKF, DEFAULT_CONTAINER_ECC512, &hConSKF);
 	}
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "SKF_OpenContainer");
+	FILE_LOG_NUMBER(file_log_name,(long)ulRet);
 
 	if(ulRet)
 	{
@@ -3195,6 +3212,8 @@ unsigned int CAPI_KEY_ECC512ConvertCipher(char * pszKeyOn,int ulKeyTarget, unsig
 	}
 
 	ulRet = SKF_UnwrapKey(hConSKF,(ECCCIPHERBLOB*)pbIn, SGD_SMS4_ECB,&hSessionKey);
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "SKF_UnwrapKey");
+	FILE_LOG_NUMBER(file_log_name,(long)ulRet);
 	if(ulRet)
 	{
 		goto err;
@@ -3205,6 +3224,8 @@ unsigned int CAPI_KEY_ECC512ConvertCipher(char * pszKeyOn,int ulKeyTarget, unsig
 	memcpy(pk.YCoordinate,pbPK+64,64);
 
 	ulRet = SKF_WrapKey(hConSKF,hSessionKey,&pk,(ECCCIPHERBLOB*)pbOut);
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "SKF_WrapKey");
+	FILE_LOG_NUMBER(file_log_name,(long)ulRet);
 	// 导入证书
 	if(ulRet)
 	{

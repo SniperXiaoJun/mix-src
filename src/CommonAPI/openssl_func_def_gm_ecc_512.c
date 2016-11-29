@@ -3483,3 +3483,194 @@ err:
 
 	return rv;
 }
+
+
+#if defined(GM_ECC_512_SUPPORT_SKF)
+
+#include "KMS_CAPI.h"
+
+unsigned int SKF_GMECC512SignCRL(
+	const unsigned char *pbCRL, unsigned int uiCRLLen,unsigned int uiAlg,
+	const unsigned char *pbPublicKeyX, unsigned int uiPublicKeyXLen,
+	const unsigned char *pbPublicKeyY, unsigned int uiPublicKeyYLen,
+	const char * pbPIN,unsigned int ulKeyTarget, unsigned int *pulRetry,
+	unsigned char *pbCRLSigned, unsigned int * puiCRLSignedLen
+	)
+{
+	unsigned int rv = -1;
+	X509_CRL * crl =  NULL;
+	unsigned char pbSig[BUFFER_LEN_1K] = {0};
+	unsigned int uiSigLen = BUFFER_LEN_1K;
+	//EC_KEY      * ecPubkey = NULL;
+
+	unsigned char digest_value[GM_HASH_MAX_BYTES_LEN] = {0};
+	unsigned int digest_len = GM_HASH_MAX_BYTES_LEN;
+
+	unsigned int r_len = GM_ECC_512_BYTES_LEN;
+	unsigned int s_len = GM_ECC_512_BYTES_LEN;
+
+	unsigned int pubkey_xy_len = 2 * GM_ECC_512_BYTES_LEN + 1;
+	unsigned char pubkey_xy_value[2 * GM_ECC_512_BYTES_LEN + 1] = {0};
+
+	unsigned char info_value[BUFFER_LEN_1K * 4] = {0};
+	unsigned int info_len = BUFFER_LEN_1K * 4;
+	unsigned char *ptr_out = info_value;
+	const unsigned char * ptr_in = NULL;
+
+	unsigned int encode_len = BUFFER_LEN_1K;
+	unsigned char encode_value[BUFFER_LEN_1K] = {0};
+
+	char pszKeyOn[BUFFER_LEN_1K];
+
+
+	ptr_in = pbCRL;
+	crl = d2i_X509_CRL(NULL, &ptr_in, uiCRLLen);
+	if (NULL == crl)
+	{
+		goto err;
+	}
+
+	memcpy(pubkey_xy_value, "\x04", 1);
+	memcpy(pubkey_xy_value + 1 , pbPublicKeyX, GM_ECC_512_BYTES_LEN);
+	memcpy(pubkey_xy_value + 1 + GM_ECC_512_BYTES_LEN, pbPublicKeyY, GM_ECC_512_BYTES_LEN);
+
+	GMECC512SignAsn1DeConvert(pbSig,&r_len,pbSig+ GM_ECC_512_BYTES_LEN,&s_len,crl->signature->data,crl->signature->length);
+
+	//rv = OpenSSL_VerifyMSG(cert_buffer_data,cert_buffer_len, sig,2 * GM_ECC_512_BYTES_LEN,pbPublicKeyX,GM_ECC_512_BYTES_LEN,pbPublicKeyY,GM_ECC_512_BYTES_LEN);
+
+	info_len =i2d_X509_CRL_INFO(crl->crl,&ptr_out);
+
+	//ASN1_item_i2d(cer->cert_info,&pCert,ASN1_ITEM_rptr(X509_CINF));
+
+	rv = tcm_gmecc512_get_message_hash(info_value, info_len,"1234567812345678", 16, pubkey_xy_value, pubkey_xy_len,digest_value,&digest_len);
+	if(rv)
+	{
+		goto err;
+	}
+
+	rv = CAPI_KEY_ECC512SignDigest(pszKeyOn,ulKeyTarget,pbPIN, digest_value, pbSig,&pulRetry);
+	if(rv)
+	{
+		goto err;
+	}
+	rv = GMECC512SignAsn1Convert(pbSig,GM_ECC_512_BYTES_LEN, pbSig + GM_ECC_512_BYTES_LEN,GM_ECC_512_BYTES_LEN, encode_value, &encode_len);
+	FILE_LOG_STRING(file_log_name, "rv");
+	FILE_LOG_NUMBER(file_log_name, rv);
+	FILE_LOG_STRING(file_log_name, "encode_value");
+	FILE_LOG_HEX(file_log_name, encode_value, encode_len);
+	if (rv)
+	{
+		goto err;
+	}
+
+	ASN1_BIT_STRING_set(crl->signature,encode_value, encode_len);
+	crl->signature->flags&= ~(ASN1_STRING_FLAG_BITS_LEFT|0x07);
+	crl->signature->flags|=ASN1_STRING_FLAG_BITS_LEFT;
+
+	ptr_out = pbCRLSigned;
+	*puiCRLSignedLen =  i2d_X509_CRL(crl, &ptr_out);
+
+	rv = 0;
+
+	FILE_LOG_FMT(file_log_name, "%s %d", __FUNCTION__, __LINE__);
+	FILE_LOG_FMT(file_log_name, "%s %d", __FUNCTION__, rv);
+
+err:
+
+	if (crl)
+	{
+		X509_CRL_free(crl);
+	}
+
+	return rv;
+}
+
+
+unsigned int SKF_GMECC512SignCert(
+	const unsigned char *pbX509Cert,   unsigned int uiX509CertLen, 
+	const unsigned char *pbPublicKeyX, unsigned int uiPublicKeyXLen,
+	const unsigned char *pbPublicKeyY, unsigned int uiPublicKeyYLen,
+	const char * pbPIN,unsigned int ulKeyTarget, unsigned int *pulRetry,
+	unsigned char * pbX509CertSigned,  unsigned int *puiX509CertSignedLen
+	)
+{
+	unsigned int rv = -1;
+	X509 * x509 =  NULL;
+	unsigned char pbSig[BUFFER_LEN_1K] = {0};
+	unsigned int uiSigLen = BUFFER_LEN_1K;
+
+	unsigned char digest_value[GM_HASH_MAX_BYTES_LEN] = {0};
+	unsigned int digest_len = GM_HASH_MAX_BYTES_LEN;
+
+	unsigned int r_len = GM_ECC_512_BYTES_LEN;
+	unsigned int s_len = GM_ECC_512_BYTES_LEN;
+
+	unsigned int encode_len = BUFFER_LEN_1K;
+	unsigned char encode_value[BUFFER_LEN_1K] = {0};
+
+	unsigned int pubkey_xy_len = 2 * GM_ECC_512_BYTES_LEN + 1;
+	unsigned char pubkey_xy_value[2 * GM_ECC_512_BYTES_LEN + 1] = {0};
+
+	unsigned char info_value[BUFFER_LEN_1K * 4] = {0};
+	unsigned int info_len = BUFFER_LEN_1K * 4;
+	unsigned char *ptr_out = info_value;
+	const unsigned char * ptr_in = NULL;
+
+	char pszKeyOn[BUFFER_LEN_1K];
+
+	ptr_in = pbX509Cert;
+	x509 = d2i_X509(NULL, &ptr_in, uiX509CertLen);
+	if (NULL == x509)
+	{
+		goto err;
+	}
+
+	ptr_out = info_value;
+
+	memcpy(pubkey_xy_value, "\x04", 1);
+	memcpy(pubkey_xy_value + 1 , pbPublicKeyX, GM_ECC_512_BYTES_LEN);
+	memcpy(pubkey_xy_value + 1 + GM_ECC_512_BYTES_LEN, pbPublicKeyY, GM_ECC_512_BYTES_LEN);
+
+	info_len =i2d_X509_CINF(x509->cert_info,&ptr_out);
+
+	rv = tcm_gmecc512_get_message_hash(info_value, info_len,"1234567812345678", 16, pubkey_xy_value, pubkey_xy_len,digest_value,&digest_len);
+
+	if (rv)
+	{
+		goto err;
+	}
+
+	rv = CAPI_KEY_ECC512SignDigest(pszKeyOn,ulKeyTarget,pbPIN, digest_value, pbSig,&pulRetry);
+	if (rv)
+	{
+		goto err;
+	}
+
+	rv = GMECC512SignAsn1Convert(pbSig,GM_ECC_512_BYTES_LEN, pbSig + GM_ECC_512_BYTES_LEN,GM_ECC_512_BYTES_LEN, encode_value, &encode_len);
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__,"encode_value");
+	FILE_LOG_HEX(file_log_name, encode_value, encode_len);
+	if (rv)
+	{
+		goto err;
+	}
+
+	ASN1_BIT_STRING_set(x509->signature,encode_value, encode_len);
+	x509->signature->flags&= ~(ASN1_STRING_FLAG_BITS_LEFT|0x07);
+	x509->signature->flags|=ASN1_STRING_FLAG_BITS_LEFT;
+
+	ptr_out = pbX509CertSigned;
+	*puiX509CertSignedLen =  i2d_X509(x509, &ptr_out);
+
+	rv = 0;
+
+err:
+
+	if (x509)
+	{
+		X509_free(x509);
+	}
+
+	return rv;
+}
+
+#endif
