@@ -993,6 +993,17 @@ extern "C" {
 		unsigned char *pbOUT, unsigned int * puiOUTLen
 		);
 
+	typedef struct _OPST_CERT_LIST{
+		unsigned char * content;
+		int contentLen;
+	}OPST_CERT_LIST;
+
+	COMMON_API unsigned int OpenSSL_P7BMake(
+		OPST_CERT_LIST pX509List[],
+		int uiX509ListLen,
+		const unsigned char *pbCRL, unsigned int uiCRLLen,
+		unsigned char *pbP7BContent, unsigned int *puiP7BContentLen
+		);
 
 #ifdef __cplusplus
 }

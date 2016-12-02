@@ -735,6 +735,97 @@ err:
 	return rv;
 }
 
+unsigned int OpenSSL_P7BMake(
+	OPST_CERT_LIST pX509List[],
+	int uiX509ListLen,
+	const unsigned char *pbCRL, unsigned int uiCRLLen,
+	unsigned char *pbP7BContent, unsigned int *puiP7BContentLen
+	)
+{
+	unsigned int rv = -1;
+	int i=0;
+	
+	PKCS7 *p7 = NULL;
+	PKCS7_SIGNED *p7s = NULL;
+	X509_CRL *crl=NULL;
+	STACK_OF(X509_CRL) *crl_stack=NULL;
+	STACK_OF(X509) *cert_stack=NULL;
+	X509 *x509 = NULL;
+
+	unsigned char * ptr_out = NULL;
+	ptr_out = pbP7BContent;
+
+	if ((p7=PKCS7_new()) == NULL) 
+	{
+		goto err;
+	}
+	if ((p7s=PKCS7_SIGNED_new()) == NULL)
+	{
+		goto err;
+	}
+	p7->type=OBJ_nid2obj(NID_pkcs7_signed);
+	p7->d.sign=p7s;
+	p7s->contents->type=OBJ_nid2obj(NID_pkcs7_data);
+
+	if (!ASN1_INTEGER_set(p7s->version,1))
+	{
+		goto err;
+	}
+
+	if (pbCRL == 0 || 0 == uiCRLLen)
+	{
+
+	}
+	else
+	{
+		crl = d2i_X509_CRL(NULL, &pbCRL, uiCRLLen);
+	}
+	
+
+	if ((crl_stack=sk_X509_CRL_new_null()) == NULL) 
+	{
+		goto err;
+	}
+	p7s->crl=crl_stack;
+	if (crl != NULL)
+	{
+		sk_X509_CRL_push(crl_stack,crl);
+		crl=NULL; /* now part of p7 for OPENSSL_freeing */
+	}
+
+	if ((cert_stack=sk_X509_new_null()) == NULL) goto err;
+	p7s->cert=cert_stack;
+
+	for (i = 0; i < uiX509ListLen; i++)
+	{
+		x509 = d2i_X509(NULL, &pX509List[i].content, pX509List[i].contentLen);
+
+		if (NULL == x509)
+		{
+			goto err;
+		}
+
+		sk_X509_push(cert_stack,x509);
+	}
+
+	//p7
+
+	*puiP7BContentLen =i2d_PKCS7(p7,&ptr_out);
+
+	rv=0;
+err:
+	if (p7 != NULL) 
+	{
+		PKCS7_free(p7);
+	}
+	if (crl != NULL)
+	{
+		X509_CRL_free(crl);
+	}
+
+	return rv;
+}
+
 
 
 unsigned int OpenSSL_SM2SignCSR(
