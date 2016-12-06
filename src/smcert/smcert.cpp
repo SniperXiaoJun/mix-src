@@ -843,6 +843,87 @@ int GetInfoByNameID(X509_NAME *certname, int inID, char *pszOut, int *piOutLen)
 		}		
 	}
 
+	if (inID == NID_COMMONNAME)
+	{
+		if (0 == pszOut[0])
+		{
+			i=sk_X509_NAME_ENTRY_num(certname->entries)-1;
+
+			ne = sk_X509_NAME_ENTRY_value(certname->entries, i);
+			n = OBJ_obj2nid(ne->object);
+			if ((n == NID_undef) || ((s = OBJ_nid2sn(n)) == NULL))
+			{
+				i2t_ASN1_OBJECT(tmp_buf, sizeof(tmp_buf), ne->object);
+				s = tmp_buf;
+			}
+
+			//标志头的长度
+			iTempLen = strlen(s);
+			//Get ASN1
+			asn1_str = X509_NAME_ENTRY_get_data(ne);		
+			//BIO 	
+			mem = BIO_new(BIO_s_mem());
+			BIO_set_close(mem, BIO_CLOSE); 
+			ASN1_STRING_print_ex(mem, asn1_str, ASN1_STRFLGS_ESC_QUOTE );	
+			BIO_get_mem_ptr(mem, &bptr);		
+			//编码前的长度
+			iLen = bptr->length;		
+			pszBuf = new char[iLen+1];
+			memset(pszBuf, 0, iLen+1);		
+			memcpy(pszBuf, bptr->data, iLen);
+			if(mem != NULL)
+			{
+				BIO_free(mem);
+				mem = NULL;
+			}
+
+			//获得对象内容 长度为转化的长度iLen + s字符串的长度iTempLen + "//" + "=" +1 
+			pszTempBuf = new char[iLen+iTempLen+3];
+			memset(pszTempBuf, 0, iLen+iTempLen+3);	
+
+			if(0 == pszOut[0])
+			{
+				p = pszTempBuf;
+				memcpy(p, s, iTempLen);
+				p+=iTempLen;
+				*(p++)='=';
+			}
+			else
+			{
+				//以前代码,先有分隔符'/'
+				p = pszTempBuf;
+				*(p++)='/';
+				memcpy(p, s, iTempLen);
+				p+=iTempLen;
+				*(p++)='=';
+			}
+
+			//转化编码
+			StringToAscii(pszBuf, p);
+			*piOutLen = *piOutLen + strlen(pszTempBuf);
+
+			//如果返回数据没有分配地址，返回长度
+			if(NULL != pszOut)
+			{			
+				//最终全部转化为UTF-8
+
+				strcat(pszOut, pszTempBuf);
+			}
+			if(pszBuf)
+			{
+				delete[] pszBuf;
+			}
+			if(pszTempBuf)
+			{
+				delete[] pszTempBuf;
+			}	
+		}
+		else
+		{
+
+		}
+	}
+
 	return *piOutLen;
 }
 
