@@ -123,37 +123,6 @@ typedef ULONG (DEVAPI *pSKF_GenerateKeyWithECCEx)(HANDLE hAgreementHandle,
 	BYTE* pbID, ULONG ulIDLen, 
 	BYTE *pbAgreementKey, ULONG *pulAgreementKeyLen);
 
-HINSTANCE ghInst = NULL;
-
-/*
-SKF函数地址
-*/
-
-FUNC_NAME_DECLARE(func_, EnumDev,);
-FUNC_NAME_DECLARE(func_, ConnectDev,);
-FUNC_NAME_DECLARE(func_, DisConnectDev,);
-FUNC_NAME_DECLARE(func_, ChangePIN,);
-FUNC_NAME_DECLARE(func_, OpenApplication,);
-FUNC_NAME_DECLARE(func_, CloseApplication,);
-FUNC_NAME_DECLARE(func_, EnumApplication,);
-FUNC_NAME_DECLARE(func_, ExportCertificate,);
-FUNC_NAME_DECLARE(func_, EnumContainer,);
-FUNC_NAME_DECLARE(func_, OpenContainer,);
-FUNC_NAME_DECLARE(func_, CloseContainer,);
-FUNC_NAME_DECLARE(func_, VerifyPIN,);
-FUNC_NAME_DECLARE(func_, GetContainerType,);
-FUNC_NAME_DECLARE(func_, ECCSignData,);
-FUNC_NAME_DECLARE(func_, ECCVerify,);
-FUNC_NAME_DECLARE(func_, ExtECCVerify,);
-FUNC_NAME_DECLARE(func_, GetDevInfo,);
-FUNC_NAME_DECLARE(func_, LockDev,);
-FUNC_NAME_DECLARE(func_, UnlockDev,);
-
-FUNC_NAME_DECLARE(func_, GenerateKeyWithECCEx,);
-FUNC_NAME_DECLARE(func_, GenerateAgreementDataWithECC,);
-FUNC_NAME_DECLARE(func_, GenerateAgreementDataWithECCEx, );
-FUNC_NAME_DECLARE(func_, GenerateAgreementDataAndKeyWithECCEx, );
-
 
 // 最大加载SKF DLL接口�?
 #define MAX_SKF_DLL_LOAD 4
@@ -390,6 +359,8 @@ unsigned int __stdcall WTF_EnumCert(const char *pszDevName,void * pvCertsValue,u
 
 	memset(data_value, 0, data_len);
 
+	FILE_LOG_FMT(file_log_name, "func=%s thread=%d line=%d", __FUNCTION__, GetCurrentThreadId(), __LINE__);
+
 #if 0
 	if (pszDevName && strlen(pszDevName))
 	{
@@ -440,8 +411,12 @@ unsigned int __stdcall WTF_EnumCert(const char *pszDevName,void * pvCertsValue,u
 
 #else
 
+	FILE_LOG_FMT(file_log_name, "func=%s thread=%d line=%d", __FUNCTION__, GetCurrentThreadId(), __LINE__);
+
 	// 遍历全部
 	ulRet = WTF_EnumCertInternal(NULL,data_value,&data_len,ulKeyFlag,ulSignFlag,ulVerifyFlag, ulFilterFlag);
+
+	FILE_LOG_FMT(file_log_name, "func=%s thread=%d line=%d", __FUNCTION__, GetCurrentThreadId(), __LINE__);
 
 	if(ulRet)
 	{
@@ -511,12 +486,16 @@ unsigned int __stdcall WTF_EnumCert(const char *pszDevName,void * pvCertsValue,u
 	{
 		memcpy(pvCertsValue,data_value,data_len);
 
+		FILE_LOG_FMT(file_log_name, "func=%s thread=%d line=%d", __FUNCTION__, GetCurrentThreadId(), __LINE__);
+
 		for (pCertContent = (SK_CERT_CONTENT *)pvCertsValue;(char *)pCertContent < (char *)pvCertsValue + data_len;)
 		{
 			pCertContent->pbValue = (BYTE *)pCertContent + sizeof(SK_CERT_CONTENT) ;
 
 			pCertContent = (BYTE *)pCertContent + pCertContent->nValueLen + sizeof(SK_CERT_CONTENT) ;
 		}
+
+		FILE_LOG_FMT(file_log_name, "func=%s thread=%d line=%d", __FUNCTION__, GetCurrentThreadId(), __LINE__);
 
 		* puiCertsLen = data_len;
 	}
@@ -533,6 +512,37 @@ err:
 
 unsigned int __stdcall WTF_ChangePIN(const char *pszDevName,unsigned int ulPINType ,const char * pszOldPin,const char * pszNewPin,unsigned int *puiRetryCount)
 {
+	HINSTANCE ghInst = NULL;
+
+	/*
+	SKF函数地址
+	*/
+
+	FUNC_NAME_DECLARE(func_, EnumDev,);
+	FUNC_NAME_DECLARE(func_, ConnectDev,);
+	FUNC_NAME_DECLARE(func_, DisConnectDev,);
+	FUNC_NAME_DECLARE(func_, ChangePIN,);
+	FUNC_NAME_DECLARE(func_, OpenApplication,);
+	FUNC_NAME_DECLARE(func_, CloseApplication,);
+	FUNC_NAME_DECLARE(func_, EnumApplication,);
+	FUNC_NAME_DECLARE(func_, ExportCertificate,);
+	FUNC_NAME_DECLARE(func_, EnumContainer,);
+	FUNC_NAME_DECLARE(func_, OpenContainer,);
+	FUNC_NAME_DECLARE(func_, CloseContainer,);
+	FUNC_NAME_DECLARE(func_, VerifyPIN,);
+	FUNC_NAME_DECLARE(func_, GetContainerType,);
+	FUNC_NAME_DECLARE(func_, ECCSignData,);
+	FUNC_NAME_DECLARE(func_, ECCVerify,);
+	FUNC_NAME_DECLARE(func_, ExtECCVerify,);
+	FUNC_NAME_DECLARE(func_, GetDevInfo,);
+	FUNC_NAME_DECLARE(func_, LockDev,);
+	FUNC_NAME_DECLARE(func_, UnlockDev,);
+
+	FUNC_NAME_DECLARE(func_, GenerateKeyWithECCEx,);
+	FUNC_NAME_DECLARE(func_, GenerateAgreementDataWithECC,);
+	FUNC_NAME_DECLARE(func_, GenerateAgreementDataWithECCEx, );
+	FUNC_NAME_DECLARE(func_, GenerateAgreementDataAndKeyWithECCEx, );
+
 	unsigned int ulRet = 0;
 
 	char * data_value;
@@ -686,6 +696,37 @@ err:
 
 unsigned int __stdcall WTF_VerifyPIN(const char *pszDevName,unsigned int ulPINType ,const char * pszPin,unsigned int *puiRetryCount)
 {
+	HINSTANCE ghInst = NULL;
+
+	/*
+	SKF函数地址
+	*/
+
+	FUNC_NAME_DECLARE(func_, EnumDev,);
+	FUNC_NAME_DECLARE(func_, ConnectDev,);
+	FUNC_NAME_DECLARE(func_, DisConnectDev,);
+	FUNC_NAME_DECLARE(func_, ChangePIN,);
+	FUNC_NAME_DECLARE(func_, OpenApplication,);
+	FUNC_NAME_DECLARE(func_, CloseApplication,);
+	FUNC_NAME_DECLARE(func_, EnumApplication,);
+	FUNC_NAME_DECLARE(func_, ExportCertificate,);
+	FUNC_NAME_DECLARE(func_, EnumContainer,);
+	FUNC_NAME_DECLARE(func_, OpenContainer,);
+	FUNC_NAME_DECLARE(func_, CloseContainer,);
+	FUNC_NAME_DECLARE(func_, VerifyPIN,);
+	FUNC_NAME_DECLARE(func_, GetContainerType,);
+	FUNC_NAME_DECLARE(func_, ECCSignData,);
+	FUNC_NAME_DECLARE(func_, ECCVerify,);
+	FUNC_NAME_DECLARE(func_, ExtECCVerify,);
+	FUNC_NAME_DECLARE(func_, GetDevInfo,);
+	FUNC_NAME_DECLARE(func_, LockDev,);
+	FUNC_NAME_DECLARE(func_, UnlockDev,);
+
+	FUNC_NAME_DECLARE(func_, GenerateKeyWithECCEx,);
+	FUNC_NAME_DECLARE(func_, GenerateAgreementDataWithECC,);
+	FUNC_NAME_DECLARE(func_, GenerateAgreementDataWithECCEx, );
+	FUNC_NAME_DECLARE(func_, GenerateAgreementDataAndKeyWithECCEx, );
+
 	unsigned int ulRet = 0;
 
 	char * data_value;
@@ -840,6 +881,37 @@ err:
 
 unsigned int __stdcall WTF_ChangePINByCertProperty(SK_CERT_DESC_PROPERTY * pCertProperty,unsigned int ulPINType ,const char * pszOldPin,const char * pszNewPin,unsigned int *puiRetryCount)
 {
+	HINSTANCE ghInst = NULL;
+
+	/*
+	SKF函数地址
+	*/
+
+	FUNC_NAME_DECLARE(func_, EnumDev,);
+	FUNC_NAME_DECLARE(func_, ConnectDev,);
+	FUNC_NAME_DECLARE(func_, DisConnectDev,);
+	FUNC_NAME_DECLARE(func_, ChangePIN,);
+	FUNC_NAME_DECLARE(func_, OpenApplication,);
+	FUNC_NAME_DECLARE(func_, CloseApplication,);
+	FUNC_NAME_DECLARE(func_, EnumApplication,);
+	FUNC_NAME_DECLARE(func_, ExportCertificate,);
+	FUNC_NAME_DECLARE(func_, EnumContainer,);
+	FUNC_NAME_DECLARE(func_, OpenContainer,);
+	FUNC_NAME_DECLARE(func_, CloseContainer,);
+	FUNC_NAME_DECLARE(func_, VerifyPIN,);
+	FUNC_NAME_DECLARE(func_, GetContainerType,);
+	FUNC_NAME_DECLARE(func_, ECCSignData,);
+	FUNC_NAME_DECLARE(func_, ECCVerify,);
+	FUNC_NAME_DECLARE(func_, ExtECCVerify,);
+	FUNC_NAME_DECLARE(func_, GetDevInfo,);
+	FUNC_NAME_DECLARE(func_, LockDev,);
+	FUNC_NAME_DECLARE(func_, UnlockDev,);
+
+	FUNC_NAME_DECLARE(func_, GenerateKeyWithECCEx,);
+	FUNC_NAME_DECLARE(func_, GenerateAgreementDataWithECC,);
+	FUNC_NAME_DECLARE(func_, GenerateAgreementDataWithECCEx, );
+	FUNC_NAME_DECLARE(func_, GenerateAgreementDataAndKeyWithECCEx, );
+
 	unsigned int ulRet = 0;
 
 	unsigned int dllPathLen = BUFFER_LEN_1K;
@@ -958,6 +1030,37 @@ err:
 
 unsigned int __stdcall WTF_GetDevInfoByCertProperty(SK_CERT_DESC_PROPERTY * pCertProperty,DEVINFO *pDevInfo)
 {
+	HINSTANCE ghInst = NULL;
+
+	/*
+	SKF函数地址
+	*/
+
+	FUNC_NAME_DECLARE(func_, EnumDev,);
+	FUNC_NAME_DECLARE(func_, ConnectDev,);
+	FUNC_NAME_DECLARE(func_, DisConnectDev,);
+	FUNC_NAME_DECLARE(func_, ChangePIN,);
+	FUNC_NAME_DECLARE(func_, OpenApplication,);
+	FUNC_NAME_DECLARE(func_, CloseApplication,);
+	FUNC_NAME_DECLARE(func_, EnumApplication,);
+	FUNC_NAME_DECLARE(func_, ExportCertificate,);
+	FUNC_NAME_DECLARE(func_, EnumContainer,);
+	FUNC_NAME_DECLARE(func_, OpenContainer,);
+	FUNC_NAME_DECLARE(func_, CloseContainer,);
+	FUNC_NAME_DECLARE(func_, VerifyPIN,);
+	FUNC_NAME_DECLARE(func_, GetContainerType,);
+	FUNC_NAME_DECLARE(func_, ECCSignData,);
+	FUNC_NAME_DECLARE(func_, ECCVerify,);
+	FUNC_NAME_DECLARE(func_, ExtECCVerify,);
+	FUNC_NAME_DECLARE(func_, GetDevInfo,);
+	FUNC_NAME_DECLARE(func_, LockDev,);
+	FUNC_NAME_DECLARE(func_, UnlockDev,);
+
+	FUNC_NAME_DECLARE(func_, GenerateKeyWithECCEx,);
+	FUNC_NAME_DECLARE(func_, GenerateAgreementDataWithECC,);
+	FUNC_NAME_DECLARE(func_, GenerateAgreementDataWithECCEx, );
+	FUNC_NAME_DECLARE(func_, GenerateAgreementDataAndKeyWithECCEx, );
+
 	unsigned int ulRet = 0;
 
 	unsigned int dllPathLen = BUFFER_LEN_1K;
@@ -1065,6 +1168,37 @@ err:
 
 unsigned int __stdcall WTF_VerifyPINByCertProperty(SK_CERT_DESC_PROPERTY * pCertProperty,unsigned int ulPINType ,const char * pszPin,unsigned int *puiRetryCount)
 {
+	HINSTANCE ghInst = NULL;
+
+	/*
+	SKF函数地址
+	*/
+
+	FUNC_NAME_DECLARE(func_, EnumDev,);
+	FUNC_NAME_DECLARE(func_, ConnectDev,);
+	FUNC_NAME_DECLARE(func_, DisConnectDev,);
+	FUNC_NAME_DECLARE(func_, ChangePIN,);
+	FUNC_NAME_DECLARE(func_, OpenApplication,);
+	FUNC_NAME_DECLARE(func_, CloseApplication,);
+	FUNC_NAME_DECLARE(func_, EnumApplication,);
+	FUNC_NAME_DECLARE(func_, ExportCertificate,);
+	FUNC_NAME_DECLARE(func_, EnumContainer,);
+	FUNC_NAME_DECLARE(func_, OpenContainer,);
+	FUNC_NAME_DECLARE(func_, CloseContainer,);
+	FUNC_NAME_DECLARE(func_, VerifyPIN,);
+	FUNC_NAME_DECLARE(func_, GetContainerType,);
+	FUNC_NAME_DECLARE(func_, ECCSignData,);
+	FUNC_NAME_DECLARE(func_, ECCVerify,);
+	FUNC_NAME_DECLARE(func_, ExtECCVerify,);
+	FUNC_NAME_DECLARE(func_, GetDevInfo,);
+	FUNC_NAME_DECLARE(func_, LockDev,);
+	FUNC_NAME_DECLARE(func_, UnlockDev,);
+
+	FUNC_NAME_DECLARE(func_, GenerateKeyWithECCEx,);
+	FUNC_NAME_DECLARE(func_, GenerateAgreementDataWithECC,);
+	FUNC_NAME_DECLARE(func_, GenerateAgreementDataWithECCEx, );
+	FUNC_NAME_DECLARE(func_, GenerateAgreementDataAndKeyWithECCEx, );
+
 	unsigned int ulRet = 0;
 
 	unsigned int dllPathLen = BUFFER_LEN_1K;
@@ -1181,6 +1315,37 @@ err:
 
 unsigned int __stdcall WTF_SM2SignDigest(SK_CERT_DESC_PROPERTY * pCertProperty, const char * pszPIN, BYTE *pbData, unsigned int ulDataLen, PECCSIGNATUREBLOB pSignature,unsigned int * puiRetryCount)
 {
+	HINSTANCE ghInst = NULL;
+
+	/*
+	SKF函数地址
+	*/
+
+	FUNC_NAME_DECLARE(func_, EnumDev,);
+	FUNC_NAME_DECLARE(func_, ConnectDev,);
+	FUNC_NAME_DECLARE(func_, DisConnectDev,);
+	FUNC_NAME_DECLARE(func_, ChangePIN,);
+	FUNC_NAME_DECLARE(func_, OpenApplication,);
+	FUNC_NAME_DECLARE(func_, CloseApplication,);
+	FUNC_NAME_DECLARE(func_, EnumApplication,);
+	FUNC_NAME_DECLARE(func_, ExportCertificate,);
+	FUNC_NAME_DECLARE(func_, EnumContainer,);
+	FUNC_NAME_DECLARE(func_, OpenContainer,);
+	FUNC_NAME_DECLARE(func_, CloseContainer,);
+	FUNC_NAME_DECLARE(func_, VerifyPIN,);
+	FUNC_NAME_DECLARE(func_, GetContainerType,);
+	FUNC_NAME_DECLARE(func_, ECCSignData,);
+	FUNC_NAME_DECLARE(func_, ECCVerify,);
+	FUNC_NAME_DECLARE(func_, ExtECCVerify,);
+	FUNC_NAME_DECLARE(func_, GetDevInfo,);
+	FUNC_NAME_DECLARE(func_, LockDev,);
+	FUNC_NAME_DECLARE(func_, UnlockDev,);
+
+	FUNC_NAME_DECLARE(func_, GenerateKeyWithECCEx,);
+	FUNC_NAME_DECLARE(func_, GenerateAgreementDataWithECC,);
+	FUNC_NAME_DECLARE(func_, GenerateAgreementDataWithECCEx, );
+	FUNC_NAME_DECLARE(func_, GenerateAgreementDataAndKeyWithECCEx, );
+
 	unsigned int ulRet = 0;
 
 
@@ -1370,14 +1535,15 @@ unsigned int __stdcall WTF_EnumCertInternal(const char * pszSKFName, void * pvCe
 		unsigned int data_len_tmp = BUFFER_LEN_1K * BUFFER_LEN_1K;
 
 		ulOutLen = 0;
-
+		FILE_LOG_FMT(file_log_name, "func=%s thread=%d line=%d", __FUNCTION__, GetCurrentThreadId(), __LINE__);
 		WTF_EnumSKF(szSKFAll, &ulSKFAll);
-
+		FILE_LOG_FMT(file_log_name, "func=%s thread=%d line=%d", __FUNCTION__, GetCurrentThreadId(), __LINE__);
 		for(ptr_SKF = szSKFAll; (ptr_SKF < szSKFAll + ulSKFAll) && *ptr_SKF != 0;)
 		{
 			data_len_tmp = BUFFER_LEN_1K * BUFFER_LEN_1K;
+			FILE_LOG_FMT(file_log_name, "func=%s thread=%d line=%d", __FUNCTION__, GetCurrentThreadId(), __LINE__);
 			ulRet = WTF_EnumCertInternalBySKF(ptr_SKF, ptr_data_value, &data_len_tmp,ulKeyFlag,ulSignFlag,ulVerifyFlag,ulFilterFlag);
-
+			FILE_LOG_FMT(file_log_name, "func=%s thread=%d line=%d", __FUNCTION__, GetCurrentThreadId(), __LINE__);
 			// next SKF
 			ptr_SKF += strlen(ptr_SKF) + 1;
 
@@ -2182,6 +2348,37 @@ err:
 
 unsigned int __stdcall WTF_EnumCertInternalBySKF(const char * pszSKFName, void * pvCertsValue,unsigned int *puiCertsLen, unsigned int ulKeyFlag, unsigned int ulSignFlag,unsigned int ulVerifyFlag, unsigned int ulFilterFlag)
 {
+	HINSTANCE ghInst = NULL;
+
+	/*
+	SKF函数地址
+	*/
+
+	FUNC_NAME_DECLARE(func_, EnumDev,);
+	FUNC_NAME_DECLARE(func_, ConnectDev,);
+	FUNC_NAME_DECLARE(func_, DisConnectDev,);
+	FUNC_NAME_DECLARE(func_, ChangePIN,);
+	FUNC_NAME_DECLARE(func_, OpenApplication,);
+	FUNC_NAME_DECLARE(func_, CloseApplication,);
+	FUNC_NAME_DECLARE(func_, EnumApplication,);
+	FUNC_NAME_DECLARE(func_, ExportCertificate,);
+	FUNC_NAME_DECLARE(func_, EnumContainer,);
+	FUNC_NAME_DECLARE(func_, OpenContainer,);
+	FUNC_NAME_DECLARE(func_, CloseContainer,);
+	FUNC_NAME_DECLARE(func_, VerifyPIN,);
+	FUNC_NAME_DECLARE(func_, GetContainerType,);
+	FUNC_NAME_DECLARE(func_, ECCSignData,);
+	FUNC_NAME_DECLARE(func_, ECCVerify,);
+	FUNC_NAME_DECLARE(func_, ExtECCVerify,);
+	FUNC_NAME_DECLARE(func_, GetDevInfo,);
+	FUNC_NAME_DECLARE(func_, LockDev,);
+	FUNC_NAME_DECLARE(func_, UnlockDev,);
+
+	FUNC_NAME_DECLARE(func_, GenerateKeyWithECCEx,);
+	FUNC_NAME_DECLARE(func_, GenerateAgreementDataWithECC,);
+	FUNC_NAME_DECLARE(func_, GenerateAgreementDataWithECCEx, );
+	FUNC_NAME_DECLARE(func_, GenerateAgreementDataAndKeyWithECCEx, );
+
 	unsigned int ulRet = 0;
 	int i = 0; // certs
 
@@ -2649,6 +2846,37 @@ err:
 
 unsigned int __stdcall WTF_EnumCertInternalByProperty(SK_CERT_DESC_PROPERTY * pCertProperty, void * pvCertsValue,unsigned int *puiCertsLen, unsigned int ulKeyFlag, unsigned int ulSignFlag,unsigned int ulVerifyFlag, unsigned int ulFilterFlag)
 {
+	HINSTANCE ghInst = NULL;
+
+	/*
+	SKF函数地址
+	*/
+
+	FUNC_NAME_DECLARE(func_, EnumDev,);
+	FUNC_NAME_DECLARE(func_, ConnectDev,);
+	FUNC_NAME_DECLARE(func_, DisConnectDev,);
+	FUNC_NAME_DECLARE(func_, ChangePIN,);
+	FUNC_NAME_DECLARE(func_, OpenApplication,);
+	FUNC_NAME_DECLARE(func_, CloseApplication,);
+	FUNC_NAME_DECLARE(func_, EnumApplication,);
+	FUNC_NAME_DECLARE(func_, ExportCertificate,);
+	FUNC_NAME_DECLARE(func_, EnumContainer,);
+	FUNC_NAME_DECLARE(func_, OpenContainer,);
+	FUNC_NAME_DECLARE(func_, CloseContainer,);
+	FUNC_NAME_DECLARE(func_, VerifyPIN,);
+	FUNC_NAME_DECLARE(func_, GetContainerType,);
+	FUNC_NAME_DECLARE(func_, ECCSignData,);
+	FUNC_NAME_DECLARE(func_, ECCVerify,);
+	FUNC_NAME_DECLARE(func_, ExtECCVerify,);
+	FUNC_NAME_DECLARE(func_, GetDevInfo,);
+	FUNC_NAME_DECLARE(func_, LockDev,);
+	FUNC_NAME_DECLARE(func_, UnlockDev,);
+
+	FUNC_NAME_DECLARE(func_, GenerateKeyWithECCEx,);
+	FUNC_NAME_DECLARE(func_, GenerateAgreementDataWithECC,);
+	FUNC_NAME_DECLARE(func_, GenerateAgreementDataWithECCEx, );
+	FUNC_NAME_DECLARE(func_, GenerateAgreementDataAndKeyWithECCEx, );
+
 	unsigned int ulRet = 0;
 	int i = 0; // certs
 
@@ -3192,6 +3420,37 @@ err:
 unsigned int __stdcall WTF_FindSKFDriver(const char * pszSKFName, char * szVersion
 	)
 {
+	HINSTANCE ghInst = NULL;
+
+	/*
+	SKF函数地址
+	*/
+
+	FUNC_NAME_DECLARE(func_, EnumDev,);
+	FUNC_NAME_DECLARE(func_, ConnectDev,);
+	FUNC_NAME_DECLARE(func_, DisConnectDev,);
+	FUNC_NAME_DECLARE(func_, ChangePIN,);
+	FUNC_NAME_DECLARE(func_, OpenApplication,);
+	FUNC_NAME_DECLARE(func_, CloseApplication,);
+	FUNC_NAME_DECLARE(func_, EnumApplication,);
+	FUNC_NAME_DECLARE(func_, ExportCertificate,);
+	FUNC_NAME_DECLARE(func_, EnumContainer,);
+	FUNC_NAME_DECLARE(func_, OpenContainer,);
+	FUNC_NAME_DECLARE(func_, CloseContainer,);
+	FUNC_NAME_DECLARE(func_, VerifyPIN,);
+	FUNC_NAME_DECLARE(func_, GetContainerType,);
+	FUNC_NAME_DECLARE(func_, ECCSignData,);
+	FUNC_NAME_DECLARE(func_, ECCVerify,);
+	FUNC_NAME_DECLARE(func_, ExtECCVerify,);
+	FUNC_NAME_DECLARE(func_, GetDevInfo,);
+	FUNC_NAME_DECLARE(func_, LockDev,);
+	FUNC_NAME_DECLARE(func_, UnlockDev,);
+
+	FUNC_NAME_DECLARE(func_, GenerateKeyWithECCEx,);
+	FUNC_NAME_DECLARE(func_, GenerateAgreementDataWithECC,);
+	FUNC_NAME_DECLARE(func_, GenerateAgreementDataWithECCEx, );
+	FUNC_NAME_DECLARE(func_, GenerateAgreementDataAndKeyWithECCEx, );
+
 	unsigned int ulRet = 0;
 	int i = 0; // certs
 
@@ -3301,6 +3560,37 @@ unsigned int __stdcall WTF_FindEnCertificateByCertDescProperty(
 	_In_ SK_CERT_DESC_PROPERTY * pCertProperty, _Out_ unsigned char * pbCert, _Inout_ unsigned int * pulCertLen
 	)
 {
+	HINSTANCE ghInst = NULL;
+
+	/*
+	SKF函数地址
+	*/
+
+	FUNC_NAME_DECLARE(func_, EnumDev,);
+	FUNC_NAME_DECLARE(func_, ConnectDev,);
+	FUNC_NAME_DECLARE(func_, DisConnectDev,);
+	FUNC_NAME_DECLARE(func_, ChangePIN,);
+	FUNC_NAME_DECLARE(func_, OpenApplication,);
+	FUNC_NAME_DECLARE(func_, CloseApplication,);
+	FUNC_NAME_DECLARE(func_, EnumApplication,);
+	FUNC_NAME_DECLARE(func_, ExportCertificate,);
+	FUNC_NAME_DECLARE(func_, EnumContainer,);
+	FUNC_NAME_DECLARE(func_, OpenContainer,);
+	FUNC_NAME_DECLARE(func_, CloseContainer,);
+	FUNC_NAME_DECLARE(func_, VerifyPIN,);
+	FUNC_NAME_DECLARE(func_, GetContainerType,);
+	FUNC_NAME_DECLARE(func_, ECCSignData,);
+	FUNC_NAME_DECLARE(func_, ECCVerify,);
+	FUNC_NAME_DECLARE(func_, ExtECCVerify,);
+	FUNC_NAME_DECLARE(func_, GetDevInfo,);
+	FUNC_NAME_DECLARE(func_, LockDev,);
+	FUNC_NAME_DECLARE(func_, UnlockDev,);
+
+	FUNC_NAME_DECLARE(func_, GenerateKeyWithECCEx,);
+	FUNC_NAME_DECLARE(func_, GenerateAgreementDataWithECC,);
+	FUNC_NAME_DECLARE(func_, GenerateAgreementDataWithECCEx, );
+	FUNC_NAME_DECLARE(func_, GenerateAgreementDataAndKeyWithECCEx, );
+
 	unsigned int ulRet = -1;
 
 	unsigned int dllPathLen = BUFFER_LEN_1K;
@@ -3437,6 +3727,37 @@ COMMON_API unsigned int __stdcall WTF_SM2GetAgreementKey(
 	_In_ const char * pszPIN,
 	_Inout_ ULONG * puiRetryCount)
 {
+	HINSTANCE ghInst = NULL;
+
+	/*
+	SKF函数地址
+	*/
+
+	FUNC_NAME_DECLARE(func_, EnumDev,);
+	FUNC_NAME_DECLARE(func_, ConnectDev,);
+	FUNC_NAME_DECLARE(func_, DisConnectDev,);
+	FUNC_NAME_DECLARE(func_, ChangePIN,);
+	FUNC_NAME_DECLARE(func_, OpenApplication,);
+	FUNC_NAME_DECLARE(func_, CloseApplication,);
+	FUNC_NAME_DECLARE(func_, EnumApplication,);
+	FUNC_NAME_DECLARE(func_, ExportCertificate,);
+	FUNC_NAME_DECLARE(func_, EnumContainer,);
+	FUNC_NAME_DECLARE(func_, OpenContainer,);
+	FUNC_NAME_DECLARE(func_, CloseContainer,);
+	FUNC_NAME_DECLARE(func_, VerifyPIN,);
+	FUNC_NAME_DECLARE(func_, GetContainerType,);
+	FUNC_NAME_DECLARE(func_, ECCSignData,);
+	FUNC_NAME_DECLARE(func_, ECCVerify,);
+	FUNC_NAME_DECLARE(func_, ExtECCVerify,);
+	FUNC_NAME_DECLARE(func_, GetDevInfo,);
+	FUNC_NAME_DECLARE(func_, LockDev,);
+	FUNC_NAME_DECLARE(func_, UnlockDev,);
+
+	FUNC_NAME_DECLARE(func_, GenerateKeyWithECCEx,);
+	FUNC_NAME_DECLARE(func_, GenerateAgreementDataWithECC,);
+	FUNC_NAME_DECLARE(func_, GenerateAgreementDataWithECCEx, );
+	FUNC_NAME_DECLARE(func_, GenerateAgreementDataAndKeyWithECCEx, );
+
 	unsigned int ulRet = 0;
 
 
