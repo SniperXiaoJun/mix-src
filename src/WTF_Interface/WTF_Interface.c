@@ -359,7 +359,7 @@ unsigned int __stdcall WTF_EnumCert(const char *pszDevName,void * pvCertsValue,u
 
 	memset(data_value, 0, data_len);
 
-	FILE_LOG_FMT(file_log_name, "func=%s thread=%d line=%d", __FUNCTION__, GetCurrentThreadId(), __LINE__);
+	
 
 #if 0
 	if (pszDevName && strlen(pszDevName))
@@ -411,12 +411,13 @@ unsigned int __stdcall WTF_EnumCert(const char *pszDevName,void * pvCertsValue,u
 
 #else
 
-	FILE_LOG_FMT(file_log_name, "func=%s thread=%d line=%d", __FUNCTION__, GetCurrentThreadId(), __LINE__);
 
 	// 遍历全部
 	ulRet = WTF_EnumCertInternal(NULL,data_value,&data_len,ulKeyFlag,ulSignFlag,ulVerifyFlag, ulFilterFlag);
 
-	FILE_LOG_FMT(file_log_name, "func=%s thread=%d line=%d", __FUNCTION__, GetCurrentThreadId(), __LINE__);
+	FILE_LOG_FMT(file_log_name, "func=%s thread=%d line=%d watch=%d", __FUNCTION__, GetCurrentThreadId(), __LINE__, ulRet);
+	FILE_LOG_FMT(file_log_name, "func=%s thread=%d line=%d watch=%d", __FUNCTION__, GetCurrentThreadId(), __LINE__, data_len);
+
 
 	if(ulRet)
 	{
@@ -486,7 +487,6 @@ unsigned int __stdcall WTF_EnumCert(const char *pszDevName,void * pvCertsValue,u
 	{
 		memcpy(pvCertsValue,data_value,data_len);
 
-		FILE_LOG_FMT(file_log_name, "func=%s thread=%d line=%d", __FUNCTION__, GetCurrentThreadId(), __LINE__);
 
 		for (pCertContent = (SK_CERT_CONTENT *)pvCertsValue;(char *)pCertContent < (char *)pvCertsValue + data_len;)
 		{
@@ -495,7 +495,7 @@ unsigned int __stdcall WTF_EnumCert(const char *pszDevName,void * pvCertsValue,u
 			pCertContent = (BYTE *)pCertContent + pCertContent->nValueLen + sizeof(SK_CERT_CONTENT) ;
 		}
 
-		FILE_LOG_FMT(file_log_name, "func=%s thread=%d line=%d", __FUNCTION__, GetCurrentThreadId(), __LINE__);
+		
 
 		* puiCertsLen = data_len;
 	}
@@ -1535,15 +1535,16 @@ unsigned int __stdcall WTF_EnumCertInternal(const char * pszSKFName, void * pvCe
 		unsigned int data_len_tmp = BUFFER_LEN_1K * BUFFER_LEN_1K;
 
 		ulOutLen = 0;
-		FILE_LOG_FMT(file_log_name, "func=%s thread=%d line=%d", __FUNCTION__, GetCurrentThreadId(), __LINE__);
+		
 		WTF_EnumSKF(szSKFAll, &ulSKFAll);
-		FILE_LOG_FMT(file_log_name, "func=%s thread=%d line=%d", __FUNCTION__, GetCurrentThreadId(), __LINE__);
+		
 		for(ptr_SKF = szSKFAll; (ptr_SKF < szSKFAll + ulSKFAll) && *ptr_SKF != 0;)
 		{
 			data_len_tmp = BUFFER_LEN_1K * BUFFER_LEN_1K;
-			FILE_LOG_FMT(file_log_name, "func=%s thread=%d line=%d", __FUNCTION__, GetCurrentThreadId(), __LINE__);
+			
 			ulRet = WTF_EnumCertInternalBySKF(ptr_SKF, ptr_data_value, &data_len_tmp,ulKeyFlag,ulSignFlag,ulVerifyFlag,ulFilterFlag);
-			FILE_LOG_FMT(file_log_name, "func=%s thread=%d line=%d", __FUNCTION__, GetCurrentThreadId(), __LINE__);
+
+			
 			// next SKF
 			ptr_SKF += strlen(ptr_SKF) + 1;
 
@@ -2168,12 +2169,12 @@ COMMON_API unsigned int __stdcall WTF_ImportCaCert(BYTE * pbCert, unsigned int u
 	SK_CERT_DESC_PROPERTY * descProperty_IN = NULL;
 
 	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "ulRet");
-	FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, ulRet);
+	
 
 	ulRet = OpenSSL_CertSubjectCompareIssuer(pbCert, ulCertLen, &bRootCert);
 
 	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "ulRet");
-	FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, ulRet);
+	
 
 	if (ulRet)
 	{
@@ -2184,7 +2185,7 @@ COMMON_API unsigned int __stdcall WTF_ImportCaCert(BYTE * pbCert, unsigned int u
 	ulRet = OpenSSL_CertGetPublicKeyAlgor(pbCert, ulCertLen,pbAlg,&ulAlgLen);
 
 	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "ulRet");
-	FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, ulRet);
+	
 
 	if (ulRet)
 	{
@@ -2204,7 +2205,7 @@ COMMON_API unsigned int __stdcall WTF_ImportCaCert(BYTE * pbCert, unsigned int u
 	}
 
 	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "ulRet");
-	FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, ulRet);
+	
 
 	descProperty_IN = (SK_CERT_DESC_PROPERTY * )malloc(sizeof(SK_CERT_DESC_PROPERTY));
 
@@ -2216,7 +2217,7 @@ COMMON_API unsigned int __stdcall WTF_ImportCaCert(BYTE * pbCert, unsigned int u
 	}
 
 	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "ulRet");
-	FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, ulRet);
+	
 
 	if (bSM2cert)
 	{
@@ -2257,7 +2258,7 @@ COMMON_API unsigned int __stdcall WTF_ImportCaCert(BYTE * pbCert, unsigned int u
 	}
 
 	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "ulRet");
-	FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, ulRet);
+	
 
 	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "hCertStore");
 	FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, hCertStore);
@@ -2287,7 +2288,7 @@ COMMON_API unsigned int __stdcall WTF_ImportCaCert(BYTE * pbCert, unsigned int u
 	ulRet = SMC_CertSetCertificateContextProperty(certContext_IN, CERT_DESC_PROP_ID,CERT_STORE_NO_CRYPT_RELEASE_FLAG, descProperty_IN);
 
 	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "ulRet");
-	FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, ulRet);
+	
 	if (!ulRet)
 	{
 		WTF_PrintErrorMsg();
@@ -2299,7 +2300,7 @@ COMMON_API unsigned int __stdcall WTF_ImportCaCert(BYTE * pbCert, unsigned int u
 	// 保存证书
 	ulRet = SMC_CertAddCertificateContextToStore(hCertStore,certContext_IN, CERT_STORE_ADD_REPLACE_EXISTING);
 	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "ulRet");
-	FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, ulRet);
+	
 
 	if(!ulRet)
 	{
@@ -2408,7 +2409,7 @@ unsigned int __stdcall WTF_EnumCertInternalBySKF(const char * pszSKFName, void *
 
 	DEVHANDLE hDev = NULL;
 
-
+	char buffer_zero[BUFFER_LEN_1K] = {0};
 
 
 	pTmp = (char *)malloc(BUFFER_LEN_1K * 4);
@@ -2490,6 +2491,7 @@ unsigned int __stdcall WTF_EnumCertInternalBySKF(const char * pszSKFName, void *
 		ulAppsSize = BUFFER_LEN_1K;
 
 		ulRet = func_EnumApplication(hDev, szAppNames, &ulAppsSize);
+
 		if (0 != ulRet)
 		{
 #if USE_SELF_MUTEX
@@ -2505,6 +2507,7 @@ unsigned int __stdcall WTF_EnumCertInternalBySKF(const char * pszSKFName, void *
 			ulConSize = BUFFER_LEN_1K;
 
 			ulRet = func_OpenApplication(hDev,ptrApp,&hAPP);
+
 			if (0 != ulRet)
 			{
 #if USE_SELF_MUTEX
@@ -2516,6 +2519,29 @@ unsigned int __stdcall WTF_EnumCertInternalBySKF(const char * pszSKFName, void *
 			}
 
 			ulRet = func_EnumContainer(hAPP,szConNames,&ulConSize);
+
+
+			while (ulRet == 0 && 0 == memcmp(buffer_zero,szConNames,ulConSize > BUFFER_LEN_1K? BUFFER_LEN_1K:ulConSize))
+			{
+				ulConSize = BUFFER_LEN_1K;
+				ulRet = func_EnumContainer(hAPP,szConNames,&ulConSize);
+			}
+			
+			if (0 == strcmp(pszSKFName,"hbcmbc"))
+			{
+				FILE_LOG_FMT(file_log_name, "func=%s thread=%d line=%d watch=%d", __FUNCTION__, GetCurrentThreadId(), __LINE__, ulRet);
+				FILE_LOG_FMT(file_log_name, "func=%s thread=%d line=%d watch=%d", __FUNCTION__, GetCurrentThreadId(), __LINE__, ulKeyFlag);
+				FILE_LOG_FMT(file_log_name, "func=%s thread=%d line=%d watch=%d", __FUNCTION__, GetCurrentThreadId(), __LINE__, ulSignFlag);
+				FILE_LOG_FMT(file_log_name, "func=%s thread=%d line=%d watch=%d", __FUNCTION__, GetCurrentThreadId(), __LINE__, ulVerifyFlag);
+				FILE_LOG_FMT(file_log_name, "func=%s thread=%d line=%d watch=%d", __FUNCTION__, GetCurrentThreadId(), __LINE__, ulFilterFlag);
+				FILE_LOG_FMT(file_log_name, "func=%s thread=%d line=%d watch=%d", __FUNCTION__, GetCurrentThreadId(), __LINE__, ulConSize);
+
+				FILE_LOG_HEX(file_log_name, szConNames, ulConSize);
+
+				FILE_LOG_FMT(file_log_name, "func=%s thread=%d line=%d watch=%s", __FUNCTION__, GetCurrentThreadId(), __LINE__, szAppNames);
+				
+			}
+
 			if (0 != ulRet)
 			{
 #if USE_SELF_MUTEX
@@ -2541,6 +2567,8 @@ unsigned int __stdcall WTF_EnumCertInternalBySKF(const char * pszSKFName, void *
 			{
 				HCONTAINER hCon = NULL;
 				ULONG ulContainerType = 0;
+
+
 
 				ulRet = func_OpenContainer(hAPP, ptrContainer, &hCon);
 				if (ulRet)
@@ -2784,9 +2812,6 @@ unsigned int __stdcall WTF_EnumCertInternalBySKF(const char * pszSKFName, void *
 		ptrDev += strlen(ptrDev);
 		ptrDev += 1;
 	}
-
-
-
 
 	if (* puiCertsLen < ulOutLen || (NULL == pvCertsValue))
 	{

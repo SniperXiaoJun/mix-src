@@ -42,8 +42,8 @@ BOOL WINAPI SMC_CertCreateSMCStores()
 		NULL,
 		NULL);
 
-	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "CertRegisterSystemStore");
-	FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, ulRet);
+
+	
 
 	if(ulRet)
 	{
@@ -62,8 +62,8 @@ BOOL WINAPI SMC_CertCreateSMCStores()
 		uiFlags,
 		NULL,
 		NULL);
-	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "CertRegisterSystemStore");
-	FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, ulRet);
+
+	
 	if(ulRet)
 	{
 		//DEBUG("System store %S is registered. \n",pvSystemName);
@@ -83,8 +83,8 @@ BOOL WINAPI SMC_CertCreateSMCStores()
 		NULL,
 		NULL);
 
-	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "CertRegisterSystemStore");
-	FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, ulRet);
+
+	
 
 	if(ulRet)
 	{
@@ -104,8 +104,8 @@ BOOL WINAPI SMC_CertCreateSMCStores()
 		NULL,
 		NULL);
 
-	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "CertRegisterSystemStore");
-	FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, ulRet);
+
+	
 
 	if(ulRet)
 	{
