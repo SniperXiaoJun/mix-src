@@ -603,6 +603,8 @@ unsigned int __stdcall WTF_ChangePIN(const char *pszDevName,unsigned int ulPINTy
 	FUNC_NAME_INIT(func_, CloseContainer,);
 	FUNC_NAME_INIT(func_, VerifyPIN,);
 	FUNC_NAME_INIT_GetContainerType(func_, GetContainerType,);
+	FUNC_NAME_INIT(func_, LockDev,);
+	FUNC_NAME_INIT(func_, UnlockDev,);
 
 	{
 		ulRet = func_ConnectDev(pCertContent->stProperty.szDeviceName, &hDev);
@@ -754,6 +756,8 @@ unsigned int __stdcall WTF_VerifyPIN(const char *pszDevName,unsigned int ulPINTy
 	FUNC_NAME_INIT(func_, CloseContainer,);
 	FUNC_NAME_INIT(func_, VerifyPIN,);
 	FUNC_NAME_INIT_GetContainerType(func_, GetContainerType,);
+	FUNC_NAME_INIT(func_, LockDev,);
+	FUNC_NAME_INIT(func_, UnlockDev,);
 
 	{
 
@@ -873,6 +877,8 @@ unsigned int __stdcall WTF_ChangePINByCertProperty(SK_CERT_DESC_PROPERTY * pCert
 	FUNC_NAME_INIT(func_, CloseContainer,);
 	FUNC_NAME_INIT(func_, VerifyPIN,);
 	FUNC_NAME_INIT_GetContainerType(func_, GetContainerType,);
+	FUNC_NAME_INIT(func_, LockDev,);
+	FUNC_NAME_INIT(func_, UnlockDev,);
 
 	{
 
@@ -991,6 +997,8 @@ unsigned int __stdcall WTF_GetDevInfoByCertProperty(SK_CERT_DESC_PROPERTY * pCer
 	FUNC_NAME_INIT(func_, VerifyPIN,);
 	FUNC_NAME_INIT(func_, GetDevInfo,);
 	FUNC_NAME_INIT_GetContainerType(func_, GetContainerType,);
+	FUNC_NAME_INIT(func_, LockDev,);
+	FUNC_NAME_INIT(func_, UnlockDev,);
 
 	// 获取设备信息
 	{
@@ -1094,6 +1102,8 @@ unsigned int __stdcall WTF_VerifyPINByCertProperty(SK_CERT_DESC_PROPERTY * pCert
 	FUNC_NAME_INIT(func_, CloseContainer,);
 	FUNC_NAME_INIT(func_, VerifyPIN,);
 	FUNC_NAME_INIT_GetContainerType(func_, GetContainerType,);
+	FUNC_NAME_INIT(func_, LockDev,);
+	FUNC_NAME_INIT(func_, UnlockDev,);
 
 	{
 
@@ -1210,6 +1220,8 @@ unsigned int __stdcall WTF_SM2SignDigest(SK_CERT_DESC_PROPERTY * pCertProperty, 
 	FUNC_NAME_INIT(func_, VerifyPIN,);
 	FUNC_NAME_INIT_GetContainerType(func_, GetContainerType,);
 	FUNC_NAME_INIT(func_, ECCSignData,);
+	FUNC_NAME_INIT(func_, LockDev,);
+	FUNC_NAME_INIT(func_, UnlockDev,);
 
 	{
 
@@ -2693,6 +2705,8 @@ unsigned int __stdcall WTF_EnumCertInternalByProperty(SK_CERT_DESC_PROPERTY * pC
 	FUNC_NAME_INIT(func_, VerifyPIN,);
 	FUNC_NAME_INIT_GetContainerType(func_, GetContainerType,);
 	FUNC_NAME_INIT(func_, GetDevInfo,);
+	FUNC_NAME_INIT(func_, LockDev,);
+	FUNC_NAME_INIT(func_, UnlockDev,);
 
 
 	pCertContent = (SK_CERT_CONTENT * )data_value;
@@ -3223,6 +3237,8 @@ unsigned int __stdcall WTF_FindSKFDriver(const char * pszSKFName, char * szVersi
 	FUNC_NAME_INIT(func_, VerifyPIN,);
 	FUNC_NAME_INIT_GetContainerType(func_, GetContainerType,);
 	FUNC_NAME_INIT(func_, GetDevInfo,);
+	FUNC_NAME_INIT(func_, LockDev,);
+	FUNC_NAME_INIT(func_, UnlockDev,);
 
 	dwSize=GetFileVersionInfoSize(dllPathValue, NULL);
 	pbVersionInfo=(BYTE *)malloc(dwSize); 
@@ -3324,6 +3340,8 @@ unsigned int __stdcall WTF_FindEnCertificateByCertDescProperty(
 	FUNC_NAME_INIT(func_, VerifyPIN,);
 	FUNC_NAME_INIT_GetContainerType(func_, GetContainerType,);
 	FUNC_NAME_INIT(func_, ECCSignData,);
+	FUNC_NAME_INIT(func_, LockDev,);
+	FUNC_NAME_INIT(func_, UnlockDev,);
 
 	{
 
@@ -3465,6 +3483,9 @@ COMMON_API unsigned int __stdcall WTF_SM2GetAgreementKey(
 	FUNC_NAME_INIT(func_, GenerateAgreementDataWithECC,);
 	FUNC_NAME_INIT(func_, GenerateAgreementDataWithECCEx, );
 	FUNC_NAME_INIT(func_, GenerateAgreementDataAndKeyWithECCEx, );
+
+	FUNC_NAME_INIT(func_, LockDev,);
+	FUNC_NAME_INIT(func_, UnlockDev,);
 
 	{
 		ulRet = func_ConnectDev(pCertProperty->szDeviceName, &hDev);
