@@ -36,59 +36,85 @@ ULONG CAPI_KEY_DevAuth(HANDLE hDevSKF)
 	ULONG ulRet = 0;
 	DEVINFO			DevInfo;
 
-	// 取16字节随机数
-	ulRandomLen = sizeof(bRandom);
-	ulRet = SKF_GenRandom(hDevSKF, bRandom, ulRandomLen);
-	if(ulRet != 0)
-	{
-		::FILE_LOG_STRING(file_log_name,"SKF_GenRandom");
-		goto err;
-	}
 
-	ulRet = SKF_GetDevInfo(hDevSKF, &DevInfo);
-	if(ulRet != 0)
-	{
-		::FILE_LOG_STRING(file_log_name,"SKF_GetDevInfo");
-		goto err;
-	}
-	// 加密随机化
-	// 默认外部认证密钥为：1234567812345678
-	memcpy(bSymKey, (unsigned char*)"\x31\x32\x33\x34\x35\x36\x37\x38\x31\x32\x33\x34\x35\x36\x37\x38", 16);
 
-	ulRet = SKF_SetSymmKey(hDevSKF, bSymKey, DevInfo.DevAuthAlgId, &hSymKey);
-	if(ulRet != 0)
-	{
-		::FILE_LOG_STRING(file_log_name,"SKF_SetSymmKey");
-		goto err;
-	}
 
-	// 加密初始化
-	EncryptParam.PaddingType = 0;
-	ulRet = SKF_EncryptInit(hSymKey, EncryptParam);
-	if(ulRet != 0)
+	for (int iTry =0; iTry < 2; iTry++)
 	{
-		::FILE_LOG_STRING(file_log_name,"SKF_EncryptInit");
-		goto err;
-	}
+		if (iTry == 0)
+		{
+			for (int i = 0; i < 16; i++)
+			{
+				bSymKey[i] = '0' + i%8 + 1;
+			}
+		}
+		else
+		{
+			for (int i = 0; i < 16; i++)
+			{
+				bSymKey[i] = 0xFF;
+			}
+		}
 
-	// 加密随机数
-	ulAuthDataLen = sizeof(bAuthData);
-	memset(bAuthData, 0x00, ulAuthDataLen);
-	ulRet = SKF_Encrypt(hSymKey, bRandom, ulRandomLen, bAuthData, &ulAuthDataLen);
-	if(ulRet != 0)
-	{
-		::FILE_LOG_STRING(file_log_name,"SKF_Encrypt");
-		goto err;
-	}
+		// 取16字节随机数
+		ulRandomLen = sizeof(bRandom);
+		ulRet = SKF_GenRandom(hDevSKF, bRandom, ulRandomLen);
+		if(ulRet != 0)
+		{
+			::FILE_LOG_STRING(file_log_name,"SKF_GenRandom");
+			continue;
+		}
 
-	// 外部认证
-	ulRet = SKF_DevAuth(hDevSKF, bAuthData, ulAuthDataLen);
-	if(ulRet != 0)
-	{
-		::FILE_LOG_STRING(file_log_name,"SKF_DevAuth");
-		goto err;
-	}
+		ulRet = SKF_GetDevInfo(hDevSKF, &DevInfo);
+		if(ulRet != 0)
+		{
+			::FILE_LOG_STRING(file_log_name,"SKF_GetDevInfo");
+			continue;
+		}
+		// 加密随机化
+		// 默认外部认证密钥为：1234567812345678
+		//memcpy(bSymKey, (unsigned char*)"\x31\x32\x33\x34\x35\x36\x37\x38\x31\x32\x33\x34\x35\x36\x37\x38", 16);
 
+		ulRet = SKF_SetSymmKey(hDevSKF, bSymKey, DevInfo.DevAuthAlgId, &hSymKey);
+		if(ulRet != 0)
+		{
+			::FILE_LOG_STRING(file_log_name,"SKF_SetSymmKey");
+			continue;
+		}
+
+		// 加密初始化
+		EncryptParam.PaddingType = 0;
+		ulRet = SKF_EncryptInit(hSymKey, EncryptParam);
+		if(ulRet != 0)
+		{
+			::FILE_LOG_STRING(file_log_name,"SKF_EncryptInit");
+			continue;
+		}
+
+		// 加密随机数
+		ulAuthDataLen = sizeof(bAuthData);
+		memset(bAuthData, 0x00, ulAuthDataLen);
+		ulRet = SKF_Encrypt(hSymKey, bRandom, ulRandomLen, bAuthData, &ulAuthDataLen);
+		if(ulRet != 0)
+		{
+			::FILE_LOG_STRING(file_log_name,"SKF_Encrypt");
+			continue;
+		}
+
+		// 外部认证
+		ulRet = SKF_DevAuth(hDevSKF, bAuthData, ulAuthDataLen);
+		if(ulRet != 0)
+		{
+			::FILE_LOG_STRING(file_log_name,"SKF_DevAuth");
+			continue;
+		}
+		else
+		{
+			break;
+		}
+
+
+	}
 err:
 
 	return ulRet;
