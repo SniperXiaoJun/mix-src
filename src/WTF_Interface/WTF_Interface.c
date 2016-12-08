@@ -1595,6 +1595,8 @@ unsigned int __stdcall WTF_EnumCertInternal(const char * pszSKFName, void * pvCe
 		* puiCertsLen = ulOutLen;
 	}
 
+	ulRet = 0;
+
 err:
 	if (data_value)
 	{
