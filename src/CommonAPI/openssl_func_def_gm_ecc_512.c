@@ -3548,7 +3548,7 @@ unsigned int SKF_GMECC512SignCRL(
 		goto err;
 	}
 
-	rv = CAPI_KEY_ECC512SignDigest(pszKeyOn,ulKeyTarget,pbPIN, digest_value, pbSig,&pulRetry);
+	rv = CAPI_KEY_ECC512SignDigest(pszKeyOn,ulKeyTarget,pbPIN, digest_value, pbSig,pulRetry);
 	if(rv)
 	{
 		goto err;
@@ -3640,7 +3640,7 @@ unsigned int SKF_GMECC512SignCert(
 		goto err;
 	}
 
-	rv = CAPI_KEY_ECC512SignDigest(pszKeyOn,ulKeyTarget,pbPIN, digest_value, pbSig,&pulRetry);
+	rv = CAPI_KEY_ECC512SignDigest(pszKeyOn,ulKeyTarget,pbPIN, digest_value, pbSig,pulRetry);
 	if (rv)
 	{
 		goto err;
