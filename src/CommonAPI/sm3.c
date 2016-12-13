@@ -2,13 +2,14 @@
 // sm3.c
 #include "sm3.h"
 
-#ifdef _WINDOWS
+#ifdef WIN32
 #include <windows.h>
 #endif
 
 #include <string.h>
 #include <stdio.h>
-#include "o_all_type_def.h"
+
+
 /*
  * 32-bit integer manipulation macros (big endian)
  */
@@ -38,8 +39,8 @@
 #define GG0(x,y,z) ( (x) ^ (y) ^ (z))
 #define GG1(x,y,z) (((x) & (y)) | ( (~(x)) & (z)) )
 
-#define SHL(x,n) (((x) & 0xFFFFFFFF) << n)
-#define ROTL(x,n) (SHL((x),n) | ((x) >> (32 - n)))
+#define  SHL(x,n) (((x) & 0xFFFFFFFF) << n%32)
+#define ROTL(x,n) (SHL((x),n) | ((x) >> (32 - n%32)))
 
 #define P0(x) ((x) ^  ROTL((x),9) ^ ROTL((x),17))
 #define P1(x) ((x) ^  ROTL((x),15) ^ ROTL((x),23))
@@ -72,7 +73,7 @@ static void sm3_process(sch_context *ctx, const unsigned char *data)
 	unsigned int Temp1, Temp2, Temp3, Temp4, Temp5;
 	int j;
 #ifdef _DEBUG
-	int i;
+//	int i;
 #endif
 
 	if(!ctx || !data)
@@ -101,13 +102,13 @@ static void sm3_process(sch_context *ctx, const unsigned char *data)
 	GET_ULONG_BE( W[15], data, 60);
 
 #ifdef _DEBUG
-	printf("Message with padding:\n");
-	for(i=0; i< 8; i++)
-	printf("%08x ",W[i]);
-	printf("\n");
-	for(i=8; i< 16; i++)
-	printf("%08x ",W[i]);
-	printf("\n");
+//	printf("Message with padding:\n");
+//	for(i=0; i< 8; i++)
+//	printf("%08x ",W[i]);
+//	printf("\n");
+//	for(i=8; i< 16; i++)
+//	printf("%08x ",W[i]);
+//	printf("\n");
 #endif
 
 	for (j = 16; j < 68; j++) 
@@ -121,13 +122,13 @@ static void sm3_process(sch_context *ctx, const unsigned char *data)
 	}
 
 #ifdef _DEBUG
-	printf("Expanding message W0-67:\n");
-	for(i=0; i<68; i++)
-	{
-		printf("%08x ",W[i]);
-		if(((i+1) % 8) == 0) printf("\n");
-	}
-	printf("\n");
+//	printf("Expanding message W0-67:\n");
+//	for(i=0; i<68; i++)
+//	{
+//		printf("%08x ",W[i]);
+//		if(((i+1) % 8) == 0) printf("\n");
+//	}
+//	printf("\n");
 #endif
 
 	for (j = 0; j < 64; j++) 
@@ -136,13 +137,13 @@ static void sm3_process(sch_context *ctx, const unsigned char *data)
 	}
 
 #ifdef _DEBUG
-	printf("Expanding message W'0-63:\n");
-	for(i=0; i<64; i++)
-	{
-		printf("%08x ",W1[i]);
-		if(((i+1) % 8) == 0) printf("\n");
-	}
-	printf("\n");
+//	printf("Expanding message W'0-63:\n");
+//	for(i=0; i<64; i++)
+//	{
+//		printf("%08x ",W1[i]);
+//		if(((i+1) % 8) == 0) printf("\n");
+//	}
+//	printf("\n");
 #endif
 
 	A = ctx->state[0];
@@ -154,8 +155,8 @@ static void sm3_process(sch_context *ctx, const unsigned char *data)
 	G = ctx->state[6];
 	H = ctx->state[7];
 #ifdef _DEBUG
-	printf("j     A       B        C         D         E        F        G       H\n");
-	printf("   %08x %08x %08x %08x %08x %08x %08x %08x\n",A,B,C,D,E,F,G,H);
+//	printf("j     A       B        C         D         E        F        G       H\n");
+//	printf("   %08x %08x %08x %08x %08x %08x %08x %08x\n",A,B,C,D,E,F,G,H);
 #endif
 
 	for (j = 0; j < 16; j++) 
@@ -173,7 +174,7 @@ static void sm3_process(sch_context *ctx, const unsigned char *data)
 		F = E;
 		E = P0(TT2);
 #ifdef _DEBUG
-		printf("%02d %08x %08x %08x %08x %08x %08x %08x %08x\n",j,A,B,C,D,E,F,G,H);
+//		printf("%02d %08x %08x %08x %08x %08x %08x %08x %08x\n",j,A,B,C,D,E,F,G,H);
 #endif
 	}
 
@@ -192,7 +193,7 @@ static void sm3_process(sch_context *ctx, const unsigned char *data)
 		F = E;
 		E = P0(TT2);
 #ifdef _DEBUG
-		printf("%02d %08x %08x %08x %08x %08x %08x %08x %08x\n",j,A,B,C,D,E,F,G,H);
+//		printf("%02d %08x %08x %08x %08x %08x %08x %08x %08x\n",j,A,B,C,D,E,F,G,H);
 #endif
 	}
 
@@ -205,8 +206,8 @@ static void sm3_process(sch_context *ctx, const unsigned char *data)
 	ctx->state[6] ^= G;
 	ctx->state[7] ^= H;
 #ifdef _DEBUG
-	printf("   %08x %08x %08x %08x %08x %08x %08x %08x\n",ctx->state[0],ctx->state[1],ctx->state[2],
-			ctx->state[3],ctx->state[4],ctx->state[5],ctx->state[6],ctx->state[7]);
+//	printf("   %08x %08x %08x %08x %08x %08x %08x %08x\n",ctx->state[0],ctx->state[1],ctx->state[2],
+//			ctx->state[3],ctx->state[4],ctx->state[5],ctx->state[6],ctx->state[7]);
 #endif
 
 }
@@ -287,13 +288,34 @@ void tcm_sch_finish( sch_context *ctx, unsigned char digest[32] )
 
 }
 
+void tcm_sch_finish_EndRaw( sch_context *ctx, unsigned char digest[32] )
+{
+    //unsigned int last, padn;
+    //unsigned int high, low;
+    //unsigned char msgLen[8];
+    
+    if(!ctx )
+        return;
+    
+    
+    PUT_ULONG_BE( ctx->state[0], digest, 0);
+    PUT_ULONG_BE( ctx->state[1], digest, 4);
+    PUT_ULONG_BE( ctx->state[2], digest, 8);
+    PUT_ULONG_BE( ctx->state[3], digest, 12);
+    PUT_ULONG_BE( ctx->state[4], digest, 16);
+    PUT_ULONG_BE( ctx->state[5], digest, 20);
+    PUT_ULONG_BE( ctx->state[6], digest, 24);
+    PUT_ULONG_BE( ctx->state[7], digest, 28);
+    
+}
+
 
 int tcm_sch_hash( unsigned int datalen_in, unsigned char *pdata_in, unsigned char digest[32]) 
 {
 	sch_context ctx;
 
 	if( (datalen_in>0) && (!pdata_in) )
-		return OPE_ERR_INVALID_PARAM;
+		return -1;
 
 	tcm_sch_starts(&ctx);
 	tcm_sch_update(&ctx, pdata_in, datalen_in);
@@ -316,7 +338,7 @@ int tcm_hmac(unsigned char *text, unsigned int text_len, unsigned char *key, uns
 	int i;
 
 	if(!key)
-		return OPE_ERR_INVALID_PARAM;
+		return -1;
 
 	if(key_len > HAMC_PAD_LEN)
 	{
@@ -363,7 +385,7 @@ int tcm_kdf(/*out*/unsigned char *key, /*in*/int klen, /*in*/unsigned char *z, /
 	unsigned char temp_digest[SM3_DIGEST_LEN];
 
 	if( (!key) || (klen <0 ) )
-		return OPE_ERR_INVALID_PARAM;
+		return -1;
 
 	if(0 == klen)
 		return 0;
