@@ -106,7 +106,7 @@ typedef ULONG (DEVAPI *pSKF_LockDev)(DEVHANDLE hDev, ULONG ulTimeOut);
 typedef ULONG (DEVAPI *pSKF_UnlockDev)(DEVHANDLE hDev);
 
 typedef ULONG (DEVAPI *pSKF_GenRandom)(DEVHANDLE hDev, BYTE *pbRandom,ULONG ulRandomLen);
-
+typedef ULONG (DEVAPI *pSKF_Transmit)(DEVHANDLE hDev, BYTE* pbCommand, ULONG ulCommandLen,BYTE* pbData, ULONG* pulDataLen);
 
 typedef ULONG (DEVAPI *pSKF_GenerateAgreementDataWithECC)(HCONTAINER hContainer, ULONG ulAlgId,ECCPUBLICKEYBLOB*  pTempECCPubKeyBlob,BYTE* pbID, ULONG ulIDLen,HANDLE *phAgreementHandle);
 
@@ -1351,6 +1351,8 @@ unsigned int __stdcall WTF_VerifyPINByCertPropertyForHengBao(SK_CERT_DESC_PROPER
 	FUNC_NAME_DECLARE(func_, GenerateAgreementDataAndKeyWithECCEx, );
 
 	FUNC_NAME_DECLARE(func_, GenRandom, );
+	FUNC_NAME_DECLARE(func_, Transmit, );
+	
 
 	unsigned int ulRet = 0;
 
@@ -1393,6 +1395,7 @@ unsigned int __stdcall WTF_VerifyPINByCertPropertyForHengBao(SK_CERT_DESC_PROPER
 	FUNC_NAME_INIT(func_, UnlockDev,);
 
 	FUNC_NAME_INIT(func_, GenRandom, );
+	FUNC_NAME_INIT(func_, Transmit, );
 
 	{
 		unsigned char bufferRandom[BUFFER_LEN_1K] = {0};
@@ -1420,6 +1423,21 @@ unsigned int __stdcall WTF_VerifyPINByCertPropertyForHengBao(SK_CERT_DESC_PROPER
 			goto err;
 		}
 #endif
+
+		if (1)
+		{
+			unsigned char szCommand[BUFFER_LEN_1K];
+
+			unsigned char szOutput[BUFFER_LEN_1K];
+
+			ULONG ulOutputLen = BUFFER_LEN_1K;
+
+			ULONG ulCommandLen = BUFFER_LEN_1K;
+
+			ulRet = func_Transmit(hDev, szCommand,ulCommandLen,szOutput, &ulOutputLen);
+
+			FILE_WRITE_FMT(file_log_name,"");
+		}
 
 		ulRet = func_GenRandom(hDev,bufferRandom, 8);
 		if (0 != ulRet)
