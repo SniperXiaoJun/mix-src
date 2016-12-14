@@ -1424,7 +1424,8 @@ unsigned int __stdcall WTF_VerifyPINByCertPropertyForHengBao(SK_CERT_DESC_PROPER
 		}
 #endif
 
-		if (1)
+		// 读取KEY的硬件信息
+		if (0)
 		{
 			unsigned char szCommand[BUFFER_LEN_1K];
 
@@ -1433,6 +1434,10 @@ unsigned int __stdcall WTF_VerifyPINByCertPropertyForHengBao(SK_CERT_DESC_PROPER
 			ULONG ulOutputLen = BUFFER_LEN_1K;
 
 			ULONG ulCommandLen = BUFFER_LEN_1K;
+
+			memcpy(szCommand, "\x80\x32\x00\x00\x31",sizeof(szCommand));
+
+			ulCommandLen = 5;
 
 			ulRet = func_Transmit(hDev, szCommand,ulCommandLen,szOutput, &ulOutputLen);
 
