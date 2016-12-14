@@ -1317,7 +1317,7 @@ err:
 }
 
 
-unsigned int __stdcall WTF_VerifyPINByCertPropertyForHengBao(SK_CERT_DESC_PROPERTY * pCertProperty,unsigned int ulPINType , CallBackCfcaGetEncryptPIN GetEncryptPIN,unsigned int *puiRetryCount)
+unsigned int __stdcall WTF_VerifyPINByCertPropertyForHengBao(SK_CERT_DESC_PROPERTY * pCertProperty,unsigned int ulPINType , CallBackCfcaGetEncryptPIN GetEncryptPIN, void * args, unsigned int *puiRetryCount)
 {
 	HINSTANCE ghInst = NULL;
 
@@ -1427,7 +1427,7 @@ unsigned int __stdcall WTF_VerifyPINByCertPropertyForHengBao(SK_CERT_DESC_PROPER
 			goto err;
 		}
 
-		ulRet = GetEncryptPIN(bufferRandom,8,szEncrypPin,&uiEncryptPinLen);
+		ulRet = GetEncryptPIN(args, bufferRandom,8,szEncrypPin,&uiEncryptPinLen);
 		if (0 != ulRet)
 		{
 			goto err;

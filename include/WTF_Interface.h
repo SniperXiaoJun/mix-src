@@ -184,10 +184,10 @@ extern "C" {
 	COMMON_API unsigned int __stdcall WTF_ChangePINByCertProperty(SK_CERT_DESC_PROPERTY * pCertProperty,unsigned int ulPINType ,const char * pszOldPin,const char * pszNewPin,unsigned int *puiRetryCount);
 	
 	
-	typedef unsigned int (CallBackCfcaGetEncryptPIN)(char *pbRandom,unsigned int uiRandomLen, BYTE *pbEncryptPIN,unsigned int *puiEncryptPINLen);
+	typedef unsigned int (CallBackCfcaGetEncryptPIN)(void * param,unsigned char *pbRandom,unsigned int uiRandomLen, unsigned char *pbEncryptPIN,unsigned int *puiEncryptPINLen);
 
 	
-	COMMON_API unsigned int __stdcall WTF_VerifyPINByCertPropertyForHengBao(SK_CERT_DESC_PROPERTY * pCertProperty,unsigned int ulPINType ,CallBackCfcaGetEncryptPIN GetEncryptPIN,unsigned int *puiRetryCount);
+	COMMON_API unsigned int __stdcall WTF_VerifyPINByCertPropertyForHengBao(SK_CERT_DESC_PROPERTY * pCertProperty,unsigned int ulPINType ,CallBackCfcaGetEncryptPIN GetEncryptPIN,void * pArgs,unsigned int *puiRetryCount);
 
 		/*
 	功能名称:	获取设备信息
