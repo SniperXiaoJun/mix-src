@@ -1317,6 +1317,11 @@ err:
 }
 
 
+
+#if defined(VERIFY_PIN_USE_ENCRYPT)
+
+#include "modp_b64.h"
+
 unsigned int __stdcall WTF_VerifyPINByCertPropertyForHengBao(SK_CERT_DESC_PROPERTY * pCertProperty,unsigned int ulPINType , CallBackCfcaGetEncryptPIN GetEncryptPIN, void * args, unsigned int *puiRetryCount)
 {
 	HINSTANCE ghInst = NULL;
@@ -1441,7 +1446,7 @@ unsigned int __stdcall WTF_VerifyPINByCertPropertyForHengBao(SK_CERT_DESC_PROPER
 
 			ulRet = func_Transmit(hDev, szCommand,ulCommandLen,szOutput, &ulOutputLen);
 
-			FILE_WRITE_FMT(file_log_name,"");
+			FILE_LOG_FMT(file_log_name, "func=%s thread=%d line=%d watch=%d", __FUNCTION__, GetCurrentThreadId(), __LINE__, ulRet);
 		}
 
 		ulRet = func_GenRandom(hDev,bufferRandom, 8);
@@ -1451,18 +1456,42 @@ unsigned int __stdcall WTF_VerifyPINByCertPropertyForHengBao(SK_CERT_DESC_PROPER
 		}
 
 		ulRet = GetEncryptPIN(args, bufferRandom,8,szEncrypPin,&uiEncryptPinLen);
+		FILE_LOG_FMT(file_log_name, "func=%s thread=%d line=%d watch=%d", __FUNCTION__, GetCurrentThreadId(), __LINE__, ulRet);
 		if (0 != ulRet)
 		{
 			goto err;
 		}
 
+		{
+			char szTmpBuffer[BUFFER_LEN_1K] = {0};
+			int iTmpBufferLen = BUFFER_LEN_1K;
+
+			FILE_LOG_STRING(file_log_name, (char *)szEncrypPin);
+			FILE_LOG_HEX(file_log_name, szEncrypPin, uiEncryptPinLen);
+
+			iTmpBufferLen = modp_b64_decode_len(uiEncryptPinLen);
+			iTmpBufferLen = modp_b64_decode(szTmpBuffer, (const char*)szEncrypPin, uiEncryptPinLen);
+
+			FILE_LOG_FMT(file_log_name, "func=%s thread=%d line=%d watch=%d", __FUNCTION__, GetCurrentThreadId(), __LINE__, iTmpBufferLen);
+
+			memset(szEncrypPin, 0, sizeof(szEncrypPin));
+			uiEncryptPinLen=iTmpBufferLen;
+
+			memcpy( szEncrypPin,szTmpBuffer, uiEncryptPinLen);
+			FILE_LOG_STRING(file_log_name, (char *)szEncrypPin);
+			FILE_LOG_HEX(file_log_name, szEncrypPin, uiEncryptPinLen);
+		}
+
+		FILE_LOG_FMT(file_log_name, "func=%s thread=%d line=%d watch=%d", __FUNCTION__, GetCurrentThreadId(), __LINE__, ulRet);
 		ulRet = func_OpenApplication(hDev,pCertProperty->szApplicationName,&hAPP);
 		if (0 != ulRet)
 		{
 			goto err;
 		}
+		FILE_LOG_FMT(file_log_name, "func=%s thread=%d line=%d watch=%d", __FUNCTION__, GetCurrentThreadId(), __LINE__, ulRet);
 
 		ulRet = func_VerifyPIN(hAPP,ulPINType , szEncrypPin, puiRetryCount);
+		FILE_LOG_FMT(file_log_name,"func_VerifyPIN");
 		if (0 != ulRet)
 		{
 			goto err;
@@ -1507,6 +1536,8 @@ err:
 
 	return ulRet;
 }
+
+#endif
 
 unsigned int __stdcall WTF_SM2SignDigest(SK_CERT_DESC_PROPERTY * pCertProperty, const char * pszPIN, BYTE *pbData, unsigned int ulDataLen, PECCSIGNATUREBLOB pSignature,unsigned int * puiRetryCount)
 {
