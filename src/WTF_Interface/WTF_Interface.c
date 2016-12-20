@@ -1403,7 +1403,7 @@ unsigned int __stdcall WTF_VerifyPINByCertPropertyForHengBao(SK_CERT_DESC_PROPER
 	FUNC_NAME_INIT(func_, Transmit, );
 
 	{
-		unsigned char bufferRandom[BUFFER_LEN_1K] = {0};
+		unsigned char bufferRandom[8] = {0};
 		ULONG bufferRandomLen = 8;
 
 		unsigned char szEncrypPin[BUFFER_LEN_1K] = {0};
@@ -1455,16 +1455,20 @@ unsigned int __stdcall WTF_VerifyPINByCertPropertyForHengBao(SK_CERT_DESC_PROPER
 			goto err;
 		}
 
-		ulRet = GetEncryptPIN(args, bufferRandom,8,szEncrypPin,&uiEncryptPinLen);
-		FILE_LOG_FMT(file_log_name, "func=%s thread=%d line=%d watch=%d", __FUNCTION__, GetCurrentThreadId(), __LINE__, ulRet);
-		if (0 != ulRet)
-		{
-			goto err;
-		}
-
 		{
 			char szTmpBuffer[BUFFER_LEN_1K] = {0};
 			int iTmpBufferLen = BUFFER_LEN_1K;
+
+
+			iTmpBufferLen = modp_b64_encode_len(sizeof(bufferRandom));
+			iTmpBufferLen = modp_b64_encode((char *)szTmpBuffer, (const char*)bufferRandom, 8);
+
+			ulRet = GetEncryptPIN(args, (unsigned char *)szTmpBuffer,iTmpBufferLen,szEncrypPin,&uiEncryptPinLen);
+			FILE_LOG_FMT(file_log_name, "func=%s thread=%d line=%d watch=%d", __FUNCTION__, GetCurrentThreadId(), __LINE__, ulRet);
+			if (0 != ulRet)
+			{
+				goto err;
+			}
 
 			FILE_LOG_STRING(file_log_name, (char *)szEncrypPin);
 			FILE_LOG_HEX(file_log_name, szEncrypPin, uiEncryptPinLen);
