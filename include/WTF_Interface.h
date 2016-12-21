@@ -186,7 +186,18 @@ extern "C" {
 	
 	typedef unsigned int (CallBackCfcaGetEncryptPIN)(void * param,unsigned char *pbRandom,unsigned int uiRandomLen, unsigned char *pbEncryptPIN,unsigned int *puiEncryptPINLen);
 
-	
+
+	typedef struct _OPST_HANDLE_ARGS{
+		void * ghInst;
+		void * hDev;
+		void * hAPP;
+		void * hCon;
+	}OPST_HANDLE_ARGS;
+
+	COMMON_API unsigned int __stdcall WTF_VerifyPINByCertPropertyInitialize(SK_CERT_DESC_PROPERTY * pCertProperty,unsigned int ulPINType , CallBackCfcaGetEncryptPIN GetEncryptPIN, void * args, unsigned int *puiRetryCount);
+	COMMON_API unsigned int __stdcall WTF_SM2SignDigestProcess(void *args, BYTE *pbData, unsigned int ulDataLen, PECCSIGNATUREBLOB pSignature);
+	COMMON_API unsigned int __stdcall WTF_VerifyPINByCertPropertyFinalize(void * args);
+
 	COMMON_API unsigned int __stdcall WTF_VerifyPINByCertPropertyForHengBao(SK_CERT_DESC_PROPERTY * pCertProperty,unsigned int ulPINType ,CallBackCfcaGetEncryptPIN GetEncryptPIN,void * pArgs,unsigned int *puiRetryCount);
 
 		/*
