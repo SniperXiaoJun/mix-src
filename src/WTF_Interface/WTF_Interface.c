@@ -1842,25 +1842,38 @@ unsigned int __stdcall WTF_VerifyPINByCertPropertyInitialize(SK_CERT_DESC_PROPER
 
 				if(hCon)
 				{
-					unsigned char digest[32] = {0};
+					/*unsigned char digest[32] = {0};
 
 					unsigned int ulRetry = 0;
 
 					ECCSIGNATUREBLOB blob;
 
 					ulRet = func_ECCSignData(hCon,digest,sizeof(digest),&blob);
+					printf("ulRet = %d ulRetry = %d%s\n", ulRet, ulRetry, "func_ECCSignData 1");
+
+					ulRet = func_VerifyPIN(hAPP,ulPINType , szEncrypPin, puiRetryCount);
+					printf("ulRet = %d ulRetry = %d%s\n", ulRet, *puiRetryCount, "func_VerifyPIN 2");
 					if (0 != ulRet)
 					{
-						goto err;
+					goto err;
 					}
+
+					ulRet = func_ECCSignData(hCon,digest,sizeof(digest),&blob);
+					printf("ulRet = %d ulRetry = %d%s\n", ulRet, ulRetry, "func_ECCSignData 2");
+
+
+					if (0 != ulRet)
+					{
+					goto err;
+					}*/
 				}
 				else
 				{
 					ulRet = EErr_SMC_FAIL;
 				}
 
+				
 				printf("%d %d %s\n",hCon,ghInst,"handleArgs");
-
 			}
 			else
 			{
