@@ -1542,7 +1542,36 @@ err:
 }
 
 
-unsigned int __stdcall WTF_SM2SignDigestProcess(void *args, BYTE *pbData, unsigned int ulDataLen, PECCSIGNATUREBLOB pSignature)
+COMMON_API unsigned int __stdcall WTF_SM2SignDigestForHengBao(SK_CERT_DESC_PROPERTY * pCertProperty,unsigned int ulPINType , CallBackCfcaGetEncryptPIN GetEncryptPIN, void * pArgs/*NULL is able*/, unsigned int *puiRetryCount, BYTE *pbData, unsigned int ulDataLen, PECCSIGNATUREBLOB pSignature)
+{
+	unsigned int ulRet = 0;
+	OPST_HANDLE_ARGS args = {0};
+	int isInitArgs = 0;
+
+	ulRet = WTF_VerifyPINByCertPropertyInitialize(pCertProperty,ulPINType,GetEncryptPIN,&args,puiRetryCount);
+	if (0 != ulRet)
+	{
+		goto err;
+	}
+
+	isInitArgs = 1;
+
+	ulRet = WTF_SM2SignDigestProcess(&args,pbData,ulDataLen,pSignature);
+	if (0 != ulRet)
+	{
+		goto err;
+	}
+err:
+	if (isInitArgs)
+	{
+		WTF_VerifyPINByCertPropertyFinalize(&args);
+	}
+
+	return ulRet;
+}
+
+
+unsigned int __stdcall WTF_SM2SignDigestProcess(OPST_HANDLE_ARGS *args, BYTE *pbData, unsigned int ulDataLen, PECCSIGNATUREBLOB pSignature)
 {
 	HINSTANCE ghInst = NULL;
 	unsigned int ulRet = 0;
@@ -1580,7 +1609,7 @@ unsigned int __stdcall WTF_SM2SignDigestProcess(void *args, BYTE *pbData, unsign
 	HAPPLICATION hAPP = NULL;
 	HCONTAINER hCon = NULL;
 
-	OPST_HANDLE_ARGS * handleArgs = (OPST_HANDLE_ARGS *)args;
+	OPST_HANDLE_ARGS * handleArgs = args;
 
 	if (handleArgs)
 	{
@@ -1642,7 +1671,7 @@ err:
 }
 
 
-unsigned int __stdcall WTF_VerifyPINByCertPropertyInitialize(SK_CERT_DESC_PROPERTY * pCertProperty,unsigned int ulPINType , CallBackCfcaGetEncryptPIN GetEncryptPIN, void * args, unsigned int *puiRetryCount)
+unsigned int __stdcall WTF_VerifyPINByCertPropertyInitialize(SK_CERT_DESC_PROPERTY * pCertProperty,unsigned int ulPINType , CallBackCfcaGetEncryptPIN GetEncryptPIN, OPST_HANDLE_ARGS * args, unsigned int *puiRetryCount)
 {
 	HINSTANCE ghInst = NULL;
 
@@ -1831,7 +1860,7 @@ unsigned int __stdcall WTF_VerifyPINByCertPropertyInitialize(SK_CERT_DESC_PROPER
 		}
 		else
 		{
-			OPST_HANDLE_ARGS * handleArgs = (OPST_HANDLE_ARGS *)args;
+			OPST_HANDLE_ARGS * handleArgs = args;
 
 			if (handleArgs)
 			{
@@ -1849,17 +1878,13 @@ unsigned int __stdcall WTF_VerifyPINByCertPropertyInitialize(SK_CERT_DESC_PROPER
 					ECCSIGNATUREBLOB blob;
 
 					ulRet = func_ECCSignData(hCon,digest,sizeof(digest),&blob);
-					printf("ulRet = %d ulRetry = %d%s\n", ulRet, ulRetry, "func_ECCSignData 1");
-
 					ulRet = func_VerifyPIN(hAPP,ulPINType , szEncrypPin, puiRetryCount);
-					printf("ulRet = %d ulRetry = %d%s\n", ulRet, *puiRetryCount, "func_VerifyPIN 2");
 					if (0 != ulRet)
 					{
 					goto err;
 					}
 
 					ulRet = func_ECCSignData(hCon,digest,sizeof(digest),&blob);
-					printf("ulRet = %d ulRetry = %d%s\n", ulRet, ulRetry, "func_ECCSignData 2");
 
 
 					if (0 != ulRet)
@@ -1872,15 +1897,11 @@ unsigned int __stdcall WTF_VerifyPINByCertPropertyInitialize(SK_CERT_DESC_PROPER
 					ulRet = EErr_SMC_FAIL;
 				}
 
-				
-				printf("%d %d %s\n",hCon,ghInst,"handleArgs");
 			}
 			else
 			{
 				return EErr_SMC_FAIL;
 			}
-			
-			printf("%d %d %s\n",hCon,ghInst,"return");
 
 			return 0;
 		}
@@ -1939,7 +1960,7 @@ err:
 
 
 
-unsigned int __stdcall WTF_VerifyPINByCertPropertyFinalize(void * args)
+unsigned int __stdcall WTF_VerifyPINByCertPropertyFinalize(OPST_HANDLE_ARGS * args)
 {
 	HINSTANCE ghInst = NULL;
 	unsigned int ulRet = 0;
@@ -1977,7 +1998,7 @@ unsigned int __stdcall WTF_VerifyPINByCertPropertyFinalize(void * args)
 	HAPPLICATION hAPP = NULL;
 	HCONTAINER hCon = NULL;
 
-	OPST_HANDLE_ARGS * handleArgs = (OPST_HANDLE_ARGS *)args;
+	OPST_HANDLE_ARGS * handleArgs = args;
 
 
 	if (handleArgs)
