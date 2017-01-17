@@ -1,4 +1,4 @@
-#ifndef _SMC_INTERFACE_H
+﻿#ifndef _SMC_INTERFACE_H
 #define _SMC_INTERFACE_H
 
 #include <tchar.h>
