@@ -1,0 +1,12 @@
+INPUT(
+./debug\main.o
+./debug\login.o
+./debug\regdialog.o
+./debug\panel.o
+./debug\chatform.o
+./debug\moc_login.o
+./debug\moc_regdialog.o
+./debug\moc_panel.o
+./debug\moc_chatform.o
+./debug\qrc_client.o
+);

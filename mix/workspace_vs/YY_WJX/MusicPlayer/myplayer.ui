@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MyPlayerClass</class>
+ <widget class="QMainWindow" name="MyPlayerClass">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>417</width>
+    <height>400</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MyPlayer</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
+     <widget class="QPushButton" name="pushButtonAdd">
+      <property name="text">
+       <string>打开</string>
+      </property>
+      <property name="icon">
+       <iconset resource="musicplayer.qrc">
+        <normaloff>:/MusicPlayer/Resources/openfile.png</normaloff>:/MusicPlayer/Resources/openfile.png</iconset>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="1">
+     <widget class="QPushButton" name="pushButtonBack">
+      <property name="text">
+       <string>上一个</string>
+      </property>
+      <property name="icon">
+       <iconset resource="musicplayer.qrc">
+        <normaloff>:/MusicPlayer/Resources/backward.png</normaloff>:/MusicPlayer/Resources/backward.png</iconset>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="2">
+     <widget class="QPushButton" name="pushButtonPlay">
+      <property name="text">
+       <string>播放</string>
+      </property>
+      <property name="icon">
+       <iconset resource="musicplayer.qrc">
+        <normaloff>:/MusicPlayer/Resources/play.png</normaloff>:/MusicPlayer/Resources/play.png</iconset>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="3">
+     <widget class="QPushButton" name="pushButtonNext">
+      <property name="text">
+       <string>下一个</string>
+      </property>
+      <property name="icon">
+       <iconset resource="musicplayer.qrc">
+        <normaloff>:/MusicPlayer/Resources/step.png</normaloff>:/MusicPlayer/Resources/step.png</iconset>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="4">
+     <widget class="QPushButton" name="pushButtonDel">
+      <property name="text">
+       <string>删除</string>
+      </property>
+      <property name="icon">
+       <iconset resource="musicplayer.qrc">
+        <normaloff>:/MusicPlayer/Resources/mute.png</normaloff>:/MusicPlayer/Resources/mute.png</iconset>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0" colspan="4">
+     <widget class="QWidget" name="widget" native="true"/>
+    </item>
+    <item row="1" column="4">
+     <widget class="QListWidget" name="listWidget"/>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>417</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menu_File">
+    <property name="title">
+     <string>菜单</string>
+    </property>
+    <addaction name="actionExit"/>
+   </widget>
+   <addaction name="menu_File"/>
+  </widget>
+  <action name="actionExit">
+   <property name="text">
+    <string>退出</string>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources>
+  <include location="musicplayer.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>actionExit</sender>
+   <signal>triggered()</signal>
+   <receiver>MyPlayerClass</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

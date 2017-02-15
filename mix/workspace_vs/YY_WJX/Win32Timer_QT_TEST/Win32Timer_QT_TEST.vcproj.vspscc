@@ -1,0 +1,18 @@
+﻿""
+{
+"FILE_VERSION" = "9237"
+"ENLISTMENT_CHOICE" = "NEVER"
+"PROJECT_FILE_RELATIVE_PATH" = ""
+"NUMBER_OF_EXCLUDED_FILES" = "8"
+"EXCLUDED_FILE0" = "GeneratedFiles\\ui_win32timer_qt_test.h"
+"EXCLUDED_FILE1" = "GeneratedFiles\\Debug\\moc_win32timer_qt_test.cpp"
+"EXCLUDED_FILE2" = "GeneratedFiles\\Release\\moc_qt_test.cpp"
+"EXCLUDED_FILE3" = "GeneratedFiles\\Release\\moc_win32timer_qt_test.cpp"
+"EXCLUDED_FILE4" = "GeneratedFiles\\qrc_win32timer_qt_test.cpp"
+"EXCLUDED_FILE5" = "GeneratedFiles\\ui_qt_test.h"
+"EXCLUDED_FILE6" = "GeneratedFiles\\Debug\\moc_qt_test.cpp"
+"EXCLUDED_FILE7" = "GeneratedFiles\\qrc_qt_test.cpp"
+"ORIGINAL_PROJECT_FILE_PATH" = ""
+"NUMBER_OF_NESTED_PROJECTS" = "0"
+"SOURCE_CONTROL_SETTINGS_PROVIDER" = "PROJECT"
+}

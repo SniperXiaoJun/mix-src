@@ -1,0 +1,4 @@
+<RCC>
+    <qresource prefix="WinCE_UDP">
+    </qresource>
+</RCC>

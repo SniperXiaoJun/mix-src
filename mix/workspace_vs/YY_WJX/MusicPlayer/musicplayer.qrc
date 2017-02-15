@@ -1,0 +1,14 @@
+<RCC>
+    <qresource prefix="/MusicPlayer">
+        <file>Resources/backward.png</file>
+        <file>Resources/mute.png</file>
+        <file>Resources/openfile.png</file>
+        <file>Resources/pause.png</file>
+        <file>Resources/play.png</file>
+        <file>Resources/quiet.png</file>
+        <file>Resources/step.png</file>
+        <file>Resources/stop.png</file>
+        <file>Resources/vocal.png</file>
+        <file>Resources/voice.png</file>
+    </qresource>
+</RCC>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>CRT_CPUViewClass</class>
+ <widget class="QWidget" name="CRT_CPUViewClass">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>681</width>
+    <height>316</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>CPU模拟</string>
+  </property>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

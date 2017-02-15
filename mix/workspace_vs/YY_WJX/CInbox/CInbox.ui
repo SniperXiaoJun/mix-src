@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>CInbox</class>
+ <widget class="QMainWindow" name="CInbox">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>240</width>
+    <height>320</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>CInbox</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="1" column="0">
+     <widget class="QListWidget" name="listWidget"/>
+    </item>
+    <item row="0" column="0">
+     <widget class="QPushButton" name="pushButton">
+      <property name="text">
+       <string>PushButton</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>240</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menu">
+    <property name="title">
+     <string>菜单</string>
+    </property>
+    <widget class="QMenu" name="menuMove">
+     <property name="title">
+      <string>移至加密文件夹</string>
+     </property>
+     <addaction name="actionFold"/>
+     <addaction name="action_A"/>
+     <addaction name="action_B"/>
+     <addaction name="action_C"/>
+    </widget>
+    <widget class="QMenu" name="menuSign">
+     <property name="title">
+      <string>标记/取消标记</string>
+     </property>
+     <addaction name="actionSign"/>
+     <addaction name="actionSignAll"/>
+     <addaction name="actionCSign"/>
+     <addaction name="actionCSignAll"/>
+    </widget>
+    <addaction name="actionOpen"/>
+    <addaction name="actionEdit"/>
+    <addaction name="actionReply"/>
+    <addaction name="actionDelete"/>
+    <addaction name="menuMove"/>
+    <addaction name="menuSign"/>
+    <addaction name="actionHelp"/>
+    <addaction name="actionExit"/>
+   </widget>
+   <addaction name="menu"/>
+  </widget>
+  <action name="actionOpen">
+   <property name="text">
+    <string>打开</string>
+   </property>
+  </action>
+  <action name="actionEdit">
+   <property name="text">
+    <string>写加密信息</string>
+   </property>
+  </action>
+  <action name="actionReply">
+   <property name="text">
+    <string>回复</string>
+   </property>
+  </action>
+  <action name="actionDelete">
+   <property name="text">
+    <string>删除</string>
+   </property>
+  </action>
+  <action name="actionHelp">
+   <property name="text">
+    <string>帮助</string>
+   </property>
+  </action>
+  <action name="actionExit">
+   <property name="text">
+    <string>退出</string>
+   </property>
+  </action>
+  <action name="actionFold">
+   <property name="text">
+    <string>加密文件夹</string>
+   </property>
+  </action>
+  <action name="action_A">
+   <property name="text">
+    <string>子文件夹A</string>
+   </property>
+  </action>
+  <action name="action_B">
+   <property name="text">
+    <string>子文件夹B</string>
+   </property>
+  </action>
+  <action name="action_C">
+   <property name="text">
+    <string>子文件夹C</string>
+   </property>
+  </action>
+  <action name="actionSign">
+   <property name="text">
+    <string>标记</string>
+   </property>
+  </action>
+  <action name="actionSignAll">
+   <property name="text">
+    <string>标记全部</string>
+   </property>
+  </action>
+  <action name="actionCSign">
+   <property name="text">
+    <string>取消标记</string>
+   </property>
+  </action>
+  <action name="actionCSignAll">
+   <property name="text">
+    <string>全部取消标记</string>
+   </property>
+  </action>
+ </widget>
+ <resources>
+  <include location="Rsource.qrc"/>
+ </resources>
+ <connections/>
+</ui>

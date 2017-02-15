@@ -1,0 +1,12 @@
+INPUT(
+./debug\main.o
+./debug\daemon.o
+./debug\tcpsockserver.o
+./debug\tcpconthread.o
+./debug\sqlitedb.o
+./debug\mysqlquerymodel.o
+./debug\moc_daemon.o
+./debug\moc_tcpsockserver.o
+./debug\moc_tcpconthread.o
+./debug\qrc_resources.o
+);

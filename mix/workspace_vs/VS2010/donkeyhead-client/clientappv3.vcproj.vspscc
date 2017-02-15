@@ -1,0 +1,18 @@
+﻿""
+{
+"FILE_VERSION" = "9237"
+"ENLISTMENT_CHOICE" = "NEVER"
+"PROJECT_FILE_RELATIVE_PATH" = ""
+"NUMBER_OF_EXCLUDED_FILES" = "8"
+"EXCLUDED_FILE0" = "debug\\moc_panel.cpp"
+"EXCLUDED_FILE1" = "release\\moc_login.cpp"
+"EXCLUDED_FILE2" = "release\\moc_chatform.cpp"
+"EXCLUDED_FILE3" = "release\\moc_regdialog.cpp"
+"EXCLUDED_FILE4" = "debug\\moc_login.cpp"
+"EXCLUDED_FILE5" = "release\\moc_panel.cpp"
+"EXCLUDED_FILE6" = "debug\\moc_chatform.cpp"
+"EXCLUDED_FILE7" = "debug\\moc_regdialog.cpp"
+"ORIGINAL_PROJECT_FILE_PATH" = ""
+"NUMBER_OF_NESTED_PROJECTS" = "0"
+"SOURCE_CONTROL_SETTINGS_PROVIDER" = "PROJECT"
+}

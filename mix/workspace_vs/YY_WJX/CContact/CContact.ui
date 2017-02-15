@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>CContactClass</class>
+ <widget class="QMainWindow" name="CContactClass">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>240</width>
+    <height>375</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>CContact</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0" colspan="2">
+     <widget class="QListWidget" name="listWidget">
+      <item>
+       <property name="text">
+        <string>EditMMS</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>ReadMMS</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Login</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Configure</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>王亚维</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>李强强</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>严海成</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>夏伟</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>胡也</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>帅龙成</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>张文</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>雷云</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>李冰</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>张维</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>吕娅萍</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QLabel" name="label">
+      <property name="text">
+       <string>查找：</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="1">
+     <widget class="QLineEdit" name="lineEdit"/>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>240</width>
+     <height>20</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QToolBar" name="mainToolBar">
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources>
+  <include location="CContact.qrc"/>
+ </resources>
+ <connections/>
+</ui>

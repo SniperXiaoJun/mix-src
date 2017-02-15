@@ -1,0 +1,42 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<title>3D场景编辑</title>
+</head>
+
+<body background="images/background.JPG">
+<p align="center">
+<font size="4"><b>
+学OpenGL编3D游戏</b></font><p align="center"><font color="#800000">第十三章 3D场景编辑</font></p>   
+
+<p align="left" style="line-height: 200%"><font size="2" color="#0000FF">&nbsp;&nbsp;&nbsp; 
+<img border="0" src="images/0004.GIF" width="65" height="40">3D场景编辑，给你提供了安排山河的可能。</font></p> 
+
+<p align="left" style="line-height: 200%"><font size="2">&nbsp;&nbsp;&nbsp; <img border="0" src="images/YELBTN.GIF" width="11" height="11">  
+3D场景编辑的核心算法是3D场景中对象拾取，因为只有有效的选择对象，才能对它进行位置编辑。<br> 
+&nbsp;&nbsp;&nbsp; 3D对象的屏幕拾取的关键，是将鼠标在屏幕上的平面位置(int mouseX,int mouseY) 转换成3D场景中的立体位置xyz（xyz.x, xyz.y, xyz.z）。</font></p>  
+<p align="center"><img border="0" src="fileimg/图13-1-3坐标转换.GIF" width="300" height="99"></p>
+<p align="left"><font size="2">&nbsp;&nbsp;&nbsp; <img border="0" src="images/YELBTN.GIF" width="11" height="11">&nbsp; 
+为了编辑对象方便，本章集成示范程序中我们将地面设为了平地。</font></p>
+<p align="left">&nbsp;&nbsp;&nbsp;<font size="2"> 
+对被选中对象我们定义了两个基本编辑操作，选中对象后:</font></p>
+<p align="left">&nbsp;&nbsp;&nbsp;<font size="2">&nbsp;&nbsp;&nbsp;&nbsp; 拖动(按住鼠标右键)</font>&nbsp;&nbsp;&nbsp;<font size="2">&nbsp;&nbsp;&nbsp;&nbsp; 
+旋转(R键)</font></p>
+<p align="center">&nbsp;&nbsp; <font size="2"><img border="0" src="fileimg/图13-1-2%20三维锥体光标.GIF" width="400" height="286"></font></p>
+<p align="center"><font size="2">3D锥形光标</font></p>
+<p align="center"><font size="2"><img border="0" src="fileimg/图13-1-2%20%20对象被选中.GIF" width="400" height="257"></font></p>
+<p align="center"><font size="2">对象初选中</font></p>
+<p align="left"><font size="2">&nbsp;&nbsp;&nbsp; <img border="0" src="images/YELBTN.GIF" width="11" height="11">&nbsp; 
+定义&quot;Q&quot;键为抬高视点(就像飞到天上)。&quot;W&quot;键为降低视点。</font></p>
+<p align="left"><font size="2">&nbsp;&nbsp;&nbsp; <img border="0" src="images/YELBTN.GIF" width="11" height="11">&nbsp; 
+加入了调入场景文件，存贮场景文件的目录选择功能。</font></p>
+<p align="left">&nbsp;&nbsp;&nbsp;<font size="2"> 程序运行时可以选择调入不同的场景文件。程序退出时可以将场景存为你新命名的文件。</font></p>
+<p align="left">　</p>
+<p align="left">　</p>
+
+</body>
+
+</html>

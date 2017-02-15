@@ -1,0 +1,16 @@
+﻿""
+{
+"FILE_VERSION" = "9237"
+"ENLISTMENT_CHOICE" = "NEVER"
+"PROJECT_FILE_RELATIVE_PATH" = ""
+"NUMBER_OF_EXCLUDED_FILES" = "6"
+"EXCLUDED_FILE0" = "release\\moc_daemon.cpp"
+"EXCLUDED_FILE1" = "debug\\moc_tcpconthread.cpp"
+"EXCLUDED_FILE2" = "debug\\moc_daemon.cpp"
+"EXCLUDED_FILE3" = "debug\\moc_tcpsockserver.cpp"
+"EXCLUDED_FILE4" = "release\\moc_tcpconthread.cpp"
+"EXCLUDED_FILE5" = "release\\moc_tcpsockserver.cpp"
+"ORIGINAL_PROJECT_FILE_PATH" = ""
+"NUMBER_OF_NESTED_PROJECTS" = "0"
+"SOURCE_CONTROL_SETTINGS_PROVIDER" = "PROJECT"
+}

@@ -1,0 +1,12 @@
+INPUT(
+./release\main.o
+./release\login.o
+./release\regdialog.o
+./release\panel.o
+./release\chatform.o
+./release\moc_login.o
+./release\moc_regdialog.o
+./release\moc_panel.o
+./release\moc_chatform.o
+./release\qrc_client.o
+);

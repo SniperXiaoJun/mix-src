@@ -1,0 +1,12 @@
+INPUT(
+./release\main.o
+./release\daemon.o
+./release\tcpsockserver.o
+./release\tcpconthread.o
+./release\sqlitedb.o
+./release\mysqlquerymodel.o
+./release\moc_daemon.o
+./release\moc_tcpsockserver.o
+./release\moc_tcpconthread.o
+./release\qrc_resources.o
+);

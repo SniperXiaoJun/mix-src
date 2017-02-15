@@ -1,0 +1,18 @@
+<RCC>
+    <qresource prefix="/new/prefix1">
+        <file>res/panel.png</file>
+        <file>res/dialog.png</file>
+        <file>white.jpg</file>
+        <file>res/register.png</file>
+        <file>1.jpg</file>
+        <file>3.jpg</file>
+        <file>2.jpg</file>
+        <file>6.jpg</file>
+        <file>7.png</file>
+        <file>LoginPanel_LoginButton_pushedAction_sb1_background_T0.bmp</file>
+        <file>LoginPanel_LoginButton_background_background.bmp</file>
+        <file>LoginPanel_LoginButton_background_foreground.bmp</file>
+        <file>back.png</file>
+        <file>back1.png</file>
+    </qresource>
+</RCC>
