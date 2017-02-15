@@ -1,0 +1,85 @@
+1.
+安装phpStudy
+
+2.
+打开apache的配置文件conf/httpd.conf。找打如下行代码，去掉其前边的注释井号（#）
+
+LoadModule ssl_module modules/mod_ssl.so  
+Include conf/extra/httpd-ssl.conf  
+#以上2行是开启ssl  
+  
+LoadModule proxy_module modules/mod_proxy.so  
+LoadModule proxy_http_module modules/mod_proxy_http.so  
+#以上2行是为了https给转发tomcat  
+
+3.
+修改conf/extra/httpd-ssl.conf 文件里的两个字段：去掉其注释 
+SSLCertificateKeyFile "C:/Apache2/conf/server.key" 
+SSLCertificateFile "C:/Apache2/conf/server.crt" 
+暂时server.key和server.crt还没生成。 
+在<VirtualHost _default_:443>中插入如下代码 
+
+SSLProxyEngine on   
+ProxyRequests off   
+#EBT-KMS
+ProxyPass /EBT-KMS/ http://127.0.0.1:8080/EBT-KMS/
+ProxyPassReverse /EBT-KMS/ http://127.0.0.1:8080/EBT-KMS/
+
+ProxyPass /tomcat/ http://127.0.0.1:8080/
+ProxyPassReverse /tomcat/ http://127.0.0.1:8080/
+
+修改为相对目录DocumentRoot与httpd.conf一致
+日志目录为相对目录
+
+DocumentRoot "D:\WWW"
+ServerName www.example.com:443
+ServerAdmin admin@example.com
+ErrorLog "C:\phpStudy\Apache\logs\error.log"
+TransferLog "C:\phpStudy\Apache\logs\access.log"
+
+CustomLog "C:\phpStudy\Apache\logs\ssl_request.log" \
+          "%t %h %{SSL_PROTOCOL}x %{SSL_CIPHER}x \"%r\" %b"
+
+5.
+ 为网站服务器生成证书及私钥文件 
+1）生成服务器的私钥 
+进入apache http server安装目录的bin目录下，在命令行里执行: 
+Java代码  收藏代码
+openssl genrsa -out server.key 1024  
+
+在当前目录下生成了一个server.key 
+可用openssl genrsa –help查看帮助 
+2）生成自签署证书 
+    首先，在当前目录创建demoCA，里面创建以下文件， 
+文件：index.txt内容为空 
+文件：serial（无扩展名）内容为01 
+文件夹newcert 
+执行下边的命令，即可生成server.crt文件。 
+Java代码  收藏代码
+openssl req -new -x509 -days 365 -key server.key -out server.crt -config ..\conf\openssl.cnf  
+
+在当前目录下生成了一个server.csr；在这一命令执行的过程中，系统会要求您填写如下信息： 
+Country Name (2 letter code):使用国际标准组织(ISO)国码格式，填写2个字母的国家代号。中国请填写CN。 
+State or Province Name (full name): 省份，比如填写BeiJing 
+Locality Name (eg, city): 城市，比如填写BeiJing 
+Organization Name (eg, company): 组织单位，比如填写ABC 
+Organizational Unit Name (eg, section): 比如填写IT Dept 
+Common Name (eg, your websites domain name): 域名，如果你用localhost域名测试，就输入localhost；如果用ip测试就输入ip地址 
+注意： 
+行使 SSL 加密的网站地址。请注意这里并不是单指您的域名，而是直接使用 SSL 的网站名称 例如:pay.abc.com。一个网站这里定义是： abc.com 是一个网站； www.abc.com 是另外一个网站； pay.abc.com 又是另外一个网站。 
+
+Email Address: 邮件地址，可以不填 
+A challenge password: 可以不填 
+An optional company name:可以不填 
+
+然后将  server.crt,server.key复制到apache的conf文件夹下，重启apache 
+5．访问https://localhost 
+看到 it works代表配置成功。 
+
+不过由于，我们的CA不是由第三方机构颁发的，而是我们自己颁发的，所以，IE访问的时候，会显示，这个证书不是由Trused CA Authenticator颁发，告诉我们可能有安全隐患。如果要消除安全警告。在浏览器里导入证书即可。 
+https配完了，可以登录https://localhost/sys/login.jsp进行验证 
+
+备注：也可以一次生成证书 
+$ openssl req -new -x509 -nodes -out server1.crt -keyout server1.key -config ..\conf\openssl.cnf 
+
+

@@ -1,0 +1,59 @@
+
+
+typedef struct CommonST
+{	
+	ASN1_INTEGER	*r;
+	ASN1_INTEGER	*s;
+}CommonST;
+
+CommonST * CommonST_new(void);
+void CommonST_free(CommonST *a);
+CommonST *d2i_CommonST( CommonST **a, const unsigned char **in, long len);
+int i2d_CommonST( CommonST *a, unsigned char **out);
+
+const ASN1_ITEM * CommonST_it(void);
+
+CommonST *CommonST_new(void) 
+{ 
+	return (CommonST *)ASN1_item_new(CommonST_it()); 
+} 
+
+void CommonST_free(CommonST *a) 
+{ 
+	ASN1_item_free((ASN1_VALUE *)a, CommonST_it()); 
+}
+
+CommonST *d2i_CommonST(CommonST **a, const unsigned char **in, long len) 
+{ 
+	return (CommonST *)ASN1_item_d2i((ASN1_VALUE **)a, in, len, CommonST_it());
+} 
+int i2d_CommonST(CommonST *a, unsigned char **out) 
+{ 
+	return ASN1_item_i2d((ASN1_VALUE *)a, out, CommonST_it());
+} 
+
+static const ASN1_TEMPLATE CommonST_seq_tt[] ={		
+	{ 
+		(0), (0), offsetof(CommonST, r),
+			"r", (ASN1_INTEGER_it) 
+	},
+	{ 
+		(0), (0), offsetof(CommonST, s),
+			"r", (ASN1_INTEGER_it) 
+	}
+};
+
+const ASN1_ITEM * CommonST_it(void) 
+{ 
+	static const ASN1_ITEM local_it = { 
+		ASN1_ITYPE_SEQUENCE,
+		V_ASN1_SEQUENCE,
+		CommonST_seq_tt,
+		sizeof(CommonST_seq_tt) / sizeof(ASN1_TEMPLATE),
+		NULL,
+		sizeof(CommonST),
+		"CommonST"
+	}; 
+
+	return &local_it; 
+}
