@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>460</width>
+    <height>452</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QVBoxLayout" name="verticalLayout_2">
+    <item>
+     <widget class="QFrame" name="GlossyFrame">
+      <property name="styleSheet">
+       <string notr="true">QFrame#GlossyFrame {
+ border: 1px solid white;
+ border-radius: 3px;
+ background: qradialgradient(
+   cx: 0.5, cy: -1.8,
+   fx: 0.5, fy: 0,
+   radius: 2, 
+   stop: 0 #9aa9be,
+   stop: 1 #293859);
+  font: bold;
+}
+
+#GlossyFrame QLabel#Title {
+ background: transparent;
+ color: white;
+}
+
+#GlossyFrame QPushButton {
+ color: #white; 
+ border: 1px solid black;
+ border-radius: 3px;
+ padding: 1px;
+ background: qlineargradient(
+   x1:0, y1:0, x2:0, y2:1,
+   stop:0 #bec1d2,
+   stop: 0.4 #717990, 
+   stop: 0.5 #5c637d
+   stop:1 #68778e
+ );
+ min-height: 36px;
+}
+
+#GlossyFrame QPushButton:pressed {
+background: qlineargradient(
+  x1:0, y1:0, x2:0, y2:1,
+  stop:0 #68778e,
+  stop: 0.4 #5c637d
+  stop: 0.5 #717990,
+  stop:1 #bec1d2
+ );
+ color: black;
+}
+
+#GlossyFrame QLineEdit {
+ background: qlineargradient(
+  x1:0, y1:0, x2:0, y2:1,
+  stop:0 gray,
+  stop: 0.2 white
+  stop:1 white
+ );
+ border-radius: 1px;
+ border: 1px solid black;
+ min-height: 24px;
+ color: black;
+}
+
+#GlossyFrame QCheckBox {
+     color:  white;
+ }
+
+#GlossyFrame QCheckBox::indicator {  
+     position: absolute;
+     height: 27px;
+     width: 64px;
+ }
+
+#GlossyFrame QCheckBox::indicator:checked {
+     image: url(:/checkbox_on.png);
+ }
+
+#GlossyFrame QCheckBox::indicator:unchecked {
+      image: url(:/checkbox_off.png);
+ }</string>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
+      </property>
+      <layout class="QGridLayout" name="gridLayout">
+       <item row="0" column="0">
+        <widget class="QLabel" name="Title">
+         <property name="text">
+          <string>Menu Title</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLineEdit" name="lineEdit"/>
+       </item>
+       <item row="2" column="0">
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <widget class="QCheckBox" name="checkBox">
+           <property name="layoutDirection">
+            <enum>Qt::RightToLeft</enum>
+           </property>
+           <property name="text">
+            <string>CheckBoX</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item row="3" column="0">
+        <widget class="QPushButton" name="pushButton">
+         <property name="text">
+          <string>PushButton</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QPushButton" name="pushButton_2">
+         <property name="text">
+          <string>PushButton</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0">
+        <widget class="QPushButton" name="pushButton_3">
+         <property name="text">
+          <string>PushButton</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="0">
+        <widget class="QPushButton" name="pushButton_4">
+         <property name="text">
+          <string>PushButton</string>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="0">
+        <widget class="QPushButton" name="pushButton_5">
+         <property name="text">
+          <string>PushButton</string>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="0">
+        <widget class="QPushButton" name="pushButton_6">
+         <property name="text">
+          <string>PushButton</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <spacer name="verticalSpacer">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>40</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>460</width>
+     <height>23</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QToolBar" name="mainToolBar">
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources/>
+ <connections/>
+</ui>
