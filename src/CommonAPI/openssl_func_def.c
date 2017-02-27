@@ -2434,6 +2434,50 @@ err:
 	return rv;
 }
 
+
+unsigned int OpenSSL_CsrGetPubkey(const unsigned char *pbCSR, unsigned int uiCSRLen,
+	unsigned char * pbPublicKey, unsigned int * puiPublicKeyLen)
+{
+	X509_REQ *req = NULL;
+	int rv = -1;
+	const unsigned char * ptr_in = NULL;
+
+	ptr_in = pbCSR;
+
+	req = d2i_X509_REQ(NULL, &ptr_in, uiCSRLen);
+	if (NULL == req)
+	{
+		goto err;
+	}
+
+	if (!pbPublicKey)
+	{
+		* puiPublicKeyLen = req->req_info->pubkey->public_key->length;
+	}
+	else if(* puiPublicKeyLen < req->req_info->pubkey->public_key->length)
+	{
+		rv = -4;
+		goto err;
+	}
+	else
+	{
+		memcpy(pbPublicKey, req->req_info->pubkey->public_key->data,req->req_info->pubkey->public_key->length);
+
+		* puiPublicKeyLen = req->req_info->pubkey->public_key->length;
+
+
+	}
+
+	rv = 0;
+err:
+	if(req)
+	{
+		X509_REQ_free(req);
+	}
+
+	return rv;
+}
+
 /*
 *	��֤���м���req�Դ���չ��Ϣ
 */

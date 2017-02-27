@@ -419,6 +419,9 @@ extern "C" {
 	COMMON_API unsigned int OpenSSL_CertGetPubkey(
 		const unsigned char * pbX509Cert, unsigned int uiX509CertLen,
 		unsigned char * pbPublicKey, unsigned int * puiPublicKeyLen);
+		
+	COMMON_API unsigned int OpenSSL_CsrGetPubkey(const unsigned char *pbCSR, unsigned int uiCSRLen,
+	unsigned char * pbPublicKey, unsigned int * puiPublicKeyLen);
 
 
 	/*
