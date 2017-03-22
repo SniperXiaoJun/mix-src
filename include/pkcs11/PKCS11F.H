@@ -910,3 +910,150 @@ CK_PKCS11_FUNCTION_INFO(C_WaitForSlotEvent)
   CK_VOID_PTR pRserved   /* reserved.  Should be NULL_PTR */
 );
 #endif
+
+//-------------------------------------------------------------------------------------------------
+/* C_SetECCAlg initializes an algorithm operation. */
+CK_PKCS11_FUNCTION_INFO(C_SetECCAlg)
+#ifdef CK_NEED_ARG_LIST
+(
+	CK_SESSION_HANDLE	hSession, 		/* the session's handle */
+	CK_ULONG	        ulECCAlg		/* the algorithm's type, only support CKM_SM2 or CKM_ECC512*/
+);
+#endif
+
+/* C_SignEncryptInit initializes an encryption and signature (private key encryption) operation
+   where the signature is (will be) an appendix to the data, and plaintext cannot be recovered from the
+ *signature. 
+*/
+CK_PKCS11_FUNCTION_INFO(C_SignEncryptInit)
+#ifdef CK_NEED_ARG_LIST
+(
+	CK_SESSION_HANDLE	hSession, 			/* the session's handle */
+	CK_MECHANISM_PTR	pSignMechanism,		/* the signature mechanism */
+	CK_OBJECT_HANDLE	hSignKey,			/* handle of signature key */
+	CK_MECHANISM_PTR	pEncryptMechanism,	/* the encryption mechanism */
+	CK_OBJECT_HANDLE	hEncryptKey			/* handle of encryption key */
+);
+#endif
+
+/* C_SignEncryptFinal finishes a multiple-part signature and encryption operation, 
+ * returning the last encryptdata and signature. */
+CK_PKCS11_FUNCTION_INFO(C_SignEncryptFinal)
+#ifdef CK_NEED_ARG_LIST
+(
+	CK_SESSION_HANDLE	hSession, 					/* the session's handle */
+	CK_BYTE_PTR			pSignature,					/* gets the signature */
+	CK_ULONG_PTR		pulSignatureLen,			/* gets signature length */
+	CK_BYTE_PTR			pLastEncryptedPart,			/* last c-text */ 
+	CK_ULONG_PTR		pulLastEncryptedPartLen		/* gets last size */
+);
+#endif
+
+
+/* C_DecryptVerifyInit initializes an decryption and verification operation.*/
+CK_PKCS11_FUNCTION_INFO(C_DecryptVerifyInit)
+#ifdef CK_NEED_ARG_LIST
+(
+	CK_SESSION_HANDLE	hSession, 			/* the session's handle */
+	CK_MECHANISM_PTR	pDecryptMechanism,	/* the decryption mechanism */
+	CK_OBJECT_HANDLE	hDecryptKey,		/* handle of decryption key */
+	CK_MECHANISM_PTR	pVerifyMechanism,	/* the verification mechanism */
+	CK_OBJECT_HANDLE	hVerifyKey			/* handle of verification key */
+);
+#endif
+
+
+/* C_DecryptVerifyFinal finishes a multiple-part decryption and verification operation. */
+CK_PKCS11_FUNCTION_INFO(C_DecryptVerifyFinal)
+#ifdef CK_NEED_ARG_LIST
+(
+	CK_SESSION_HANDLE	hSession, 			/* the session's handle */
+	CK_BYTE_PTR			pLastPart,			/* gets plaintext */
+	CK_ULONG_PTR		pulLastPartLen,		/* p-text size */
+	CK_BYTE_PTR			pSignature,			/* signature to verify */
+	CK_ULONG			ulSignatureLen		/* signature length */
+);
+#endif
+
+//-------------------------------------------------------------------------------------------------
+/* C_ECCKeyAgreementInit initializes an key agreement operation. */
+CK_PKCS11_FUNCTION_INFO(C_ECCKeyAgreementInit)
+#ifdef CK_NEED_ARG_LIST
+(
+	CK_SESSION_HANDLE	hSession, 		/* the session's handle */
+	CK_ULONG	        ulECCAlg,		/* the algorithm's type, only support CKM_SM2 or CKM_ECC512*/
+	CK_BYTE_PTR			pbTmpPub,		/*the temp public key value*/
+	CK_ULONG_PTR		pulTmpPubLen,	/* pbTmpPub size */
+	CK_ULONG_PTR		pulKeyAgreementID			/* output the key agreement ID */
+);
+#endif
+
+/* C_ECCGenAgreementKey is an GenAgreement Key operation. */
+CK_PKCS11_FUNCTION_INFO(C_ECCGenAgreementKey)
+#ifdef CK_NEED_ARG_LIST
+(
+	CK_SESSION_HANDLE	hSessionA, 			/* the session's handle */
+	CK_ULONG	        ulMode,				/* 0:initiator,  1:receiver*/
+	CK_ULONG	        ulKeyAgreementID,	/* the key agreement ID*/
+	CK_BYTE_PTR			pOtherPubKey,		/* the other's public key value*/
+	CK_ULONG			ulOtherPubKeyLen,	/* 'pOtherPublicKey' size */
+	CK_BYTE_PTR			pTmpOtherPubKey,	/*the other's temp public key value*/
+	CK_ULONG			ulTmpOtherPubKeyLen,	/* 'pTmpOtherPublicKey' size */	
+	CK_BYTE_PTR			pOtherUserID,			/*the other's user id*/
+	CK_ULONG			ulOtherUserIDLen,		/* 'pOtherUserID' size */
+	CK_BYTE_PTR			pMyUserID,				/*My user id*/
+	CK_ULONG			ulMyUserIDLen,			/* 'pMyUserID' size */
+	CK_OBJECT_HANDLE     hBasePubKey,		 /* base public key */
+	CK_OBJECT_HANDLE     hBasePriKey,		/* base private key */
+	CK_ATTRIBUTE_PTR     pTemplate,         /* new key template */
+	CK_ULONG             ulAttributeCount,  /* template length */
+	CK_OBJECT_HANDLE_PTR phKeyA,              /* gets new handle A*/
+	CK_SESSION_HANDLE	hSessionB, 			/* the session's handle */
+	CK_OBJECT_HANDLE_PTR phKeyB              /* gets new handle B*/
+);
+#endif
+
+/* C_ECCKeyAgreementFinal finishes an key agreement operation. */
+CK_PKCS11_FUNCTION_INFO(C_ECCKeyAgreementFinal)
+#ifdef CK_NEED_ARG_LIST
+(
+CK_SESSION_HANDLE	hSession, 					/* the session's handle */
+CK_ULONG			ulKeyAgreementID			/* the key agreement ID */
+);
+#endif
+
+/* C_SetZMP Set ZMP operation. */
+CK_PKCS11_FUNCTION_INFO(C_SetZMP)
+#ifdef CK_NEED_ARG_LIST
+(
+CK_SESSION_HANDLE	hSession, 					/* the session's handle */
+CK_OBJECT_HANDLE	hSM2PriKey,					/* handle of decryption key(sm2) */
+CK_OBJECT_HANDLE	hKPX,						/* handle of kpx key */
+CK_BYTE_PTR			pbCipher,					/* ciphertext, encrypt(r4¨’r2) */
+CK_ULONG			ulCipherLen,				/* ciphertext length */
+CK_OBJECT_HANDLE_PTR phZMP						/* return ZMP handle */
+);
+#endif
+
+/* C_SetKPX Set KPX operation. */
+CK_PKCS11_FUNCTION_INFO(C_SetKPX)
+#ifdef CK_NEED_ARG_LIST
+(
+CK_SESSION_HANDLE	hSessionA, 					/* the A session's handle */
+CK_OBJECT_HANDLE	hAgreementKeyA,				/* handle of agreement keyA*/
+CK_SESSION_HANDLE	hSessionB, 					/* the B session's handle */
+CK_OBJECT_HANDLE	hAgreementKeyB,				/* handle of agreement keyB*/
+CK_OBJECT_HANDLE	hKPX,						/* handle of kpx key */
+CK_ULONG			ulCurKPID,					/* Current user KPX ID */
+CK_OBJECT_HANDLE	hZMP						/* handle of ZMP  */
+);
+#endif
+
+/* C_SetPriParam Set and Check  ZMP operation. */
+CK_PKCS11_FUNCTION_INFO(C_SetPriParam)
+#ifdef CK_NEED_ARG_LIST
+(
+CK_SESSION_HANDLE	hSession, 					/* the A session's handle */
+CK_OBJECT_HANDLE	hZMP						/* handle of ZMP  */
+);
+#endif
