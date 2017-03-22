@@ -14,6 +14,55 @@ CK_BBOOL bFalse = CK_FALSE;
 HMODULE g_hP11Module = NULL;
 CK_FUNCTION_LIST* g_FunctionPtr = NULL;
 
+
+CK_ULONG IN_LoadLibrary( void )
+{
+	CK_RV rv; 	// Return Code 
+	char *perror;	
+	CK_RV (*symPtr)(CK_FUNCTION_LIST_PTR_PTR);
+
+	perror = 0;
+
+	//Load library.
+	if(g_hP11Module == NULL)
+	{
+		g_hP11Module = LoadLibrary("TFTknP11.dll"); 
+		if (!g_hP11Module)
+		{
+			return CKR_GENERAL_ERROR;   
+		}
+
+		//Load C_GetFunctionList.
+		symPtr = (CK_RV (*)(CK_FUNCTION_LIST_PTR_PTR))GetProcAddress(g_hP11Module, "C_GetFunctionList");  
+		if (!symPtr)
+		{
+			return CKR_GENERAL_ERROR;  
+		}
+
+		rv = symPtr(&g_FunctionPtr); 
+		if(rv != CKR_OK)
+			return rv;
+
+		rv = g_FunctionPtr->C_Initialize(NULL);
+		if(rv != CKR_OK)
+			return rv;
+	}
+
+	return CKR_OK;
+}
+
+
+void IN_FreeLibrary()
+{
+	if(g_hP11Module != NULL)
+	{
+		g_FunctionPtr->C_Finalize(NULL);
+		FreeLibrary(g_hP11Module);
+		g_hP11Module=NULL;
+		g_FunctionPtr=NULL;
+	}
+}
+
 int RT_P11_API_SetMetas(
 	unsigned char *pAuthKey, int uiAuthKeyLen,
 	unsigned char *pSecID, int uiSecIDLen,
@@ -30,12 +79,14 @@ int RT_P11_API_SetMetas(
 	int i = 0;
 	CK_SESSION_HANDLE hSession = NULL_PTR;
 
+	IN_LoadLibrary();
+
 	ulSlotCount = sizeof(szSlotID)/sizeof(CK_SLOT_ID);
 	rv = g_FunctionPtr->C_GetSlotList(bTrue, szSlotID, &ulSlotCount);
 	if(rv != CKR_OK)
 	{
 		FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
-		goto EndOP;
+		goto err;
 	}
 
 	FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
@@ -58,13 +109,13 @@ int RT_P11_API_SetMetas(
 	rv = g_FunctionPtr->C_OpenSession(ulSlotID, CKF_RW_SESSION|CKF_SERIAL_SESSION, NULL_PTR, NULL_PTR, &hSession);
 	if (rv != CKR_OK) {
 		FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
-		goto EndOP;
+		goto err;
 	}
 
 	rv = g_FunctionPtr->C_Login(hSession, CKU_USER, (CK_UTF8CHAR_PTR)pszPIN, strlen(pszPIN));
 	if (rv!=CKR_OK && rv!=CKR_USER_ALREADY_LOGGED_IN) {
 		FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
-		goto EndOP;
+		goto err;
 	}
 
 	{{
@@ -91,7 +142,7 @@ int RT_P11_API_SetMetas(
 		rv = g_FunctionPtr->C_FindObjectsInit(hSession, findTemplate, sizeof(findTemplate)/sizeof(CK_ATTRIBUTE));
 		if (rv != CKR_OK) {
 			FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
-			goto EndOP;
+			goto err;
 		}
 
 		FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
@@ -100,7 +151,7 @@ int RT_P11_API_SetMetas(
 		g_FunctionPtr->C_FindObjectsFinal(hSession);
 		if (rv != CKR_OK) {
 			FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
-			goto EndOP;
+			goto err;
 		}
 		FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
 
@@ -113,7 +164,7 @@ int RT_P11_API_SetMetas(
 			rv = g_FunctionPtr->C_CreateObject(hSession, secIDCreateTemplate, sizeof(secIDCreateTemplate) / sizeof(CK_ATTRIBUTE), &hSecID);
 			if (rv != CKR_OK) {
 				FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
-				goto EndOP;
+				goto err;
 			}
 			
 		}
@@ -164,7 +215,7 @@ int RT_P11_API_SetMetas(
 		rv = g_FunctionPtr->C_FindObjectsInit(hSession, findTemplate, sizeof(findTemplate)/sizeof(CK_ATTRIBUTE));
 		if (rv != CKR_OK) {
 			FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
-			goto EndOP;
+			goto err;
 		}
 
 		FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
@@ -173,7 +224,7 @@ int RT_P11_API_SetMetas(
 		g_FunctionPtr->C_FindObjectsFinal(hSession);
 		if (rv != CKR_OK) {
 			FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
-			goto EndOP;
+			goto err;
 		}
 		FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
 
@@ -296,7 +347,7 @@ int RT_P11_API_SetMetas(
 			rv = g_FunctionPtr->C_CreateObject(hSession, KPXTemplate, sizeof(KPXTemplate) / sizeof(CK_ATTRIBUTE), &hKPX);
 			if (rv != CKR_OK) {
 				FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
-				goto EndOP;
+				goto err;
 			}
 		}
 
@@ -304,7 +355,13 @@ int RT_P11_API_SetMetas(
 		FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
 	}}
 
-EndOP:
+err:
+	if (hSession)
+	{
+		rv = g_FunctionPtr->C_CloseSession(hSession);
+	}
+
+	IN_FreeLibrary();
 
 	return rv;
 
@@ -330,12 +387,14 @@ int RT_P11_API_SetZMMetas(
 	int i = 0;
 	CK_SESSION_HANDLE hSession = NULL_PTR;
 
+	IN_LoadLibrary();
+
 	ulSlotCount = sizeof(szSlotID)/sizeof(CK_SLOT_ID);
 	rv = g_FunctionPtr->C_GetSlotList(bTrue, szSlotID, &ulSlotCount);
 	if(rv != CKR_OK)
 	{
 		FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
-		goto EndOP;
+		goto err;
 	}
 
 	FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
@@ -358,13 +417,13 @@ int RT_P11_API_SetZMMetas(
 	rv = g_FunctionPtr->C_OpenSession(ulSlotID, CKF_RW_SESSION|CKF_SERIAL_SESSION, NULL_PTR, NULL_PTR, &hSession);
 	if (rv != CKR_OK) {
 		FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
-		goto EndOP;
+		goto err;
 	}
 
 	rv = g_FunctionPtr->C_Login(hSession, CKU_USER, (CK_UTF8CHAR_PTR)pszPIN, strlen(pszPIN));
 	if (rv!=CKR_OK && rv!=CKR_USER_ALREADY_LOGGED_IN) {
 		FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
-		goto EndOP;
+		goto err;
 	}
 
 	// c1 encrypt key and zmp
@@ -389,13 +448,13 @@ int RT_P11_API_SetZMMetas(
 		if (rv != CKR_OK) {
 			FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
 
-			goto EndOP;
+			goto err;
 		}
 
 		rv = g_FunctionPtr->C_EncryptInit(hSession, &mech, hKey);
 		if (rv != CKR_OK) {
 			FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
-			goto EndOP;
+			goto err;
 		}
 		FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
 
@@ -403,7 +462,7 @@ int RT_P11_API_SetZMMetas(
 		rv = g_FunctionPtr->C_Encrypt(hSession, pZMP, ulLen, pZMP, &ulLen);
 		if (rv != CKR_OK) {
 			FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
-			goto EndOP;
+			goto err;
 		}
 		FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
 
@@ -411,7 +470,7 @@ int RT_P11_API_SetZMMetas(
 		rv = g_FunctionPtr->C_EncryptInit(hSession, &mech, hKey);
 		if (rv != CKR_OK) {
 			FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
-			goto EndOP;
+			goto err;
 		}
 		FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
 
@@ -419,14 +478,14 @@ int RT_P11_API_SetZMMetas(
 		rv = g_FunctionPtr->C_Encrypt(hSession, pSignKey + 4 + 2 * GM_ECC_512_BYTES_LEN + 4 , ulLen, pSignKey + 4 + 2 * GM_ECC_512_BYTES_LEN + 4, &ulLen);
 		if (rv != CKR_OK) {
 			FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
-			goto EndOP;
+			goto err;
 		}
 		FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
 
 		rv = g_FunctionPtr->C_EncryptInit(hSession, &mech, hKey);
 		if (rv != CKR_OK) {
 			FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
-			goto EndOP;
+			goto err;
 		}
 		FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
 
@@ -434,14 +493,14 @@ int RT_P11_API_SetZMMetas(
 		rv = g_FunctionPtr->C_Encrypt(hSession, pCryptKey + 4 + 2 * GM_ECC_512_BYTES_LEN + 4 , ulLen, pCryptKey + 4 + 2 * GM_ECC_512_BYTES_LEN + 4, &ulLen);
 		if (rv != CKR_OK) {
 			FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
-			goto EndOP;
+			goto err;
 		}
 		FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
 
 		rv = g_FunctionPtr->C_EncryptInit(hSession, &mech, hKey);
 		if (rv != CKR_OK) {
 			FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
-			goto EndOP;
+			goto err;
 		}
 		FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
 
@@ -449,14 +508,14 @@ int RT_P11_API_SetZMMetas(
 		rv = g_FunctionPtr->C_Encrypt(hSession, pExchangeKey + 4 + 2 * GM_ECC_512_BYTES_LEN + 4 , ulLen, pExchangeKey + 4 + 2 * GM_ECC_512_BYTES_LEN + 4, &ulLen);
 		if (rv != CKR_OK) {
 			FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
-			goto EndOP;
+			goto err;
 		}
 		FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
 
 		rv = g_FunctionPtr->C_DestroyObject(hSession,hKey);
 		if (rv != CKR_OK) {
 			FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
-			goto EndOP;
+			goto err;
 		}
 		FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
 	}
@@ -550,7 +609,7 @@ int RT_P11_API_SetZMMetas(
 		if (rv != CKR_OK) {
 			FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
 			
-			goto EndOP;
+			goto err;
 		}
 		FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
 		
@@ -605,7 +664,7 @@ int RT_P11_API_SetZMMetas(
 		if (rv != CKR_OK) {
 			FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
 			
-			goto EndOP;
+			goto err;
 		}
 		FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
 
@@ -613,13 +672,11 @@ int RT_P11_API_SetZMMetas(
 		if (rv != CKR_OK) {
 			FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
 			
-			goto EndOP;
+			goto err;
 		}
 		FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
 		
 	}}
-
-
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// ×¨ÃÜ
@@ -668,7 +725,7 @@ int RT_P11_API_SetZMMetas(
 		rv = g_FunctionPtr->C_CreateObject(hSession, ECC512CreatePublicKeyTemplate, ulPubKeyCount, &hPubKey);
 		if (rv != CKR_OK) {
 			FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
-			goto EndOP;
+			goto err;
 		}
 		FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
 
@@ -676,12 +733,10 @@ int RT_P11_API_SetZMMetas(
 		if (rv != CKR_OK) {
 			FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
 			
-			goto EndOP;
+			goto err;
 		}
 		FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
 	}}
-
-
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// ×¨ÃÜ
@@ -731,7 +786,7 @@ int RT_P11_API_SetZMMetas(
 		if (rv != CKR_OK) {
 			FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
 			
-			goto EndOP;
+			goto err;
 		}
 		FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
 		
@@ -740,14 +795,20 @@ int RT_P11_API_SetZMMetas(
 		if (rv != CKR_OK) {
 			FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
 			
-			goto EndOP;
+			goto err;
 		}
 		FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
 		
 	}}
 
 
-EndOP:
+err:
+	if (hSession)
+	{
+		rv = g_FunctionPtr->C_CloseSession(hSession);
+	}
+
+	IN_FreeLibrary();
 
 	return rv;
 }
@@ -760,7 +821,110 @@ int RT_P11_API_SetZMCerts(
 	char * pszPIN, unsigned int * pulRetry
 	)
 {
+	CK_RV rv = CKR_OK;
 
+	CK_ULONG ulSlotID = 0;
+	CK_ULONG ulAuthSlotID = 0;
+	CK_SLOT_ID szSlotID[256];
+	CK_ULONG ulSlotCount = 256;
+	int i = 0;
+	CK_SESSION_HANDLE hSession = NULL_PTR;
+
+	IN_LoadLibrary();
+
+	ulSlotCount = sizeof(szSlotID)/sizeof(CK_SLOT_ID);
+
+	rv = g_FunctionPtr->C_GetSlotList(bTrue, szSlotID, &ulSlotCount);
+	if(rv != CKR_OK)
+	{
+		FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
+		goto err;
+	}
+
+	FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
+
+	ulAuthSlotID = atoi((char *) pAuthKey);
+
+	for(i = 0; i < ulSlotCount; i++)
+	{
+		if (szSlotID[i] == ulAuthSlotID)
+		{
+			continue;
+		}
+		else
+		{
+			ulSlotID = szSlotID[i];
+			break;
+		}
+	}
+
+	rv = g_FunctionPtr->C_OpenSession(ulSlotID, CKF_RW_SESSION|CKF_SERIAL_SESSION, NULL_PTR, NULL_PTR, &hSession);
+	if (rv != CKR_OK) {
+		FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
+		goto err;
+	}
+
+	rv = g_FunctionPtr->C_Login(hSession, CKU_USER, (CK_UTF8CHAR_PTR)pszPIN, strlen(pszPIN));
+	if (rv!=CKR_OK && rv!=CKR_USER_ALREADY_LOGGED_IN) {
+		FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
+		goto err;
+	}
+
+	{
+		CK_OBJECT_CLASS DataClass = CKO_CERTIFICATE;
+		CK_BBOOL True = TRUE;
+		CK_ULONG ulObjectCount = 0;
+		CK_OBJECT_HANDLE hObjects[16];
+
+		CK_ATTRIBUTE certTemplateSign[] = {
+			{CKA_CLASS, &DataClass , sizeof(DataClass)},
+			{CKA_TOKEN, &True, sizeof(True)},
+			{CKA_ID,RT_ZM_SIGN , strlen(RT_ZM_SIGN)},
+			{CKA_VALUE, pSignCert,uiSignCertLen}
+		};
+
+		CK_ATTRIBUTE certTemplateEnc[] = {
+			{CKA_CLASS, &DataClass , sizeof(DataClass)},
+			{CKA_TOKEN, &True, sizeof(True)},
+			{CKA_ID,RT_ZM_ENC , strlen(RT_ZM_ENC)},
+			{CKA_VALUE, pCryptCert,uiCryptCertLen}
+		};
+
+		CK_ATTRIBUTE certTemplateExc[] = {
+			{CKA_CLASS, &DataClass , sizeof(DataClass)},
+			{CKA_TOKEN, &True, sizeof(True)},
+			{CKA_ID,RT_ZM_EXC , strlen(RT_ZM_EXC)},
+			{CKA_VALUE, pExchangeCert,uiExchangeCertLen}
+		};
+
+		rv = g_FunctionPtr->C_CreateObject(hSession, certTemplateSign, sizeof(certTemplateSign)/sizeof(CK_ATTRIBUTE),hObjects);
+		if (rv != CKR_OK)
+		{
+			goto err;
+		}
+
+		rv = g_FunctionPtr->C_CreateObject(hSession, certTemplateEnc, sizeof(certTemplateEnc)/sizeof(CK_ATTRIBUTE),hObjects);
+		if (rv != CKR_OK)
+		{
+			goto err;
+		}
+
+		rv = g_FunctionPtr->C_CreateObject(hSession, certTemplateExc, sizeof(certTemplateExc)/sizeof(CK_ATTRIBUTE),hObjects);
+		if (rv != CKR_OK)
+		{
+			goto err;
+		}
+	}	
+
+err:
+	if (hSession)
+	{
+		rv = g_FunctionPtr->C_CloseSession(hSession);
+	}
+
+	IN_FreeLibrary();
+
+	return rv;
 }
 
 int RT_P11_API_GetCertCount(
@@ -769,5 +933,92 @@ int RT_P11_API_GetCertCount(
 	char * pszPIN, unsigned int * pulRetry
 	)
 {
+	CK_RV rv = CKR_OK;
 
+	CK_ULONG ulSlotID = 0;
+	CK_ULONG ulAuthSlotID = 0;
+	CK_SLOT_ID szSlotID[256];
+	CK_ULONG ulSlotCount = 256;
+	int i = 0;
+	CK_SESSION_HANDLE hSession = NULL_PTR;
+
+	IN_LoadLibrary();
+
+	ulSlotCount = sizeof(szSlotID)/sizeof(CK_SLOT_ID);
+
+	rv = g_FunctionPtr->C_GetSlotList(bTrue, szSlotID, &ulSlotCount);
+	if(rv != CKR_OK)
+	{
+		FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
+		goto err;
+	}
+
+	FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
+
+	ulAuthSlotID = atoi((char *) pAuthKey);
+
+	*CertCount = 0;
+
+	for(i = 0; i < ulSlotCount; i++)
+	{
+		if (szSlotID[i] == ulAuthSlotID)
+		{
+			continue;
+		}
+		else
+		{
+			ulSlotID = szSlotID[i];
+			break;
+		}
+	}
+
+	rv = g_FunctionPtr->C_OpenSession(ulSlotID, CKF_RW_SESSION|CKF_SERIAL_SESSION, NULL_PTR, NULL_PTR, &hSession);
+	if (rv != CKR_OK) {
+		FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
+		goto err;
+	}
+
+	rv = g_FunctionPtr->C_Login(hSession, CKU_USER, (CK_UTF8CHAR_PTR)pszPIN, strlen(pszPIN));
+	if (rv!=CKR_OK && rv!=CKR_USER_ALREADY_LOGGED_IN) {
+		FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
+		goto err;
+	}
+
+	{
+		CK_OBJECT_CLASS DataClass = CKO_CERTIFICATE;
+		CK_BBOOL True = TRUE;
+		CK_ULONG ulObjectCount = 0;
+		CK_OBJECT_HANDLE hObjects[16], hUserInfoObj = NULL_PTR;
+
+		CK_ATTRIBUTE searchTemplate[] = {
+			{CKA_CLASS, &DataClass , sizeof(DataClass)},
+			{CKA_TOKEN, &True, sizeof(True)},
+		};
+
+		rv = g_FunctionPtr->C_FindObjectsInit(hSession, searchTemplate, sizeof(searchTemplate)/sizeof(CK_ATTRIBUTE));
+		if (rv != CKR_OK)
+		{
+			goto err;
+		}
+		ulObjectCount = sizeof(hObjects)/sizeof(CK_OBJECT_HANDLE);
+		rv = g_FunctionPtr->C_FindObjects(hSession, hObjects, sizeof(hObjects)/sizeof(CK_OBJECT_HANDLE), &ulObjectCount);
+		g_FunctionPtr->C_FindObjectsFinal(hSession);
+
+		if (rv != CKR_OK)
+		{
+			goto err;
+		}
+
+		*CertCount = ulObjectCount;
+	}	
+
+err:
+	if (hSession)
+	{
+		rv = g_FunctionPtr->C_CloseSession(hSession);
+	}
+
+	IN_FreeLibrary();
+
+	return rv;
 }
