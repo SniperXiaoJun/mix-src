@@ -31,6 +31,8 @@ extern "C" {
 	
 	int RT_P11_API_SetZMMetas(
 		unsigned char *pAuthKey, int uiAuthKeyLen,
+		unsigned char *pSecID, int uiSecIDLen,
+		unsigned char szR1[32],unsigned char szR2[32], 
 		unsigned char *pZMP, int uiZMPLen,
 		unsigned char *pSignKey, int uiSignKeyLen,
 		unsigned char *pCryptKey, int uiCryptKeyLen,
