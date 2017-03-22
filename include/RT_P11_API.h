@@ -23,24 +23,33 @@ extern "C" {
 #endif
 
 	int RT_P11_API_SetMetas(
-		unsigned char *pTarget, int uiTargetLen,
+		unsigned char *pAuthKey, int uiAuthKeyLen,
 		unsigned char *pSecID, int uiSecIDLen,
-		unsigned char *pHMac, int uiHMacLen
+		unsigned char *pHMac, int uiHMacLen,
+		char * pszPIN, unsigned int * pulRetry
 		);
 	
 	int RT_P11_API_SetZMMetas(
-		unsigned char *pTarget, int uiTargetLen,
-		unsigned char *pZMP, int uiZMPLen
+		unsigned char *pAuthKey, int uiAuthKeyLen,
+		unsigned char *pZMP, int uiZMPLen,
 		unsigned char *pSignKey, int uiSignKeyLen,
 		unsigned char *pCryptKey, int uiCryptKeyLen,
-		unsigned char *pExchangeKey, int uiExchangeKeyLen
+		unsigned char *pExchangeKey, int uiExchangeKeyLen,
+		char * pszPIN, unsigned int * pulRetry
 		);
 		
 	int RT_P11_API_SetZMCerts(
-		unsigned char *pTarget, int uiTargetLen,
+		unsigned char *pAuthKey, int uiAuthKeyLen,
 		unsigned char *pSignCert, int uiSignCertLen,
 		unsigned char *pCryptCert, int uiCryptCertLen,
-		unsigned char *pExchangeCert, int uiExchangeCertLen
+		unsigned char *pExchangeCert, int uiExchangeCertLen,
+		char * pszPIN, unsigned int * pulRetry
+		);
+
+	int RT_P11_API_GetCertCount(
+		unsigned char *pAuthKey, int uiAuthKeyLen,
+		unsigned int *CertCount,
+		char * pszPIN, unsigned int * pulRetry
 		);
 
 #ifdef __cplusplus
