@@ -4,7 +4,7 @@
 #include "o_all_func_def.h"
 #include <string.h>
 
-char DEFAULT_CONTAINER_SM2[] = "ContainerSM2";
+char DEFAULT_CONTAINER_SM2[] = "RT_SM_CON";
 char DEFAULT_CONTAINER_ECC512[] = "ContainerECC512";
 char DEFAULT_APPLICATION[] = "DEFAULT_APPLICATION";
 char DEFAULT_FILE_NAME[] = "DEFAULT_FILE_NAME";
