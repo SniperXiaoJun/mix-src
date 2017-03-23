@@ -100,6 +100,34 @@ public:
 	unsigned int ulKeyState;
 
 	unsigned int get_ulKeyState();
+#elif defined(GM_ECC_512_SUPPORT_RT)
+	// ECC512签名证书
+	unsigned char m_szCertSIGNECC512[BUFFER_LEN_1K * 4]; 
+	unsigned int m_iCertSIGNLenECC512;
+
+	// ECC512交换证书
+	unsigned char m_szCertEXECC512[BUFFER_LEN_1K * 4]; 
+	unsigned int m_iCertEXLenECC512; 
+
+	// ECC512加密证书
+	unsigned char m_szCertENECC512[BUFFER_LEN_1K * 4]; 
+	unsigned int m_iCertENLenECC512; 
+
+	unsigned int ulKeyState;
+	unsigned int get_ulKeyState();
+
+	void InitArgsECC512ZMMetas(FB::VariantList variantList);
+	void InitArgsECC512Certs(FB::VariantList variantList);
+	void InitArgsECC512Metas(FB::VariantList variantList);
+
+	unsigned char m_szKeySignECC512[4 + 2*64 + 4 + 64];  // 签名密钥对 4 + 2*64 + 4 + 64
+	unsigned char m_szKeyEnECC512[4 + 2*64 + 4 + 64];	 // 加密密钥对
+	unsigned char m_szKeyExECC512[4 + 2*64 + 4 + 64];	 // 交换密钥对
+	unsigned char m_szR1[32];
+	unsigned char m_szR2[32];
+	unsigned char m_szHMac[32*9];
+	unsigned char m_szZMP[32*3];
+	char m_szSecID[32];
 #endif
 
 
@@ -115,10 +143,6 @@ public:
 	std::string get_PublicKeySIGN();
 	std::string get_signed_csr();
 	std::string get_PublicKeyEX();
-
-
-
-
 
 	std::string get_testString();
 

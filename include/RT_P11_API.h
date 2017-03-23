@@ -24,14 +24,14 @@ extern "C" {
 
 	int RT_P11_API_SetMetas(
 		unsigned char *pAuthKey, int uiAuthKeyLen,
-		unsigned char *pSecID, int uiSecIDLen,
+		char *pSecID, int uiSecIDLen,
 		unsigned char *pHMac, int uiHMacLen,
 		char * pszPIN, unsigned int * pulRetry
 		);
 	
 	int RT_P11_API_SetZMMetas(
 		unsigned char *pAuthKey, int uiAuthKeyLen,
-		unsigned char *pSecID, int uiSecIDLen,
+		char *pSecID, int uiSecIDLen,
 		unsigned char szR1[32],unsigned char szR2[32], 
 		unsigned char *pZMP, int uiZMPLen,
 		unsigned char *pSignKey, int uiSignKeyLen,

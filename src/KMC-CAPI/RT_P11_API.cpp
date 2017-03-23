@@ -161,6 +161,9 @@ int RT_P11_API_SetMetas(
 		}
 		else
 		{
+			FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
+			FILE_LOG_HEX(file_log_name, (unsigned char *)pSecID, strlen(pSecID));
+
 			rv = g_FunctionPtr->C_CreateObject(hSession, secIDCreateTemplate, sizeof(secIDCreateTemplate) / sizeof(CK_ATTRIBUTE), &hSecID);
 			if (rv != CKR_OK) {
 				FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
@@ -344,6 +347,9 @@ int RT_P11_API_SetMetas(
 				break;
 			}
 
+			FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
+			FILE_LOG_HEX(file_log_name, bHMACKey, pos);
+
 			rv = g_FunctionPtr->C_CreateObject(hSession, KPXTemplate, sizeof(KPXTemplate) / sizeof(CK_ATTRIBUTE), &hKPX);
 			if (rv != CKR_OK) {
 				FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
@@ -384,6 +390,7 @@ int RT_P11_API_SetZMMetas(
 	CK_ULONG ulAuthSlotID = 0;
 	CK_SLOT_ID szSlotID[256];
 	CK_ULONG ulSlotCount = 256;
+	unsigned char szR3[32] = {0};
 	int i = 0;
 	CK_SESSION_HANDLE hSession = NULL_PTR;
 
@@ -414,6 +421,9 @@ int RT_P11_API_SetZMMetas(
 		}
 	}
 
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
+	FILE_LOG_HEX(file_log_name, (unsigned char *)pSecID, strlen(pSecID));
+
 	rv = g_FunctionPtr->C_OpenSession(ulSlotID, CKF_RW_SESSION|CKF_SERIAL_SESSION, NULL_PTR, NULL_PTR, &hSession);
 	if (rv != CKR_OK) {
 		FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
@@ -425,6 +435,24 @@ int RT_P11_API_SetZMMetas(
 		FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
 		goto err;
 	}
+
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
+	FILE_LOG_HEX(file_log_name, (unsigned char *)pSignKey, uiSignKeyLen);
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
+	FILE_LOG_HEX(file_log_name, (unsigned char *)pCryptKey, uiCryptKeyLen);
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
+	FILE_LOG_HEX(file_log_name, (unsigned char *)pExchangeKey, uiExchangeKeyLen);
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
+	FILE_LOG_HEX(file_log_name, (unsigned char *)pZMP, uiZMPLen);
+
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
+	FILE_LOG_HEX(file_log_name, (unsigned char *)szR1, 32);
+
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
+	FILE_LOG_HEX(file_log_name, (unsigned char *)szR2, 32);
+
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
+	FILE_LOG_HEX(file_log_name, (unsigned char *)szR3, 32);
 
 	// c1 encrypt key and zmp
 	{
@@ -459,6 +487,10 @@ int RT_P11_API_SetZMMetas(
 		FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
 
 		ulLen = uiZMPLen;
+
+		FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
+		FILE_LOG_HEX(file_log_name, (unsigned char *)pZMP, ulLen);
+
 		rv = g_FunctionPtr->C_Encrypt(hSession, pZMP, ulLen, pZMP, &ulLen);
 		if (rv != CKR_OK) {
 			FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
@@ -475,6 +507,8 @@ int RT_P11_API_SetZMMetas(
 		FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
 
 		ulLen = 64;
+		FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
+		FILE_LOG_HEX(file_log_name, (unsigned char *)pSignKey  + 4 + 2 * GM_ECC_512_BYTES_LEN + 4, ulLen);
 		rv = g_FunctionPtr->C_Encrypt(hSession, pSignKey + 4 + 2 * GM_ECC_512_BYTES_LEN + 4 , ulLen, pSignKey + 4 + 2 * GM_ECC_512_BYTES_LEN + 4, &ulLen);
 		if (rv != CKR_OK) {
 			FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
@@ -490,6 +524,8 @@ int RT_P11_API_SetZMMetas(
 		FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
 
 		ulLen = 64;
+		FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
+		FILE_LOG_HEX(file_log_name, (unsigned char *)pCryptKey + 4 + 2 * GM_ECC_512_BYTES_LEN + 4, ulLen);
 		rv = g_FunctionPtr->C_Encrypt(hSession, pCryptKey + 4 + 2 * GM_ECC_512_BYTES_LEN + 4 , ulLen, pCryptKey + 4 + 2 * GM_ECC_512_BYTES_LEN + 4, &ulLen);
 		if (rv != CKR_OK) {
 			FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
@@ -505,6 +541,8 @@ int RT_P11_API_SetZMMetas(
 		FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
 
 		ulLen = 64;
+		FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
+		FILE_LOG_HEX(file_log_name, (unsigned char *)pExchangeKey + 4 + 2 * GM_ECC_512_BYTES_LEN + 4, ulLen);
 		rv = g_FunctionPtr->C_Encrypt(hSession, pExchangeKey + 4 + 2 * GM_ECC_512_BYTES_LEN + 4 , ulLen, pExchangeKey + 4 + 2 * GM_ECC_512_BYTES_LEN + 4, &ulLen);
 		if (rv != CKR_OK) {
 			FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
@@ -520,6 +558,24 @@ int RT_P11_API_SetZMMetas(
 		FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
 	}
 
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
+	FILE_LOG_HEX(file_log_name, (unsigned char *)pSignKey, uiSignKeyLen);
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
+	FILE_LOG_HEX(file_log_name, (unsigned char *)pCryptKey, uiCryptKeyLen);
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
+	FILE_LOG_HEX(file_log_name, (unsigned char *)pExchangeKey, uiExchangeKeyLen);
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
+	FILE_LOG_HEX(file_log_name, (unsigned char *)pZMP, uiZMPLen);
+
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
+	FILE_LOG_HEX(file_log_name, (unsigned char *)szR1, 32);
+
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
+	FILE_LOG_HEX(file_log_name, (unsigned char *)szR2, 32);
+
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
+	FILE_LOG_HEX(file_log_name, (unsigned char *)szR3, 32);
+
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// 专密：互通密钥参数文件
 	{{ // 创建文件
@@ -532,7 +588,6 @@ int RT_P11_API_SetZMMetas(
 		unsigned char szKPX[32*3 + 1 + 2];
 		CK_ULONG ulKPXLen = 32*3 + 1 + 2;
 		int i = 0;
-		unsigned char szR3[32] = {0};
 		int pos = 0;
 		CK_KEY_TYPE		keyType = CKK_GENERIC_SECRET;
 		CK_OBJECT_CLASS SecretClass = CKO_SECRET_KEY;
@@ -605,6 +660,9 @@ int RT_P11_API_SetZMMetas(
 			break;
 		}
 
+		FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
+		FILE_LOG_HEX(file_log_name, (unsigned char *)szKPX, pos);
+
 		rv = g_FunctionPtr->C_CreateObject(hSession, KPXTemplate, sizeof(KPXTemplate) / sizeof(CK_ATTRIBUTE), &hKPX);
 		if (rv != CKR_OK) {
 			FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
@@ -614,6 +672,24 @@ int RT_P11_API_SetZMMetas(
 		FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
 		
 	}}
+
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
+	FILE_LOG_HEX(file_log_name, (unsigned char *)pSignKey, uiSignKeyLen);
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
+	FILE_LOG_HEX(file_log_name, (unsigned char *)pCryptKey, uiCryptKeyLen);
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
+	FILE_LOG_HEX(file_log_name, (unsigned char *)pExchangeKey, uiExchangeKeyLen);
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
+	FILE_LOG_HEX(file_log_name, (unsigned char *)pZMP, uiZMPLen);
+
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
+	FILE_LOG_HEX(file_log_name, (unsigned char *)szR1, 32);
+
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
+	FILE_LOG_HEX(file_log_name, (unsigned char *)szR2, 32);
+
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
+	FILE_LOG_HEX(file_log_name, (unsigned char *)szR3, 32);
 
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -800,6 +876,24 @@ int RT_P11_API_SetZMMetas(
 		FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
 		
 	}}
+
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
+	FILE_LOG_HEX(file_log_name, (unsigned char *)pSignKey, uiSignKeyLen);
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
+	FILE_LOG_HEX(file_log_name, (unsigned char *)pCryptKey, uiCryptKeyLen);
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
+	FILE_LOG_HEX(file_log_name, (unsigned char *)pExchangeKey, uiExchangeKeyLen);
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
+	FILE_LOG_HEX(file_log_name, (unsigned char *)pZMP, uiZMPLen);
+
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
+	FILE_LOG_HEX(file_log_name, (unsigned char *)szR1, 32);
+
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
+	FILE_LOG_HEX(file_log_name, (unsigned char *)szR2, 32);
+
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
+	FILE_LOG_HEX(file_log_name, (unsigned char *)szR3, 32);
 
 
 err:
@@ -1017,6 +1111,9 @@ err:
 	{
 		rv = g_FunctionPtr->C_CloseSession(hSession);
 	}
+
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
+	FILE_LOG_HEX(file_log_name, (unsigned char *)CertCount, 4);
 
 	IN_FreeLibrary();
 

@@ -21,6 +21,7 @@
 #include "KMS_CAPI.h"
 #include "encode_switch.h"
 #include "WTF_Interface.h"
+#include "RT_P11_API.h"
 
 static char DEFAULT_CONTAINER[] = "ContainerSM2";
 static char DEFAULT_APPLICATION[] = "DEFAULT_APPLICATION";
@@ -40,6 +41,9 @@ DWORD WINAPI ThreadFuncSKFImportSM2Certs(LPVOID aThisClass);
 DWORD WINAPI ThreadFuncSKFGenECC512KeyPair(LPVOID aThisClass);
 DWORD WINAPI ThreadFuncSKFImportECC512KeyPair(LPVOID aThisClass);
 DWORD WINAPI ThreadFuncSKFGenECC512CSR(LPVOID aThisClass);
+DWORD WINAPI ThreadFuncSKFImportECC512Certs(LPVOID aThisClass);
+#elif defined(GM_ECC_512_SUPPORT_RT)
+DWORD WINAPI ThreadFuncSKFImportECC512KeyPair(LPVOID aThisClass);
 DWORD WINAPI ThreadFuncSKFImportECC512Certs(LPVOID aThisClass);
 #endif
 
@@ -623,7 +627,9 @@ void FBCommonAPI::InitArgsSKFImportSM2KeyPair(FB::VariantList variantList)
 		return;
 	}
 
+	m_iPINLen = sizeof(m_szPIN);
 	GetArrayStrOfIndex(variantList,0, m_szPIN, &m_iPINLen);
+
 	GetArrayStrOfIndex(variantList,1, (char *)szEnvelopedKeyBlobB64,(int *)(&ulEnvelopedKeyBlobB64Len));
 
 	ulEnvelopedKeyBlobLen = modp_b64_decode((char *)&m_stEnvelopedKeyBlobEX, (const char *)szEnvelopedKeyBlobB64,ulEnvelopedKeyBlobB64Len);
@@ -746,8 +752,7 @@ void FBCommonAPI::InitArgsSKFSetUserPIN(FB::VariantList variantList)
 		return;
 	}
 
-	m_iPINLen = BUFFER_LEN_1K;
-
+	m_iPINLen = sizeof(m_szPIN);
 	GetArrayStrOfIndex(variantList,0, m_szPIN, &m_iPINLen);
 
 	ulResult = 0;
@@ -766,8 +771,7 @@ void FBCommonAPI::InitArgsSKFSetUserPINAndValidCode(FB::VariantList variantList)
 		return;
 	}
 
-	m_iPINLen = BUFFER_LEN_1K;
-
+	m_iPINLen = sizeof(m_szPIN);
 	GetArrayStrOfIndex(variantList,0, m_szPIN, &m_iPINLen);
 
 	m_iValidCodeLen = BUFFER_LEN_1K;
@@ -791,8 +795,7 @@ void FBCommonAPI::InitArgsSKFSetUserPINAndUserInfo(FB::VariantList variantList)
 		return;
 	}
 
-	m_iPINLen = BUFFER_LEN_1K;
-
+	m_iPINLen = sizeof(m_szPIN);
 	GetArrayStrOfIndex(variantList,0, m_szPIN, &m_iPINLen);
 
 
@@ -823,6 +826,7 @@ void FBCommonAPI::InitArgsSKFImportSM2Certs(FB::VariantList variantList)
 		return;
 	}
 
+	m_iPINLen = sizeof(m_szPIN);
 	GetArrayStrOfIndex(variantList,0, m_szPIN, &m_iPINLen);
 
 	GetArrayStrOfIndex(variantList,1, (char *)data_value_cert_b64,(int *) (&data_len_cert_b64));
@@ -972,7 +976,7 @@ void GetArrayStrOfIndex(FB::VariantList& variantList, int index, char * pValue, 
 {
 	std::string c_str = variantList[index].convert_cast<std::string>();
 
-	memset(pValue,0, * pLen);
+	memset(pValue,0, c_str.size());
 
 	*pLen = c_str.size();
 
@@ -1067,6 +1071,7 @@ void FBCommonAPI::InitArgsUserInfo(FB::VariantList aArrayArgIN)
 	UniToUTF8(data_value,userInfo.idCardNumber);
 	userInfo.uiLenID = strlen(userInfo.idCardNumber);
 
+	m_iPINLen = sizeof(m_szPIN);
 	GetArrayStrOfIndex(aArrayArgIN,10, m_szPIN, &m_iPINLen);
 	GetArrayNumberOfIndex(aArrayArgIN,11,&ulContype);
 
@@ -1465,7 +1470,7 @@ void FBCommonAPI::ExecCommonFuncID(long ulFuncID, FB::VariantList aArrayArgIN, F
 		}
 
 		break;
-
+		// 获取证书状态
 	case 28:
 		{
 			memset(m_szPublicKeySIGN,0, 64);
@@ -1508,8 +1513,83 @@ void FBCommonAPI::ExecCommonFuncID(long ulFuncID, FB::VariantList aArrayArgIN, F
 
 		break;
 
+#elif defined(GM_ECC_512_SUPPORT_RT)
+	// 导入ECC512密钥对
+	case 25:
+		{
+			::FILE_LOG_STRING(file_log_name,"InitArgsECC512ZMMetas 25");
 
+			InitArgsECC512ZMMetas(aArrayArgIN);
+
+			::FILE_LOG_STRING(file_log_name,"ExecCommonFuncID 25");
+
+			::FILE_LOG_NUMBER(file_log_name,ulResult);
+
+			if (0 != ulResult)
+			{
+				return;
+			}
+
+			hThrd=CreateThread(NULL,0,ThreadFuncSKFImportECC512KeyPair,(LPVOID)this,0,&threadId);
+		}
+
+		break;
+
+		// 导入证书
+	case 27:
+		{
+			InitArgsECC512Certs(aArrayArgIN);
+
+			if (0 != ulResult)
+			{
+				return;
+			}
+
+			::FILE_LOG_STRING(file_log_name,"ExecCommonFuncID 27");
+			::FILE_LOG_NUMBER(file_log_name,ulResult);
+
+			if (0 != ulResult)
+			{
+				return;
+			}
+
+			hThrd=CreateThread(NULL,0,ThreadFuncSKFImportECC512Certs,(LPVOID)this,0,&threadId);
+		}
+
+		break;
+		// 获取证书个数
+	case 28:
+		{
+			ulKeyState = 0;
+			ulResult = RT_P11_API_GetCertCount((unsigned char *)m_szAuthKey,strlen(m_szAuthKey), &ulKeyState,m_szPIN,&m_ulRetry);
+		}
+
+		break;
+		// 设置SECID和HMC
+	case 29:
+		{
+			InitArgsECC512Metas(aArrayArgIN);
+
+			if (0 != ulResult)
+			{
+				return;
+			}
+
+			::FILE_LOG_STRING(file_log_name,"ExecCommonFuncID 27");
+			::FILE_LOG_NUMBER(file_log_name,ulResult);
+
+			ulResult = RT_P11_API_SetMetas(
+				(unsigned char *)m_szAuthKey,strlen(m_szAuthKey),
+				m_szSecID,strlen(m_szSecID),
+				m_szHMac,sizeof(m_szHMac),
+				m_szPIN,&m_ulRetry);
+
+
+		}
+
+		break;
 #endif
+
 
 		// 插拔KEY事件检测   用于登录
 	case 0xFF:
@@ -1554,6 +1634,273 @@ void FBCommonAPI::ExecCommonFuncID(long ulFuncID, FB::VariantList aArrayArgIN, F
 	}
 }
 
+#if defined(GM_ECC_512_SUPPORT_RT)
+
+
+void FBCommonAPI::InitArgsECC512Certs(FB::VariantList variantList)
+{
+	int inBuffSize  = 0;
+
+	unsigned char data_value_cert_b64[BUFFER_LEN_1K * 4]; 
+	unsigned int data_len_cert_b64 = BUFFER_LEN_1K * 4;
+
+	GetArrayLength(variantList,&inBuffSize);
+
+	::FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__,"inBuffSize");
+	::FILE_LOG_NUMBER(file_log_name, inBuffSize);
+
+	if (4 != inBuffSize)
+	{
+		ulResult = OPE_ERR_INVALID_PARAM;
+		return;
+	}
+
+	m_iPINLen = sizeof(m_szPIN);
+	GetArrayStrOfIndex(variantList,0, m_szPIN, &m_iPINLen);
+
+	GetArrayStrOfIndex(variantList,1, (char *)data_value_cert_b64,(int *) (&data_len_cert_b64));
+
+	m_iCertSIGNLenECC512 = modp_b64_decode((char *)m_szCertSIGNECC512, (char *)data_value_cert_b64,data_len_cert_b64);
+
+	data_len_cert_b64 = BUFFER_LEN_1K * 4;
+
+	GetArrayStrOfIndex(variantList,2, (char *)data_value_cert_b64,(int *) (&data_len_cert_b64));
+
+	m_iCertENLenECC512 = modp_b64_decode((char *)m_szCertENECC512, (char *)data_value_cert_b64,data_len_cert_b64);
+
+
+	data_len_cert_b64 = BUFFER_LEN_1K * 4;
+
+	GetArrayStrOfIndex(variantList,3, (char *)data_value_cert_b64,(int *) (&data_len_cert_b64));
+
+	m_iCertEXLenECC512 = modp_b64_decode((char *)m_szCertEXECC512, (char *)data_value_cert_b64,data_len_cert_b64);
+
+	ulResult = 0;
+}
+
+void FBCommonAPI::InitArgsECC512Metas(FB::VariantList variantList)
+{
+	int inBuffSize  = 0;
+
+	char szBlobB64[BUFFER_LEN_1K * 4]; 
+	unsigned char szBlob[BUFFER_LEN_1K * 4]; 
+	unsigned int ulBlobB64Len = BUFFER_LEN_1K * 4;
+	unsigned int ulBlobLen = BUFFER_LEN_1K * 4;
+	int tmpLen = 1024;
+
+	GetArrayLength(variantList,&inBuffSize);
+
+	if (8 != inBuffSize)
+	{
+		ulResult = OPE_ERR_INVALID_PARAM;
+		return;
+	}
+
+	m_iPINLen = sizeof(m_szPIN);
+	GetArrayStrOfIndex(variantList,0, m_szPIN, &m_iPINLen);
+
+	tmpLen = sizeof(m_szSecID);
+	GetArrayStrOfIndex(variantList,1, m_szSecID, &tmpLen);
+
+	// HMAC
+	GetArrayStrOfIndex(variantList,2, szBlobB64,(int *)(&ulBlobB64Len));
+	ulBlobLen = modp_b64_decode((char *)&szBlob, szBlobB64,ulBlobB64Len);
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
+	FILE_LOG_HEX(file_log_name, szBlob, ulBlobLen);
+	if (sizeof(m_szHMac) != ulBlobLen)
+	{
+		ulResult = OPE_ERR_INVALID_PARAM;
+		return;
+	}
+	else
+	{
+		memcpy(m_szHMac,szBlob,ulBlobLen);
+	}
+
+	ulResult = 0;
+}
+
+
+void FBCommonAPI::InitArgsECC512ZMMetas(FB::VariantList variantList)
+{
+	int inBuffSize  = 0;
+
+	char szBlobB64[BUFFER_LEN_1K * 4]; 
+	unsigned char szBlob[BUFFER_LEN_1K * 4]; 
+	unsigned int ulBlobB64Len = BUFFER_LEN_1K * 4;
+	unsigned int ulBlobLen = BUFFER_LEN_1K * 4;
+	int tmpLen = 1024;
+
+	GetArrayLength(variantList,&inBuffSize);
+
+	if (8 != inBuffSize)
+	{
+		ulResult = OPE_ERR_INVALID_PARAM;
+		return;
+	}
+
+	m_iPINLen = sizeof(m_szPIN);
+	GetArrayStrOfIndex(variantList,0, m_szPIN, &m_iPINLen);
+
+	tmpLen = sizeof(m_szSecID);
+	GetArrayStrOfIndex(variantList,1, m_szSecID, &tmpLen);
+
+	// R1
+	GetArrayStrOfIndex(variantList,2, szBlobB64,(int *)(&ulBlobB64Len));
+	ulBlobLen = modp_b64_decode((char *)&szBlob, szBlobB64,ulBlobB64Len);
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
+	FILE_LOG_HEX(file_log_name, szBlob, ulBlobLen);
+	if (sizeof(m_szR1) != ulBlobLen)
+	{
+		ulResult = OPE_ERR_INVALID_PARAM;
+		return;
+	}
+	else
+	{
+		memcpy(m_szR1,szBlob,ulBlobLen);
+	}
+
+	// R2
+	GetArrayStrOfIndex(variantList,3, szBlobB64,(int *)(&ulBlobB64Len));
+	ulBlobLen = modp_b64_decode((char *)&szBlob, szBlobB64,ulBlobB64Len);
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
+	FILE_LOG_HEX(file_log_name, szBlob, ulBlobLen);
+	if (sizeof(m_szR2) != ulBlobLen)
+	{
+		ulResult = OPE_ERR_INVALID_PARAM;
+		return;
+	}
+	else
+	{
+		memcpy(m_szR2,szBlob,ulBlobLen);
+	}
+
+	// ZMP
+	GetArrayStrOfIndex(variantList,4, szBlobB64,(int *)(&ulBlobB64Len));
+	ulBlobLen = modp_b64_decode((char *)&szBlob, szBlobB64,ulBlobB64Len);
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
+	FILE_LOG_HEX(file_log_name, szBlob, ulBlobLen);
+	if (sizeof(m_szZMP) != ulBlobLen)
+	{
+		ulResult = OPE_ERR_INVALID_PARAM;
+		return;
+	}
+	else
+	{
+		memcpy(m_szZMP,szBlob,ulBlobLen);
+	}
+
+	// SIGN
+	GetArrayStrOfIndex(variantList,5, szBlobB64,(int *)(&ulBlobB64Len));
+	ulBlobLen = modp_b64_decode((char *)&szBlob, szBlobB64,ulBlobB64Len);
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
+	FILE_LOG_HEX(file_log_name, szBlob, ulBlobLen);
+	if (sizeof(m_szKeySignECC512) != ulBlobLen)
+	{
+		ulResult = OPE_ERR_INVALID_PARAM;
+		return;
+	}
+	else
+	{
+		memcpy(m_szKeySignECC512,szBlob,ulBlobLen);
+	}
+
+	// EN
+	GetArrayStrOfIndex(variantList,6, szBlobB64,(int *)(&ulBlobB64Len));
+	ulBlobLen = modp_b64_decode((char *)&szBlob, szBlobB64,ulBlobB64Len);
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
+	FILE_LOG_HEX(file_log_name, szBlob, ulBlobLen);
+	if (sizeof(m_szKeyEnECC512) != ulBlobLen)
+	{
+		ulResult = OPE_ERR_INVALID_PARAM;
+		return;
+	}
+	else
+	{
+		memcpy(m_szKeyEnECC512,szBlob,ulBlobLen);
+	}
+
+	// EX
+	GetArrayStrOfIndex(variantList,7, szBlobB64,(int *)(&ulBlobB64Len));
+	ulBlobLen = modp_b64_decode((char *)&szBlob, szBlobB64,ulBlobB64Len);
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
+	FILE_LOG_HEX(file_log_name, szBlob, ulBlobLen);
+	if (sizeof(m_szKeyExECC512) != ulBlobLen)
+	{
+		ulResult = OPE_ERR_INVALID_PARAM;
+		return;
+	}
+	else
+	{
+		memcpy(m_szKeyExECC512,szBlob,ulBlobLen);
+	}
+
+	ulResult = 0;
+}
+
+
+DWORD WINAPI ThreadFuncSKFImportECC512Certs(LPVOID aThisClass)
+{
+	FBCommonAPI * thisClass = (FBCommonAPI*)aThisClass;
+
+	thisClass->ulResult = RT_P11_API_SetZMCerts((unsigned char *)thisClass->m_szAuthKey, strlen(thisClass->m_szAuthKey),
+		thisClass->m_szCertSIGNECC512,thisClass->m_iCertSIGNLenECC512,
+		thisClass->m_szCertENECC512,thisClass->m_iCertENLenECC512,
+		thisClass->m_szCertEXECC512,thisClass->m_iCertEXLenECC512,
+
+		thisClass->m_szPIN,&(thisClass->m_ulRetry));
+	
+	if(thisClass->ulResult)
+	{
+		goto err;
+	}
+err:
+
+	return 0;
+}
+
+unsigned int FBCommonAPI::get_ulKeyState()
+{
+	return ulKeyState;
+}
+
+
+DWORD WINAPI ThreadFuncSKFImportECC512KeyPair(LPVOID aThisClass)
+{
+	FBCommonAPI * thisClass = (FBCommonAPI*)aThisClass;
+
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "thisClass->m_szPIN");
+	FILE_LOG_STRING(file_log_name,thisClass->m_szPIN);
+
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "thisClass->m_szAuthKey");
+	FILE_LOG_STRING(file_log_name,thisClass->m_szAuthKey);
+
+	thisClass->ulResult = RT_P11_API_SetZMMetas(
+		(unsigned char *)thisClass->m_szAuthKey, strlen(thisClass->m_szAuthKey), 
+		thisClass->m_szSecID,strlen(thisClass->m_szSecID),
+		(unsigned char *)thisClass->m_szR1,
+		(unsigned char *)thisClass->m_szR2,
+		(unsigned char *)thisClass->m_szZMP, 96,
+		(unsigned char *)thisClass->m_szKeySignECC512, 200,
+		(unsigned char *)thisClass->m_szKeySignECC512, 200,
+		(unsigned char *)thisClass->m_szKeySignECC512, 200,
+		thisClass->m_szPIN,(unsigned int *)&(thisClass->m_ulRetry));
+
+	FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, thisClass->ulResult);
+
+	if(thisClass->ulResult)
+	{
+		goto err;
+	}
+
+err:
+
+	return 0;
+}
+
+#endif
+
+
 #if defined(GM_ECC_512_SUPPORT)
 
 #include "gm-ecc-512.h"
@@ -1576,6 +1923,7 @@ void FBCommonAPI::InitArgsSKFImportECC512Certs(FB::VariantList variantList)
 		return;
 	}
 
+	m_iPINLen = sizeof(m_szPIN);
 	GetArrayStrOfIndex(variantList,0, m_szPIN, &m_iPINLen);
 
 	GetArrayStrOfIndex(variantList,1, (char *)data_value_cert_b64,(int *) (&data_len_cert_b64));
@@ -1614,6 +1962,7 @@ void FBCommonAPI::InitArgsSKFImportECC512KeyPair(FB::VariantList variantList)
 		return;
 	}
 
+	m_iPINLen = sizeof(m_szPIN);
 	GetArrayStrOfIndex(variantList,0, m_szPIN, &m_iPINLen);
 
 	// 加密
