@@ -26,7 +26,7 @@ CK_ULONG IN_LoadLibrary( void )
 	//Load library.
 	if(g_hP11Module == NULL)
 	{
-		g_hP11Module = LoadLibrary("TFTknP11.dll"); 
+		g_hP11Module = LoadLibraryA("TFTknP11.dll"); 
 		if (!g_hP11Module)
 		{
 			return CKR_GENERAL_ERROR;   
@@ -65,7 +65,7 @@ void IN_FreeLibrary()
 
 int RT_P11_API_SetMetas(
 	unsigned char *pAuthKey, int uiAuthKeyLen,
-	unsigned char *pSecID, int uiSecIDLen,
+	char *pSecID, int uiSecIDLen,
 	unsigned char *pHMac, int uiHMacLen,
 	char * pszPIN, unsigned int * pulRetry
 	)
@@ -236,7 +236,7 @@ int RT_P11_API_SetMetas(
 		{
 			switch(pSecID[0])
 			{
-			case 1:
+			case '1':
 				//A类用户CKA_VALUE：
 				//	03 + {01+20+HK1} + {05+20+HK5} + {06+20+HK6}
 				pos = 0;
@@ -262,7 +262,7 @@ int RT_P11_API_SetMetas(
 				pos+=32;
 				KPXTemplate[5].ulValueLen = pos;
 				break;
-			case 2:
+			case '2':
 				//B0类用户CKA_VALUE：
 				//	04 + {02+20+HK2} + {06+20+HK6} + {07+20+HK7} + {08+20+HK8}
 				pos = 0;
@@ -294,7 +294,7 @@ int RT_P11_API_SetMetas(
 				pos+=32;
 				KPXTemplate[5].ulValueLen = pos;
 				break;
-			case 3:
+			case '3':
 				//B1类用户CKA_VALUE：
 				//	02 + {03+20+HK3} + {08+20+HK8}
 				pos = 0;
@@ -314,7 +314,7 @@ int RT_P11_API_SetMetas(
 				pos+=32;
 				KPXTemplate[5].ulValueLen = pos;
 				break;
-			case 4:
+			case '4':
 				//C类用户CKA_VALUE：
 				//	03 + {04+20+HK4} + {08+20+HK8} + {09+20+HK9}
 				pos = 0;
@@ -369,7 +369,7 @@ err:
 
 int RT_P11_API_SetZMMetas(
 	unsigned char *pAuthKey, int uiAuthKeyLen,
-	unsigned char *pSecID, int uiSecIDLen,
+	char *pSecID, int uiSecIDLen,
 	unsigned char szR1[32],unsigned char szR2[32], 
 	unsigned char *pZMP, int uiZMPLen,
 	unsigned char *pSignKey, int uiSignKeyLen,
@@ -553,7 +553,7 @@ int RT_P11_API_SetZMMetas(
 
 		switch(pSecID[0])
 		{
-		case 1:
+		case '1':
 			pos = 0;
 			szKPX[pos] = 0x02;
 			pos+=1;
@@ -569,7 +569,7 @@ int RT_P11_API_SetZMMetas(
 			pos+=32;
 			KPXTemplate[5].ulValueLen = pos;
 			break;
-		case 2:
+		case '2':
 			pos = 0;
 			szKPX[pos] = 0x02;
 			pos+=1;
@@ -585,7 +585,7 @@ int RT_P11_API_SetZMMetas(
 			pos+=32;
 			KPXTemplate[5].ulValueLen = pos;
 			break;
-		case 3:
+		case '3':
 			pos = 0;
 			szKPX[pos] = 0x01;
 			pos+=1;
@@ -597,7 +597,7 @@ int RT_P11_API_SetZMMetas(
 			pos+=32;
 			KPXTemplate[5].ulValueLen = pos;
 			break;
-		case 4:
+		case '4':
 			pos = 0;
 			break;
 		default:
