@@ -364,7 +364,7 @@ int RT_P11_API_SetMetas(
 err:
 	if (hSession)
 	{
-		rv = g_FunctionPtr->C_CloseSession(hSession);
+		g_FunctionPtr->C_CloseSession(hSession);
 	}
 
 	IN_FreeLibrary();
@@ -919,7 +919,7 @@ int RT_P11_API_SetZMMetas(
 err:
 	if (hSession)
 	{
-		rv = g_FunctionPtr->C_CloseSession(hSession);
+		g_FunctionPtr->C_CloseSession(hSession);
 	}
 
 	IN_FreeLibrary();
@@ -1036,7 +1036,7 @@ int RT_P11_API_SetZMCerts(
 err:
 	if (hSession)
 	{
-		rv = g_FunctionPtr->C_CloseSession(hSession);
+		g_FunctionPtr->C_CloseSession(hSession);
 	}
 
 	FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
@@ -1134,7 +1134,7 @@ int RT_P11_API_GetCertCount(
 err:
 	if (hSession)
 	{
-		rv = g_FunctionPtr->C_CloseSession(hSession);
+		g_FunctionPtr->C_CloseSession(hSession);
 	}
 
 	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
