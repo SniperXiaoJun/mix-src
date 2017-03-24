@@ -1541,10 +1541,6 @@ void FBCommonAPI::ExecCommonFuncID(long ulFuncID, FB::VariantList aArrayArgIN, F
 		{
 			InitArgsECC512Certs(aArrayArgIN);
 
-			if (0 != ulResult)
-			{
-				return;
-			}
 
 			::FILE_LOG_STRING(file_log_name,"ExecCommonFuncID 27");
 			::FILE_LOG_NUMBER(file_log_name,ulResult);
