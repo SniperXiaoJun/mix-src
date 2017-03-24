@@ -1014,18 +1014,21 @@ int RT_P11_API_SetZMCerts(
 		rv = g_FunctionPtr->C_CreateObject(hSession, certTemplateSign, sizeof(certTemplateSign)/sizeof(CK_ATTRIBUTE),hObjects);
 		if (rv != CKR_OK)
 		{
+			FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
 			goto err;
 		}
 
 		rv = g_FunctionPtr->C_CreateObject(hSession, certTemplateEnc, sizeof(certTemplateEnc)/sizeof(CK_ATTRIBUTE),hObjects);
 		if (rv != CKR_OK)
 		{
+			FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
 			goto err;
 		}
 
 		rv = g_FunctionPtr->C_CreateObject(hSession, certTemplateExc, sizeof(certTemplateExc)/sizeof(CK_ATTRIBUTE),hObjects);
 		if (rv != CKR_OK)
 		{
+			FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
 			goto err;
 		}
 	}	
@@ -1035,6 +1038,8 @@ err:
 	{
 		rv = g_FunctionPtr->C_CloseSession(hSession);
 	}
+
+	FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
 
 	IN_FreeLibrary();
 
