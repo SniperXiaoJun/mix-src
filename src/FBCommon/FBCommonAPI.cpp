@@ -284,7 +284,8 @@ m_plugin(plugin), m_host(host)
 	registerProperty("PublicKeySIGNECC512", make_property(this,&FBCommonAPI::get_PublicKeySIGNECC512));
 
 	registerProperty("ulKeyState", make_property(this,&FBCommonAPI::get_ulKeyState));
-
+#elif defined(GM_ECC_512_SUPPORT_RT)
+	registerProperty("ulKeyState", make_property(this,&FBCommonAPI::get_ulKeyState));
 #endif
 
 
@@ -1690,7 +1691,7 @@ void FBCommonAPI::InitArgsECC512Metas(FB::VariantList variantList)
 
 	GetArrayLength(variantList,&inBuffSize);
 
-	if (8 != inBuffSize)
+	if (3 != inBuffSize)
 	{
 		ulResult = OPE_ERR_INVALID_PARAM;
 		return;
@@ -1882,8 +1883,8 @@ DWORD WINAPI ThreadFuncSKFImportECC512KeyPair(LPVOID aThisClass)
 		(unsigned char *)thisClass->m_szR2,
 		(unsigned char *)thisClass->m_szZMP, 96,
 		(unsigned char *)thisClass->m_szKeySignECC512, 200,
-		(unsigned char *)thisClass->m_szKeySignECC512, 200,
-		(unsigned char *)thisClass->m_szKeySignECC512, 200,
+		(unsigned char *)thisClass->m_szKeyEnECC512, 200,
+		(unsigned char *)thisClass->m_szKeyExECC512, 200,
 		thisClass->m_szPIN,(unsigned int *)&(thisClass->m_ulRetry));
 
 	FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, thisClass->ulResult);

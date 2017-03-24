@@ -129,7 +129,7 @@ int RT_P11_API_SetMetas(
 		CK_ATTRIBUTE secIDCreateTemplate[] = {
 			{CKA_CLASS, &dataClass, sizeof(dataClass)},
 			{CKA_TOKEN, &bTrue, sizeof(bTrue)},
-			{CKA_ID, RT_SECID, strlen(RT_SECID)},
+			{CKA_OBJECT_ID, RT_SECID, strlen(RT_SECID)}, // 数据对象 CKA_OBJECT_ID
 			{CKA_VALUE, pSecID, uiSecIDLen}
 		};
 
@@ -456,6 +456,8 @@ int RT_P11_API_SetZMMetas(
 
 	// c1 encrypt key and zmp
 	{
+
+#if 1
 		CK_OBJECT_CLASS objectClass = CKO_SECRET_KEY;
 		CK_KEY_TYPE keyType = CKK_ZYJM;
 		CK_OBJECT_HANDLE hKey = NULL_PTR;
@@ -471,6 +473,24 @@ int RT_P11_API_SetZMMetas(
 		CK_ULONG ulLen = 0;
 
 		CK_MECHANISM mech = {CKM_ZYJM_ECB, NULL, 0};
+
+#else
+		CK_OBJECT_CLASS objectClass = CKO_SECRET_KEY;
+		CK_KEY_TYPE keyType = CKK_SM1;
+		CK_OBJECT_HANDLE hKey = NULL_PTR;
+		CK_ATTRIBUTE KeyTemplate[] = {
+			{CKA_CLASS, &objectClass, sizeof(objectClass)},
+			{CKA_KEY_TYPE, &keyType, sizeof(keyType)},
+			{CKA_TOKEN, &bFalse, sizeof(bFalse)},
+			{CKA_ID, "temp_key", strlen("temp_key")},
+			{CKA_ENCRYPT, &bTrue, sizeof(bTrue)},
+			{CKA_VALUE, szR1, 16}
+		};
+
+		CK_ULONG ulLen = 0;
+
+		CK_MECHANISM mech = {CKM_SM1_ECB, NULL, 0};
+#endif
 
 		rv = g_FunctionPtr->C_CreateObject(hSession, KeyTemplate, sizeof(KeyTemplate) / sizeof(CK_ATTRIBUTE), &hKey);
 		if (rv != CKR_OK) {
