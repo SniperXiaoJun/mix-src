@@ -1077,10 +1077,10 @@ unsigned int OpenSSL_SM2SetX509SignValue(
 		break;
 	}
 
-	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__,"ptr_in");
-	FILE_LOG_HEX(file_log_name, ptr_in, uiX509Len);
-	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__,"ptr_out");
-	FILE_LOG_HEX(file_log_name, ptr_out, *puiX509SignedLen);
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__,"pbX509");
+	FILE_LOG_HEX(file_log_name, pbX509, uiX509Len);
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__,"pbX509Signed");
+	FILE_LOG_HEX(file_log_name, pbX509Signed, *puiX509SignedLen);
 
 	rv = 0;
 err:
