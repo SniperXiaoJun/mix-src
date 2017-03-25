@@ -990,13 +990,12 @@ int RT_P11_API_SetZMCerts(
 		CK_ULONG ulObjectCount = 0;
 		CK_OBJECT_HANDLE hObjects[16];
 		CK_CERTIFICATE_TYPE CertType = CKC_X_509;
-		CK_UTF8CHAR CertLabel[] = "X509 Certificate object";
 		CK_UTF8CHAR CertSubject[] = "ECC512 X509 Certificate";
 
 		CK_ATTRIBUTE certTemplateSign[] = {
 			{CKA_CLASS, &DataClass , sizeof(DataClass)},
 			{CKA_CERTIFICATE_TYPE, &CertType, sizeof(CertType)},
-			{CKA_LABEL, CertLabel, sizeof(CertLabel)-1},
+			{CKA_LABEL,RT_ZM_SIGN , strlen(RT_ZM_SIGN)},
 			{CKA_SUBJECT, CertSubject, sizeof(CertSubject)-1},
 			{CKA_TOKEN, &True, sizeof(True)},
 			{CKA_ID,RT_ZM_SIGN , strlen(RT_ZM_SIGN)},
@@ -1006,7 +1005,7 @@ int RT_P11_API_SetZMCerts(
 		CK_ATTRIBUTE certTemplateEnc[] = {
 			{CKA_CLASS, &DataClass , sizeof(DataClass)},
 			{CKA_CERTIFICATE_TYPE, &CertType, sizeof(CertType)},
-			{CKA_LABEL, CertLabel, sizeof(CertLabel)-1},
+			{CKA_LABEL ,RT_ZM_ENC , strlen(RT_ZM_ENC)},
 			{CKA_SUBJECT, CertSubject, sizeof(CertSubject)-1},
 			{CKA_TOKEN, &True, sizeof(True)},
 			{CKA_ID,RT_ZM_ENC , strlen(RT_ZM_ENC)},
@@ -1016,7 +1015,7 @@ int RT_P11_API_SetZMCerts(
 		CK_ATTRIBUTE certTemplateExc[] = {
 			{CKA_CLASS, &DataClass , sizeof(DataClass)},
 			{CKA_CERTIFICATE_TYPE, &CertType, sizeof(CertType)},
-			{CKA_LABEL, CertLabel, sizeof(CertLabel)-1},
+			{CKA_LABEL, RT_ZM_EXC , strlen(RT_ZM_EXC)},
 			{CKA_SUBJECT, CertSubject, sizeof(CertSubject)-1},
 			{CKA_TOKEN, &True, sizeof(True)},
 			{CKA_ID,RT_ZM_EXC , strlen(RT_ZM_EXC)},
