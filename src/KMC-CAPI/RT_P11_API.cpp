@@ -1097,11 +1097,11 @@ int RT_P11_API_GetCertCount(
 		goto err;
 	}
 
-	rv = g_FunctionPtr->C_Login(hSession, CKU_USER, (CK_UTF8CHAR_PTR)pszPIN, strlen(pszPIN));
-	if (rv!=CKR_OK && rv!=CKR_USER_ALREADY_LOGGED_IN) {
-		FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
-		goto err;
-	}
+	//rv = g_FunctionPtr->C_Login(hSession, CKU_USER, (CK_UTF8CHAR_PTR)pszPIN, strlen(pszPIN));
+	//if (rv!=CKR_OK && rv!=CKR_USER_ALREADY_LOGGED_IN) {
+	//	FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
+	//	goto err;
+	//}
 
 	{
 		CK_OBJECT_CLASS DataClass = CKO_CERTIFICATE;
