@@ -1782,61 +1782,61 @@ unsigned int __stdcall WTF_VerifyPINByCertPropertyInitialize(SK_CERT_DESC_PROPER
 #endif
 
 		// 读取KEY的硬件信息
-		if (0)
-		{
-			unsigned char szCommand[BUFFER_LEN_1K];
+		//if (0)
+		//{
+		//	unsigned char szCommand[BUFFER_LEN_1K];
 
-			unsigned char szOutput[BUFFER_LEN_1K];
+		//	unsigned char szOutput[BUFFER_LEN_1K];
 
-			ULONG ulOutputLen = BUFFER_LEN_1K;
+		//	ULONG ulOutputLen = BUFFER_LEN_1K;
 
-			ULONG ulCommandLen = BUFFER_LEN_1K;
+		//	ULONG ulCommandLen = BUFFER_LEN_1K;
 
-			memcpy(szCommand, "\x80\x32\x00\x00\x31",sizeof(szCommand));
+		//	memcpy(szCommand, "\x80\x32\x00\x00\x31",sizeof(szCommand));
 
-			ulCommandLen = 5;
+		//	ulCommandLen = 5;
 
-			ulRet = func_Transmit(hDev, szCommand,ulCommandLen,szOutput, &ulOutputLen);
+		//	ulRet = func_Transmit(hDev, szCommand,ulCommandLen,szOutput, &ulOutputLen);
 
-			FILE_LOG_FMT(file_log_name, "func=%s thread=%d line=%d watch=%d", __FUNCTION__, GetCurrentThreadId(), __LINE__, ulRet);
-		}
+		//	FILE_LOG_FMT(file_log_name, "func=%s thread=%d line=%d watch=%d", __FUNCTION__, GetCurrentThreadId(), __LINE__, ulRet);
+		//}
 
-		ulRet = func_GenRandom(hDev,bufferRandom, 8);
+		//ulRet = func_GenRandom(hDev,bufferRandom, 8);
+		//if (0 != ulRet)
+		//{
+		//	goto err;
+		//}
+
+		/*{
+		char szTmpBuffer[BUFFER_LEN_1K] = {0};
+		int iTmpBufferLen = BUFFER_LEN_1K;
+
+
+		iTmpBufferLen = modp_b64_encode_len(sizeof(bufferRandom));
+		iTmpBufferLen = modp_b64_encode((char *)szTmpBuffer, (const char*)bufferRandom, 8);
+
+		ulRet = GetEncryptPIN(args, (unsigned char *)szTmpBuffer,iTmpBufferLen,szEncrypPin,&uiEncryptPinLen);
+		FILE_LOG_FMT(file_log_name, "func=%s thread=%d line=%d watch=%d", __FUNCTION__, GetCurrentThreadId(), __LINE__, ulRet);
 		if (0 != ulRet)
 		{
-			goto err;
+		goto err;
 		}
 
-		{
-			char szTmpBuffer[BUFFER_LEN_1K] = {0};
-			int iTmpBufferLen = BUFFER_LEN_1K;
+		FILE_LOG_STRING(file_log_name, (char *)szEncrypPin);
+		FILE_LOG_HEX(file_log_name, szEncrypPin, uiEncryptPinLen);
 
+		iTmpBufferLen = modp_b64_decode_len(uiEncryptPinLen);
+		iTmpBufferLen = modp_b64_decode(szTmpBuffer, (const char*)szEncrypPin, uiEncryptPinLen);
 
-			iTmpBufferLen = modp_b64_encode_len(sizeof(bufferRandom));
-			iTmpBufferLen = modp_b64_encode((char *)szTmpBuffer, (const char*)bufferRandom, 8);
+		FILE_LOG_FMT(file_log_name, "func=%s thread=%d line=%d watch=%d", __FUNCTION__, GetCurrentThreadId(), __LINE__, iTmpBufferLen);
 
-			ulRet = GetEncryptPIN(args, (unsigned char *)szTmpBuffer,iTmpBufferLen,szEncrypPin,&uiEncryptPinLen);
-			FILE_LOG_FMT(file_log_name, "func=%s thread=%d line=%d watch=%d", __FUNCTION__, GetCurrentThreadId(), __LINE__, ulRet);
-			if (0 != ulRet)
-			{
-				goto err;
-			}
+		memset(szEncrypPin, 0, sizeof(szEncrypPin));
+		uiEncryptPinLen=iTmpBufferLen;
 
-			FILE_LOG_STRING(file_log_name, (char *)szEncrypPin);
-			FILE_LOG_HEX(file_log_name, szEncrypPin, uiEncryptPinLen);
-
-			iTmpBufferLen = modp_b64_decode_len(uiEncryptPinLen);
-			iTmpBufferLen = modp_b64_decode(szTmpBuffer, (const char*)szEncrypPin, uiEncryptPinLen);
-
-			FILE_LOG_FMT(file_log_name, "func=%s thread=%d line=%d watch=%d", __FUNCTION__, GetCurrentThreadId(), __LINE__, iTmpBufferLen);
-
-			memset(szEncrypPin, 0, sizeof(szEncrypPin));
-			uiEncryptPinLen=iTmpBufferLen;
-
-			memcpy( szEncrypPin,szTmpBuffer, uiEncryptPinLen);
-			FILE_LOG_STRING(file_log_name, (char *)szEncrypPin);
-			FILE_LOG_HEX(file_log_name, szEncrypPin, uiEncryptPinLen);
-		}
+		memcpy( szEncrypPin,szTmpBuffer, uiEncryptPinLen);
+		FILE_LOG_STRING(file_log_name, (char *)szEncrypPin);
+		FILE_LOG_HEX(file_log_name, szEncrypPin, uiEncryptPinLen);
+		}*/
 
 		FILE_LOG_FMT(file_log_name, "func=%s thread=%d line=%d watch=%d", __FUNCTION__, GetCurrentThreadId(), __LINE__, ulRet);
 		ulRet = func_OpenApplication(hDev,pCertProperty->szApplicationName,&hAPP);
@@ -1846,12 +1846,12 @@ unsigned int __stdcall WTF_VerifyPINByCertPropertyInitialize(SK_CERT_DESC_PROPER
 		}
 		FILE_LOG_FMT(file_log_name, "func=%s thread=%d line=%d watch=%d", __FUNCTION__, GetCurrentThreadId(), __LINE__, ulRet);
 
-		ulRet = func_VerifyPIN(hAPP,ulPINType , szEncrypPin, puiRetryCount);
-		FILE_LOG_FMT(file_log_name,"func_VerifyPIN");
-		if (0 != ulRet)
-		{
-			goto err;
-		}
+		//ulRet = func_VerifyPIN(hAPP,ulPINType , szEncrypPin, puiRetryCount);
+		//FILE_LOG_FMT(file_log_name,"func_VerifyPIN");
+		//if (0 != ulRet)
+		//{
+		//	goto err;
+		//}
 
 		ulRet = func_OpenContainer(hAPP, pCertProperty->szContainerName, &hCon);
 		if (0 != ulRet)
@@ -2169,13 +2169,19 @@ unsigned int __stdcall WTF_SM2SignDigest(SK_CERT_DESC_PROPERTY * pCertProperty, 
 			goto err;
 		}
 
-		ulRet = func_VerifyPIN(hAPP, 1, pszPIN, puiRetryCount);
+		//ulRet = func_VerifyPIN(hAPP, 1, pszPIN, puiRetryCount);
 		if (0 != ulRet)
 		{
 			goto err;
 		}
 
 		ulRet = func_OpenContainer(hAPP, pCertProperty->szContainerName, &hCon);
+		if (0 != ulRet)
+		{
+			goto err;
+		}
+
+		ulRet = func_ECCSignData(hCon,pbData,ulDataLen,pSignature);
 		if (0 != ulRet)
 		{
 			goto err;
