@@ -194,15 +194,15 @@ extern "C" {
 		void * hCon;
 	}OPST_HANDLE_ARGS;
 
-	COMMON_API unsigned int __stdcall WTF_VerifyPINByCertPropertyInitialize(SK_CERT_DESC_PROPERTY * pCertProperty,unsigned int ulPINType , CallBackCfcaGetEncryptPIN GetEncryptPIN, void * OPST_HANDLE_ARGS, unsigned int *puiRetryCount);
+	COMMON_API unsigned int __stdcall WTF_SM2SignInitializeVerifyPINByCertProperty(SK_CERT_DESC_PROPERTY * pCertProperty,unsigned int ulPINType , CallBackCfcaGetEncryptPIN GetEncryptPIN, void * OPST_HANDLE_ARGS, unsigned int *puiRetryCount);
 	COMMON_API unsigned int __stdcall WTF_SM2SignDigestProcess(OPST_HANDLE_ARGS *args, BYTE *pbData, unsigned int ulDataLen, PECCSIGNATUREBLOB pSignature);
-	COMMON_API unsigned int __stdcall WTF_VerifyPINByCertPropertyFinalize(OPST_HANDLE_ARGS * args);
-
+	COMMON_API unsigned int __stdcall WTF_SM2SignFinalize(OPST_HANDLE_ARGS * args);
 	COMMON_API unsigned int __stdcall WTF_SM2SignDigestForHengBao(SK_CERT_DESC_PROPERTY * pCertProperty,unsigned int ulPINType , CallBackCfcaGetEncryptPIN GetEncryptPIN, void * pArgs/*NULL is able*/, unsigned int *puiRetryCount, BYTE *pbData, unsigned int ulDataLen, PECCSIGNATUREBLOB pSignature);
 
-	COMMON_API unsigned int __stdcall WTF_VerifyPINByCertPropertyForHengBao(SK_CERT_DESC_PROPERTY * pCertProperty,unsigned int ulPINType ,CallBackCfcaGetEncryptPIN GetEncryptPIN,void * pArgs,unsigned int *puiRetryCount);
 
-		/*
+
+
+	/*
 	功能名称:	获取设备信息
 	函数名称:	WTF_GetDevInfoByCertProperty
 	输入参数:	
