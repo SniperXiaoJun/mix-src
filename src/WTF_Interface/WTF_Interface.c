@@ -1433,26 +1433,6 @@ COMMON_API unsigned int __stdcall WTF_SM2SignInitializeV2(SK_CERT_DESC_PROPERTY 
 		}
 #endif
 
-		// 读取KEY的硬件信息
-		if (0)
-		{
-			unsigned char szCommand[BUFFER_LEN_1K];
-
-			unsigned char szOutput[BUFFER_LEN_1K];
-
-			ULONG ulOutputLen = BUFFER_LEN_1K;
-
-			ULONG ulCommandLen = BUFFER_LEN_1K;
-
-			memcpy(szCommand, "\x80\x32\x00\x00\x31",sizeof(szCommand));
-
-			ulCommandLen = 5;
-
-			ulRet = func_Transmit(hDev, szCommand,ulCommandLen,szOutput, &ulOutputLen);
-
-			FILE_LOG_FMT(file_log_name, "func=%s thread=%d line=%d watch=%d", __FUNCTION__, GetCurrentThreadId(), __LINE__, ulRet);
-		}
-
 		FILE_LOG_FMT(file_log_name, "func=%s thread=%d line=%d watch=%d", __FUNCTION__, GetCurrentThreadId(), __LINE__, ulRet);
 		ulRet = func_OpenApplication(hDev,pCertProperty->szApplicationName,&hAPP);
 		if (0 != ulRet)

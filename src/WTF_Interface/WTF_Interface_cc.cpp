@@ -11,6 +11,8 @@ unsigned int __stdcall WTF_ArgsGet(SK_CERT_DESC_PROPERTY * pCertProperty, OPST_H
 
 	tmpArgs = g_currentArgs[pCertProperty->szDeviceName];
 
+	memcpy(args, &tmpArgs, sizeof(OPST_HANDLE_ARGS));
+
 	return 0;
 }
 
