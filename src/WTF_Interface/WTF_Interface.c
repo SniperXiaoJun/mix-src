@@ -1546,18 +1546,11 @@ err:
 	return ulRet;
 }
 
-COMMON_API unsigned int __stdcall WTF_SM2SignFinalizeV2(SK_CERT_DESC_PROPERTY * pCertProperty)
+COMMON_API unsigned int __stdcall WTF_SM2SignFinalizeV2(OPST_HANDLE_ARGS *args)
 {
-	OPST_HANDLE_ARGS args = {0};
 	unsigned int ulRet = 0;
 
-	ulRet = WTF_ArgsGet(pCertProperty,&args);
-	if (0 != ulRet)
-	{
-		goto err;
-	}
-
-	ulRet = WTF_SM2SignFinalize(&args);
+	ulRet = WTF_SM2SignFinalize(args);
 	if (0 != ulRet)
 	{
 		goto err;
