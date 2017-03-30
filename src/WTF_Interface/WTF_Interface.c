@@ -1322,6 +1322,272 @@ err:
 
 #include "modp_b64.h"
 
+
+COMMON_API unsigned int __stdcall WTF_SM2SignInitializeV2(SK_CERT_DESC_PROPERTY * pCertProperty, OPST_HANDLE_ARGS * args)
+{
+	HINSTANCE ghInst = NULL;
+
+	/*
+	SKF函数地址
+	*/
+
+	FUNC_NAME_DECLARE(func_, EnumDev,);
+	FUNC_NAME_DECLARE(func_, ConnectDev,);
+	FUNC_NAME_DECLARE(func_, DisConnectDev,);
+	FUNC_NAME_DECLARE(func_, ChangePIN,);
+	FUNC_NAME_DECLARE(func_, OpenApplication,);
+	FUNC_NAME_DECLARE(func_, CloseApplication,);
+	FUNC_NAME_DECLARE(func_, EnumApplication,);
+	FUNC_NAME_DECLARE(func_, ExportCertificate,);
+	FUNC_NAME_DECLARE(func_, EnumContainer,);
+	FUNC_NAME_DECLARE(func_, OpenContainer,);
+	FUNC_NAME_DECLARE(func_, CloseContainer,);
+	FUNC_NAME_DECLARE(func_, VerifyPIN,);
+	FUNC_NAME_DECLARE(func_, GetContainerType,);
+	FUNC_NAME_DECLARE(func_, ECCSignData,);
+	FUNC_NAME_DECLARE(func_, ECCVerify,);
+	FUNC_NAME_DECLARE(func_, ExtECCVerify,);
+	FUNC_NAME_DECLARE(func_, GetDevInfo,);
+	FUNC_NAME_DECLARE(func_, LockDev,);
+	FUNC_NAME_DECLARE(func_, UnlockDev,);
+
+	FUNC_NAME_DECLARE(func_, GenerateKeyWithECCEx,);
+	FUNC_NAME_DECLARE(func_, GenerateAgreementDataWithECC,);
+	FUNC_NAME_DECLARE(func_, GenerateAgreementDataWithECCEx, );
+	FUNC_NAME_DECLARE(func_, GenerateAgreementDataAndKeyWithECCEx, );
+
+	FUNC_NAME_DECLARE(func_, GenRandom, );
+	FUNC_NAME_DECLARE(func_, Transmit, );
+	
+
+	unsigned int ulRet = 0;
+
+	unsigned int dllPathLen = BUFFER_LEN_1K;
+	char dllPathValue[BUFFER_LEN_1K] = {0};
+
+	DEVHANDLE hDev = NULL;
+	HAPPLICATION hAPP = NULL;
+	HCONTAINER hCon = NULL;
+
+	ulRet = WTF_ReadSKFPath(pCertProperty->szSKFName, dllPathValue, &dllPathLen);
+
+	if (0 != ulRet)
+	{
+		ulRet = EErr_SMC_DLL_REG_PATH;
+		goto err;
+	}
+
+	ghInst=LoadLibraryA(dllPathValue);//动态加载Dll
+
+	if (!ghInst)
+	{
+		ulRet = EErr_SMC_DLL_PATH;
+		goto err;
+	}
+
+	FUNC_NAME_INIT(func_, EnumDev,);
+	FUNC_NAME_INIT(func_, ConnectDev,);
+	FUNC_NAME_INIT(func_, DisConnectDev,);
+	FUNC_NAME_INIT(func_, ChangePIN,);
+	FUNC_NAME_INIT(func_, OpenApplication,);
+	FUNC_NAME_INIT(func_, CloseApplication,);
+	FUNC_NAME_INIT(func_, EnumApplication,);
+	FUNC_NAME_INIT(func_, ExportCertificate,);
+	FUNC_NAME_INIT(func_, EnumContainer,);
+	FUNC_NAME_INIT(func_, OpenContainer,);
+	FUNC_NAME_INIT(func_, CloseContainer,);
+	FUNC_NAME_INIT(func_, VerifyPIN,);
+	FUNC_NAME_INIT_GetContainerType(func_, GetContainerType,);
+	FUNC_NAME_INIT(func_, LockDev,);
+	FUNC_NAME_INIT(func_, UnlockDev,);
+
+	FUNC_NAME_INIT(func_, ECCSignData,);
+
+	FUNC_NAME_INIT(func_, GenRandom, );
+	FUNC_NAME_INIT(func_, Transmit, );
+
+	{
+		unsigned char bufferRandom[8] = {0};
+		ULONG bufferRandomLen = 8;
+
+		unsigned char szEncrypPin[BUFFER_LEN_1K] = {0};
+		unsigned int uiEncryptPinLen = BUFFER_LEN_1K;
+
+
+		ulRet = func_ConnectDev(pCertProperty->szDeviceName, &hDev);
+		if (0 != ulRet)
+		{
+			goto err;
+		}
+
+#if USE_SELF_MUTEX
+		if(ulRet=SDSCWaitMutex(mutex_buffer,INFINITE,&hMutex))
+		{
+			goto err;
+		}
+#else
+		ulRet = func_LockDev(hDev,0xFFFFFFFF);
+		if (0 != ulRet)
+		{
+			goto err;
+		}
+#endif
+
+		// 读取KEY的硬件信息
+		if (0)
+		{
+			unsigned char szCommand[BUFFER_LEN_1K];
+
+			unsigned char szOutput[BUFFER_LEN_1K];
+
+			ULONG ulOutputLen = BUFFER_LEN_1K;
+
+			ULONG ulCommandLen = BUFFER_LEN_1K;
+
+			memcpy(szCommand, "\x80\x32\x00\x00\x31",sizeof(szCommand));
+
+			ulCommandLen = 5;
+
+			ulRet = func_Transmit(hDev, szCommand,ulCommandLen,szOutput, &ulOutputLen);
+
+			FILE_LOG_FMT(file_log_name, "func=%s thread=%d line=%d watch=%d", __FUNCTION__, GetCurrentThreadId(), __LINE__, ulRet);
+		}
+
+		FILE_LOG_FMT(file_log_name, "func=%s thread=%d line=%d watch=%d", __FUNCTION__, GetCurrentThreadId(), __LINE__, ulRet);
+		ulRet = func_OpenApplication(hDev,pCertProperty->szApplicationName,&hAPP);
+		if (0 != ulRet)
+		{
+			goto err;
+		}
+		FILE_LOG_FMT(file_log_name, "func=%s thread=%d line=%d watch=%d", __FUNCTION__, GetCurrentThreadId(), __LINE__, ulRet);
+
+		ulRet = func_OpenContainer(hAPP, pCertProperty->szContainerName, &hCon);
+		if (0 != ulRet)
+		{
+			goto err;
+		}
+		else
+		{
+			OPST_HANDLE_ARGS * handleArgs = args;
+
+			if (handleArgs)
+			{
+				handleArgs->ghInst = ghInst;
+				handleArgs->hDev = hDev;
+				handleArgs->hAPP = hAPP;
+				handleArgs->hCon = hCon;
+
+				if(hCon)
+				{
+
+				}
+				else
+				{
+					ulRet = EErr_SMC_FAIL;
+				}
+
+			}
+			else
+			{
+				return EErr_SMC_FAIL;
+			}
+
+			return 0;
+		}
+
+		if(hCon)
+		{
+			func_CloseContainer(hCon);hCon=NULL;
+		}
+
+		ulRet = func_CloseApplication(hAPP);
+		if (0 != ulRet)
+		{
+			goto err;
+		}
+
+#if USE_SELF_MUTEX
+		SDSCReleaseMutex(hMutex);
+#else
+		func_UnlockDev(hDev);
+#endif
+
+		ulRet = func_DisConnectDev(hDev);hDev = NULL;
+		if (0 != ulRet)
+		{
+			goto err;
+		}
+	}
+
+err:
+
+	if(hCon)
+	{
+		func_CloseContainer(hCon);hCon=NULL;
+	}
+
+	if(hDev)
+	{
+#if USE_SELF_MUTEX
+		SDSCReleaseMutex(hMutex);
+#else
+		func_UnlockDev(hDev);
+#endif
+		func_DisConnectDev(hDev);hDev = NULL;
+	}
+
+	if(ghInst)
+	{
+		FreeLibrary(ghInst);//释放Dll函数
+		ghInst = NULL;
+	}
+
+	return ulRet;
+}
+
+COMMON_API unsigned int __stdcall WTF_SM2SignDigestProcessV2(SK_CERT_DESC_PROPERTY * pCertProperty, BYTE *pbData, unsigned int ulDataLen, PECCSIGNATUREBLOB pSignature)
+{
+	OPST_HANDLE_ARGS args = {0};
+	unsigned int ulRet = 0;
+
+	ulRet = WTF_ArgsGet(pCertProperty,&args);
+	if (0 != ulRet)
+	{
+		goto err;
+	}
+
+	ulRet = WTF_SM2SignDigestProcess(&args,pbData,ulDataLen,pSignature);
+	if (0 != ulRet)
+	{
+		goto err;
+	}
+err:
+
+	return ulRet;
+}
+
+COMMON_API unsigned int __stdcall WTF_SM2SignFinalizeV2(SK_CERT_DESC_PROPERTY * pCertProperty)
+{
+	OPST_HANDLE_ARGS args = {0};
+	unsigned int ulRet = 0;
+
+	ulRet = WTF_ArgsGet(pCertProperty,&args);
+	if (0 != ulRet)
+	{
+		goto err;
+	}
+
+	ulRet = WTF_SM2SignFinalize(&args);
+	if (0 != ulRet)
+	{
+		goto err;
+	}
+err:
+
+	return ulRet;
+}
+
+
 COMMON_API unsigned int __stdcall WTF_SM2SignDigestForHengBao(SK_CERT_DESC_PROPERTY * pCertProperty,unsigned int ulPINType , CallBackCfcaGetEncryptPIN GetEncryptPIN, void * pArgs/*NULL is able*/, unsigned int *puiRetryCount, BYTE *pbData, unsigned int ulDataLen, PECCSIGNATUREBLOB pSignature)
 {
 	unsigned int ulRet = 0;
