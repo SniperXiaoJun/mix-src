@@ -1528,6 +1528,7 @@ err:
 COMMON_API unsigned int __stdcall WTF_SM2SignDigestProcessV2(SK_CERT_DESC_PROPERTY * pCertProperty, BYTE *pbData, unsigned int ulDataLen, PECCSIGNATUREBLOB pSignature)
 {
 	OPST_HANDLE_ARGS args = {0};
+	OPST_HANDLE_ARGS argsZERO = {0};
 	unsigned int ulRet = 0;
 
 	ulRet = WTF_ArgsGet(pCertProperty,&args);
@@ -1536,12 +1537,31 @@ COMMON_API unsigned int __stdcall WTF_SM2SignDigestProcessV2(SK_CERT_DESC_PROPER
 		goto err;
 	}
 
+	if(0 == memcmp(&args, &argsZERO, sizeof(OPST_HANDLE_ARGS)))
+	{
+		ulRet = WTF_SM2SignInitializeV2(pCertProperty,&args);
+
+		WTF_ArgsPut(pCertProperty,&args);
+
+		if (0 != ulRet)
+		{
+			goto err;
+		}
+	}
+
+
 	ulRet = WTF_SM2SignDigestProcess(&args,pbData,ulDataLen,pSignature);
 	if (0 != ulRet)
 	{
 		goto err;
 	}
 err:
+
+	if (ulRet)
+	{
+		WTF_SM2SignFinalizeV2(&args);
+		WTF_ArgsClr();
+	}
 
 	return ulRet;
 }
