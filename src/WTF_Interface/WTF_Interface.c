@@ -3099,13 +3099,13 @@ unsigned int __stdcall WTF_CertGetProperty(BYTE* pbCert, unsigned int ulCertLen,
 		FileTimeToSystemTime(&pCertContext->pCertInfo->NotBefore, &sysTime);
 		SystemTimeToTime_t( sysTime,&(pCertProperty->ulNotBefore));
 		memset(szTime, 0, sizeof(szTime));
-		sprintf_s(szTime, 128, "%04d-%02d-%02d %d:%d:%d", sysTime.wYear, sysTime.wMonth, sysTime.wDay, sysTime.wHour, sysTime.wMinute, sysTime.wSecond);
+		sprintf_s(szTime, 128, "%04d-%02d-%02d %02d:%02d:%02d", sysTime.wYear, sysTime.wMonth, sysTime.wDay, sysTime.wHour, sysTime.wMinute, sysTime.wSecond);
 		// 证书有效终止日期
 		memset(&sysTime, 0, sizeof(sysTime));
 		FileTimeToSystemTime(&pCertContext->pCertInfo->NotAfter, &sysTime);
 		SystemTimeToTime_t( sysTime,&(pCertProperty->ulNotAfter));
 		memset(szTime, 0, sizeof(szTime));
-		sprintf_s(szTime, 128, "%04d-%02d-%02d %d:%d:%d", sysTime.wYear, sysTime.wMonth, sysTime.wDay, sysTime.wHour, sysTime.wMinute, sysTime.wSecond);
+		sprintf_s(szTime, 128, "%04d-%02d-%02d %02d:%02d:%02d", sysTime.wYear, sysTime.wMonth, sysTime.wDay, sysTime.wHour, sysTime.wMinute, sysTime.wSecond);
 
 		CertGetNameStringA(pCertContext,CERT_NAME_ATTR_TYPE,0,NULL, pCertProperty->szCommonName, 64);
 
