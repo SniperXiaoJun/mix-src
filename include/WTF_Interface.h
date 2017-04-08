@@ -89,19 +89,33 @@ extern "C" {
 	*/
 	COMMON_API unsigned int __stdcall WTF_ReadSKFPath(const char * pszSKFName, char * pszDllPath, unsigned int *puiDllPathLen);
 
+
+	/*
+	功能名称:	读取指定SKF签名类型
+	函数名称:	WTF_ReadSKFSignType
+	输入参数:	pszSKFName SKF库
+	输出参数:	
+				pszSignType		SKF库加载路径
+				puiSignTypeLen	长度
+	返回值: 
+	失败：
+	功能描述:	读取指定SKF签名类型
+	*/
+	COMMON_API unsigned int __stdcall WTF_ReadSKFSignType(const char * pszSKFName, char * pszSignType, unsigned int *puiSignTypeLen);
+
 	/*
 	功能名称:	枚举证书
 	函数名称:	WTF_EnumCertInternal
 	输入参数:	
 				pszSKFName SKF库(NULL 代表全部SKF库)
-				ulKeyFlag
+				uiKeyFlag
 					证书(密钥类型标志) 可以做按位与操作
 					参见 WTF_CERT_ALG_FLAG
-				ulSignFlag 
+				uiSignFlag 
 					证书(签名|加密标志) 可以做按位与操作
 					参见 WTF_CERT_SIGN_FLAG
 
-				ulVerifyFlag
+				uiVerifyFlag
 					证书(验证标志) 可以做按位与操作
 					参见 WTF_CERT_VERIFY_FLAG
 	输出参数:	
@@ -111,9 +125,9 @@ extern "C" {
 	失败：
 	功能描述:	枚举证书
 	*/
-	COMMON_API unsigned int __stdcall WTF_EnumCertInternal(const char *pszSKFName, void *pvCertsValue,unsigned int *puiCertsLen, unsigned int ulKeyFlag, unsigned int ulSignFlag,unsigned int ulVerifyFlag, unsigned int ulFilterFlag);
-	COMMON_API unsigned int __stdcall WTF_EnumCertInternalBySKF(const char * pszSKFName, void * pvCertsValue,unsigned int *puiCertsLen, unsigned int ulKeyFlag, unsigned int ulSignFlag,unsigned int ulVerifyFlag, unsigned int ulFilterFlag);
-	COMMON_API unsigned int __stdcall WTF_EnumCertInternalByProperty(SK_CERT_DESC_PROPERTY * pCertProperty, void * pvCertsValue,unsigned int *puiCertsLen, unsigned int ulKeyFlag, unsigned int ulSignFlag,unsigned int ulVerifyFlag, unsigned int ulFilterFlag);
+	COMMON_API unsigned int __stdcall WTF_EnumCertInternal(const char *pszSKFName, void *pvCertsValue,unsigned int *puiCertsLen, unsigned int uiKeyFlag, unsigned int uiSignFlag,unsigned int uiVerifyFlag, unsigned int uiFilterFlag);
+	COMMON_API unsigned int __stdcall WTF_EnumCertInternalBySKF(const char * pszSKFName, void * pvCertsValue,unsigned int *puiCertsLen, unsigned int uiKeyFlag, unsigned int uiSignFlag,unsigned int uiVerifyFlag, unsigned int uiFilterFlag);
+	COMMON_API unsigned int __stdcall WTF_EnumCertInternalByProperty(SK_CERT_DESC_PROPERTY * pCertProperty, void * pvCertsValue,unsigned int *puiCertsLen, unsigned int uiKeyFlag, unsigned int uiSignFlag,unsigned int uiVerifyFlag, unsigned int uiFilterFlag);
 	/*
 	功能名称:	枚举设备
 	函数名称:	WTF_EnumDev
@@ -132,14 +146,14 @@ extern "C" {
 	函数名称:	WTF_EnumCert
 	输入参数:	
 			pszSKFName SKF库(NULL 代表全部SKF库)
-			ulKeyFlag
+			uiKeyFlag
 				证书(密钥类型标志) 可以做按位与操作
 				参见 WTF_CERT_ALG_FLAG
-			ulSignFlag 
+			uiSignFlag 
 				证书(签名|加密标志) 可以做按位与操作
 				参见 WTF_CERT_SIGN_FLAG
 
-			ulVerifyFlag
+			uiVerifyFlag
 				证书(验证标志) 可以做按位与操作
 				参见 WTF_CERT_VERIFY_FLAG
 	输出参数:	
@@ -149,14 +163,14 @@ extern "C" {
 	失败：
 	功能描述:	枚举证书
 	*/
-	COMMON_API unsigned int __stdcall WTF_EnumCert(const char *pszDevName,void *pvCertsValue,unsigned int *puiCertsLen, unsigned int ulKeyFlag, unsigned int ulSignFlag,unsigned int ulVerifyFlag, unsigned int ulFilterFlag);
+	COMMON_API unsigned int __stdcall WTF_EnumCert(const char *pszDevName,void *pvCertsValue,unsigned int *puiCertsLen, unsigned int uiKeyFlag, unsigned int uiSignFlag,unsigned int uiVerifyFlag, unsigned int uiFilterFlag);
 
 	/*
 	功能名称:	修改密码（签名证书代表设备）
 	函数名称:	WTF_ChangePIN
 	输入参数:	
 				pszDevName 设备名（使用者CN）
-				ulPINType	类型
+				uiPINType	类型
 				pszOldPin 旧密码
 				pszNewPin 新密码
 				puiRetryCount 重试次数
@@ -165,7 +179,7 @@ extern "C" {
 	失败：
 	功能描述:	修改密码
 	*/
-	COMMON_API unsigned int __stdcall WTF_ChangePIN(const char *pszDevName,unsigned int ulPINType ,const char *pszOldPin,const char * pszNewPin,unsigned int *puiRetryCount);
+	COMMON_API unsigned int __stdcall WTF_ChangePIN(const char *pszDevName,unsigned int uiPINType ,const char *pszOldPin,const char * pszNewPin,unsigned int *puiRetryCount);
 	/*
 	功能名称:	修改密码通过证书属性（签名证书代表设备）
 	函数名称:	WTF_ChangePINByCertProperty
@@ -173,7 +187,7 @@ extern "C" {
 				pCertProperty 证书属性  // SMC接口查找出来之后的结构体
 				pszPIN	密码
 				pbData  数据
-				ulDataLen 长度
+				uiDataLen 长度
 	输出参数:	
 				pSignature 签名值
 				puiRetryCount 重试次数
@@ -181,7 +195,7 @@ extern "C" {
 	失败：
 	功能描述:	修改密码
 	*/
-	COMMON_API unsigned int __stdcall WTF_ChangePINByCertProperty(SK_CERT_DESC_PROPERTY * pCertProperty,unsigned int ulPINType ,const char * pszOldPin,const char * pszNewPin,unsigned int *puiRetryCount);
+	COMMON_API unsigned int __stdcall WTF_ChangePINByCertProperty(SK_CERT_DESC_PROPERTY * pCertProperty,unsigned int uiPINType ,const char * pszOldPin,const char * pszNewPin,unsigned int *puiRetryCount);
 	
 	
 	typedef unsigned int (CallBackCfcaGetEncryptPIN)(void * param,unsigned char *pbRandom,unsigned int uiRandomLen, unsigned char *pbEncryptPIN,unsigned int *puiEncryptPINLen);
@@ -194,15 +208,15 @@ extern "C" {
 		void * hCon;
 	}OPST_HANDLE_ARGS;
 
-	COMMON_API unsigned int __stdcall WTF_SM2SignInitializeVerifyPINByCertProperty(SK_CERT_DESC_PROPERTY * pCertProperty,unsigned int ulPINType , CallBackCfcaGetEncryptPIN GetEncryptPIN,  OPST_HANDLE_ARGS * args, unsigned int *puiRetryCount);
-	COMMON_API unsigned int __stdcall WTF_SM2SignDigestProcess(OPST_HANDLE_ARGS *args, BYTE *pbData, unsigned int ulDataLen, PECCSIGNATUREBLOB pSignature);
+	COMMON_API unsigned int __stdcall WTF_SM2SignInitializeVerifyPINByCertProperty(SK_CERT_DESC_PROPERTY * pCertProperty,unsigned int uiPINType , CallBackCfcaGetEncryptPIN GetEncryptPIN,  OPST_HANDLE_ARGS * args, unsigned int *puiRetryCount);
+	COMMON_API unsigned int __stdcall WTF_SM2SignDigestProcess(OPST_HANDLE_ARGS *args, BYTE *pbData, unsigned int uiDataLen, PECCSIGNATUREBLOB pSignature);
 	COMMON_API unsigned int __stdcall WTF_SM2SignFinalize(OPST_HANDLE_ARGS * args);
-	COMMON_API unsigned int __stdcall WTF_SM2SignDigestForHengBao(SK_CERT_DESC_PROPERTY * pCertProperty,unsigned int ulPINType , CallBackCfcaGetEncryptPIN GetEncryptPIN, void * pArgs/*NULL is able*/, unsigned int *puiRetryCount, BYTE *pbData, unsigned int ulDataLen, PECCSIGNATUREBLOB pSignature);
+	COMMON_API unsigned int __stdcall WTF_SM2SignDigestForHengBao(SK_CERT_DESC_PROPERTY * pCertProperty,unsigned int uiPINType , CallBackCfcaGetEncryptPIN GetEncryptPIN, void * pArgs/*NULL is able*/, unsigned int *puiRetryCount, BYTE *pbData, unsigned int uiDataLen, PECCSIGNATUREBLOB pSignature);
 
 
 
 	COMMON_API unsigned int __stdcall WTF_SM2SignInitializeV2(SK_CERT_DESC_PROPERTY * pCertProperty, OPST_HANDLE_ARGS *args);
-	COMMON_API unsigned int __stdcall WTF_SM2SignDigestProcessV2(SK_CERT_DESC_PROPERTY * pCertProperty, BYTE *pbData, unsigned int ulDataLen, PECCSIGNATUREBLOB pSignature);
+	COMMON_API unsigned int __stdcall WTF_SM2SignDigestProcessV2(SK_CERT_DESC_PROPERTY * pCertProperty, BYTE *pbData, unsigned int uiDataLen, PECCSIGNATUREBLOB pSignature);
 	COMMON_API unsigned int __stdcall WTF_SM2SignFinalizeV2(OPST_HANDLE_ARGS *args);
 
 	COMMON_API unsigned int __stdcall WTF_ArgsGet(SK_CERT_DESC_PROPERTY * pCertProperty, OPST_HANDLE_ARGS * args);
@@ -228,7 +242,7 @@ extern "C" {
 	函数名称:	WTF_VerifyPIN
 	输入参数:	
 				pszDevName 设备名称
-				ulPINType 管理员/用户
+				uiPINType 管理员/用户
 				pszPIN	密码
 	输出参数:	
 				puiRetryCount 重试次数
@@ -236,13 +250,13 @@ extern "C" {
 	失败：
 	功能描述:	验证设备密码
 	*/
-	COMMON_API unsigned int __stdcall WTF_VerifyPIN(const char *pszDevName,unsigned int ulPINType ,const char *pszPin,unsigned int *puiRetryCount);
+	COMMON_API unsigned int __stdcall WTF_VerifyPIN(const char *pszDevName,unsigned int uiPINType ,const char *pszPin,unsigned int *puiRetryCount);
 	/*
 	功能名称:	验证设备密码通过证书属性（签名证书代表设备）
 	函数名称:	WTF_VerifyPINByCertProperty
 	输入参数:	
 				pCertProperty 证书属性  // SMC接口查找出来之后的结构体
-				ulPINType 管理员/用户
+				uiPINType 管理员/用户
 				pszPIN	密码
 	输出参数:	
 				puiRetryCount 重试次数
@@ -250,7 +264,7 @@ extern "C" {
 	失败：
 	功能描述:	验证设备密码通过证书属性
 	*/
-	COMMON_API unsigned int __stdcall WTF_VerifyPINByCertProperty(SK_CERT_DESC_PROPERTY * pCertProperty,unsigned int ulPINType ,const char * pszPin,unsigned int *puiRetryCount);
+	COMMON_API unsigned int __stdcall WTF_VerifyPINByCertProperty(SK_CERT_DESC_PROPERTY * pCertProperty,unsigned int uiPINType ,const char * pszPin,unsigned int *puiRetryCount);
 
 
 	/*
@@ -260,7 +274,7 @@ extern "C" {
 				pCertProperty 证书属性  // SMC接口查找出来之后的结构体
 				pszPIN	密码
 				pbData  数据
-				ulDataLen 长度
+				uiDataLen 长度
 	输出参数:	
 				pSignature 签名值
 				puiRetryCount 重试次数
@@ -268,7 +282,14 @@ extern "C" {
 	失败：
 	功能描述:	修改密码
 	*/
-	COMMON_API unsigned int __stdcall WTF_SM2SignDigest(SK_CERT_DESC_PROPERTY *pCertProperty, const char *pszPIN, BYTE *pbData, unsigned int ulDataLen, PECCSIGNATUREBLOB pSignature,unsigned int *puiRetryCount);
+	COMMON_API unsigned int __stdcall WTF_SM2SignDigest(SK_CERT_DESC_PROPERTY *pCertProperty, const char *pszPIN, BYTE *pbData, unsigned int uiDataLen, PECCSIGNATUREBLOB pSignature,unsigned int *puiRetryCount);
+
+	COMMON_API unsigned int __stdcall WTF_SM2SignDigestV2(
+		SK_CERT_DESC_PROPERTY *pCertProperty, 
+		const char *pszPIN, 
+		BYTE *pbDigest, unsigned int uiDigestLen, 
+		BYTE *pbData, unsigned int uiDataLen, 
+		PECCSIGNATUREBLOB pSignature,unsigned int *puiRetryCount);
 	
 
 	/*
@@ -278,75 +299,75 @@ extern "C" {
 				pszDevName 设备名（使用者CN）
 				pSM2PubKeyBlob	公钥
 				pbData  数据
-				ulDataLen 长度
+				uiDataLen 长度
 				pSignature 签名值
 	输出参数:	
 	返回值: 
 	失败：
 	功能描述:	修改密码
 	*/
-	COMMON_API unsigned int __stdcall WTF_SM2VerifyDigest(ECCPUBLICKEYBLOB* pSM2PubKeyBlob, BYTE *pbData, ULONG  ulDataLen, PECCSIGNATUREBLOB pSignature);
+	COMMON_API unsigned int __stdcall WTF_SM2VerifyDigest(ECCPUBLICKEYBLOB* pSM2PubKeyBlob, BYTE *pbData, ULONG  uiDataLen, PECCSIGNATUREBLOB pSignature);
 
 
 	/*
 	功能描述:	验证证书的合法性
 	参数:
 				pszSKFName SKF库(NULL 代表全部SKF库)
-				ulVerifyFlag
+				uiVerifyFlag
 					证书(验证标志) 可以做按位与操作
 					参见 WTF_CERT_VERIFY_FLAG
 				pbCert[IN]:  输入证书内容,DER编码
-				ulCertLen[IN]:输入证书内容长度。
+				uiCertLen[IN]:输入证书内容长度。
 	返回值		0：  成功。
 	其他： 错误码
 
 	*/
-	COMMON_API unsigned int __stdcall WTF_VerifyCert(unsigned int ulFlag, unsigned int ulAlgType, BYTE* pbCert, unsigned int ulCertLen);
+	COMMON_API unsigned int __stdcall WTF_VerifyCert(unsigned int uiFlag, unsigned int uiAlgType, BYTE* pbCert, unsigned int uiCertLen);
 
 	/*
 	功能描述:	验证根证书的合法性
 	参数:
-				ulVerifyFlag
+				uiVerifyFlag
 					(验证标志) 可以做按位与操作
-				ulVerifyFlag
+				uiVerifyFlag
 					证书(验证标志) 可以做按位与操作
 					参见 WTF_CERT_VERIFY_FLAG
 				pbCert[IN]:  输入证书内容,DER编码
-				ulCertLen[IN]:输入证书内容长度。
+				uiCertLen[IN]:输入证书内容长度。
 	返回值		0：  成功。
 	其他： 错误码
 
 	*/
-	COMMON_API unsigned int __stdcall WTF_VerifyRootCert(unsigned int ulVerifyFlag,unsigned int ulAlgType, BYTE* pbCert, unsigned int ulCertLen);
+	COMMON_API unsigned int __stdcall WTF_VerifyRootCert(unsigned int uiVerifyFlag,unsigned int uiAlgType, BYTE* pbCert, unsigned int uiCertLen);
 
 
 	/*
 	功能描述:	证书获取属性信息
 	输入参数:	
 				pbCert[IN]:		输入证书内容,DER编码
-				ulCertLen[IN]:	输入证书内容长度。
+				uiCertLen[IN]:	输入证书内容长度。
 	输出参数:	
 				pCertProperty	证书属性
 	返回值		0：  成功。
 	其他： 错误码
 
 	*/
-	COMMON_API unsigned int __stdcall WTF_CertGetProperty(BYTE* pbCert, unsigned int ulCertLen, SK_CERT_DESC_PROPERTY * pCertProperty);
+	COMMON_API unsigned int __stdcall WTF_CertGetProperty(BYTE* pbCert, unsigned int uiCertLen, SK_CERT_DESC_PROPERTY * pCertProperty);
 
 	/*
 	功能描述:	显示证书
 	输入参数:	
 				pbCert[IN]:		输入证书内容,DER编码
-				ulCertLen[IN]:	输入证书内容长度。
+				uiCertLen[IN]:	输入证书内容长度。
 	返回值		0：  成功。
 	其他：		错误码
 	*/
-	COMMON_API unsigned int __stdcall WTF_UIDlgViewContext(BYTE* pbCert, unsigned int ulCertLen);
+	COMMON_API unsigned int __stdcall WTF_UIDlgViewContext(BYTE* pbCert, unsigned int uiCertLen);
 
 	/*
 	功能描述:	清空存储区里的证书
 	输入参数:	
-				ulStoreID ：
+				uiStoreID ：
 					DEFAULT_SMC_STORE_SM2_ROOT_ID 1                // 根
 					DEFAULT_SMC_STORE_SM2_USER_ID 2                // 用户
 					DEFAULT_SMC_STORE_SM2_OTHERS_ID 3              // 其他
@@ -354,42 +375,42 @@ extern "C" {
 	返回值		0：  成功。
 	其他：		错误码
 	*/
-	COMMON_API unsigned int __stdcall WTF_ClearStore(unsigned int ulStoreID);
+	COMMON_API unsigned int __stdcall WTF_ClearStore(unsigned int uiStoreID);
 
 	/*
 	功能描述:	导入根证书
 	输入参数:	
 				pbCert[IN]:		输入证书内容,DER编码
-				ulCertLen[IN]:	输入证书内容长度。
+				uiCertLen[IN]:	输入证书内容长度。
 	输出参数：
-				pulAlgType 算法类型
+				puiAlgType 算法类型
 	返回值		0：  成功。
 				
 	其他：		错误码
 	*/
-	COMMON_API unsigned int __stdcall WTF_ImportCaCert(BYTE * pbCert, unsigned int ulCertLen, unsigned int * pulAlgType);
+	COMMON_API unsigned int __stdcall WTF_ImportCaCert(BYTE * pbCert, unsigned int uiCertLen, unsigned int * puiAlgType);
 
 	/*
 	功能描述:	是否是根证书
 	输入参数:	
 				pbCert[IN]:		输入证书内容,DER编码
-				ulCertLen[IN]:	输入证书内容长度。
+				uiCertLen[IN]:	输入证书内容长度。
 	返回值		0：  成功。
 	其他：		错误码
 	*/
-	COMMON_API unsigned int __stdcall WTF_IsSM2RootCert(BYTE* pbCert, unsigned int ulCertLen,unsigned int * bIRoot);
+	COMMON_API unsigned int __stdcall WTF_IsSM2RootCert(BYTE* pbCert, unsigned int uiCertLen,unsigned int * bIRoot);
 
 	/*
 	功能描述:	查找上级CA证书
 	输入参数:	
 				pbCert[IN]:		输入证书内容,DER编码
-				ulCertLen[IN]:	输入证书内容长度。
+				uiCertLen[IN]:	输入证书内容长度。
 	输出参数：
 	返回值		0：  成功。
 	其他：		错误码
 	*/
-	COMMON_API unsigned int __stdcall WTF_FindSM2CACert(BYTE* pbCert, unsigned int ulCertLen,
-		BYTE* pbCACert, unsigned int * ulCACertLen
+	COMMON_API unsigned int __stdcall WTF_FindSM2CACert(BYTE* pbCert, unsigned int uiCertLen,
+		BYTE* pbCACert, unsigned int * uiCACertLen
 		);
 
 	/*
@@ -413,7 +434,7 @@ extern "C" {
 	功能描述:	通过证书描述属性获取加密证书
 	*/
 	COMMON_API unsigned int __stdcall WTF_FindEnCertificateByCertDescProperty(
-		_In_ SK_CERT_DESC_PROPERTY * pCertDescProperty, _Out_ unsigned char * pbCert, _Inout_ unsigned int * pulCertLen
+		_In_ SK_CERT_DESC_PROPERTY * pCertDescProperty, _Out_ unsigned char * pbCert, _Inout_ unsigned int * puiCertLen
 		);
 
 	COMMON_API unsigned int __stdcall WTF_SM2GetAgreementKey(
@@ -433,20 +454,20 @@ extern "C" {
 
 	COMMON_API unsigned int __stdcall WTF_SM2GetAgreementKeyEx(
 		_In_ BYTE* pbCert,
-		_In_ unsigned int ulCertLen,
-		_In_ int ulAlgId,
+		_In_ unsigned int uiCertLen,
+		_In_ int uiAlgId,
 		_Out_ BYTE* pbTempECCPubKeyBlobA,
-		_Inout_ int *pulTempECCPubKeyBlobALen,
+		_Inout_ int *puiTempECCPubKeyBlobALen,
 		_In_ BYTE* pbIDA,
-		_In_ int ulIDALen,
+		_In_ int uiIDALen,
 		_In_ BYTE* pbECCPubKeyBlobB,
-		_In_ int  ulECCPubKeyBlobBLen,
+		_In_ int  uiECCPubKeyBlobBLen,
 		_In_ BYTE* pbTempECCPubKeyBlobB,
-		_In_ int  ulTempECCPubKeyBlobBLen,
+		_In_ int  uiTempECCPubKeyBlobBLen,
 		_In_ BYTE* pbIDB,
-		_In_ int ulIDBLen,
+		_In_ int uiIDBLen,
 		_Out_ BYTE *pbAgreementKey,
-		_Inout_ int *pulAgreementKeyLen,
+		_Inout_ int *puiAgreementKeyLen,
 		_In_ const char * pszPIN,
 		_Inout_ int * puiRetryCount);
 

@@ -19,6 +19,7 @@ HANDLE hMutex = 0;
 #define REG_ROOT_KEY HKEY_LOCAL_MACHINE
 #define REG_SUB_KEY_PREFIX "SOFTWARE\\Microsoft\\Cryptography\\Defaults\\SKF"
 #define REG_VALUE_PATH_KEYNAME "path"
+#define REG_VALUE_SIGNTYPE_KEYNAME "signtype"
 #define REG_CURRENT_SKF "WDSKF"
 
 #define SM2_ALG_BYTES "\x2a\x86\x48\xce\x3d\x02\x01"
@@ -127,10 +128,10 @@ typedef ULONG (DEVAPI *pSKF_GenerateKeyWithECCEx)(HANDLE hAgreementHandle,
 	BYTE *pbAgreementKey, ULONG *pulAgreementKeyLen);
 
 
-// 最大加载SKF DLL接口�?
+// 最大加载SKF DLL接口个数
 #define MAX_SKF_DLL_LOAD 4
 
-// 最在设备个�?
+// 最大设备个数
 #define MAX_SKF_CERT 1024
 
 unsigned int __stdcall WTF_EnumSKF(char * pszSKFNames, unsigned int * puiSKFNamesLen)
@@ -157,15 +158,15 @@ unsigned int __stdcall WTF_EnumSKF(char * pszSKFNames, unsigned int * puiSKFName
 		return -1;
 	}
 
-	//枚举键值信�?--------------------------------------------------------------
-	for(dwIndex=0;dwIndex<NameCnt;dwIndex++)    //枚举键�?
+	//枚举键值信息--------------------------------------------------------------
+	for(dwIndex=0;dwIndex<NameCnt;dwIndex++)    //枚举键
 	{
 		NameSize=NameMaxLen+1;
 		szValueName=(char *)malloc(NameSize);
 
 		memset(szValueName, 0, NameSize);
 
-		RegEnumKeyExA(hKey,dwIndex,szValueName,&NameSize,NULL,NULL,NULL,NULL);//读取键�?
+		RegEnumKeyExA(hKey,dwIndex,szValueName,&NameSize,NULL,NULL,NULL,NULL);//读取键
 
 		DEBUG("%s %s\n", szValueName, "");
 
@@ -231,8 +232,8 @@ unsigned int __stdcall WTF_ReadSKFPath(const char * pszSKFName, char * pszDllPat
 		RegCloseKey(hKey);
 		return -1;
 	}
-	//枚举键值信�?--------------------------------------------------------------
-	for(dwIndex=0;dwIndex<NameCnt;dwIndex++)    //枚举键�?
+	//枚举键值信息--------------------------------------------------------------
+	for(dwIndex=0;dwIndex<NameCnt;dwIndex++)    //枚举键
 	{
 		DataSize=MaxDateLen+1;
 		NameSize=NameMaxLen+1;
@@ -242,7 +243,7 @@ unsigned int __stdcall WTF_ReadSKFPath(const char * pszSKFName, char * pszDllPat
 		memset(szValueName, 0, NameSize);
 		memset(szValueData, 0, DataSize);
 
-		RegEnumValueA(hKey,dwIndex,szValueName,&NameSize,NULL,&Type,szValueData,&DataSize);//读取键�?
+		RegEnumValueA(hKey,dwIndex,szValueName,&NameSize,NULL,&Type,szValueData,&DataSize);//读取键
 
 		DEBUG("%s %s\n", szValueName, szValueData);
 
@@ -256,6 +257,88 @@ unsigned int __stdcall WTF_ReadSKFPath(const char * pszSKFName, char * pszDllPat
 			else
 			{
 				* puiDllPathLen = DataSize;
+			}
+			bFalg = TRUE;
+			break;
+		}
+
+		free(szValueName);
+		free(szValueData);
+		szValueName = 0;
+		szValueData = 0;
+	}
+
+	RegCloseKey(hKey);
+
+	if (bFalg)
+	{
+		ulRet = 0;
+	}
+	else
+	{
+		ulRet = -1;
+	}
+
+	return ulRet;
+}
+
+unsigned int __stdcall WTF_ReadSKFSignType(const char * pszSKFName, char * pszSignType, unsigned int *puiSignTypeLen)
+{
+	unsigned int ulRet = 0;
+	HKEY hKey;
+	BOOL bFalg = FALSE;
+	unsigned int DataSize,MaxDateLen;
+	unsigned int dwIndex=0,NameSize,NameCnt,NameMaxLen,Type;
+	char SubKey[BUFFER_LEN_1K] = {0};
+
+	//LPCSTR SubKey[] =  REG_SUB_KEY_PREFIX;
+
+	char * szValueName;
+	LPBYTE  szValueData;
+
+	strcat(SubKey,REG_SUB_KEY_PREFIX);
+	strcat(SubKey,"\\");
+	strcat(SubKey,pszSKFName);
+
+	if (RegOpenKeyExA(REG_ROOT_KEY,SubKey,0,KEY_READ,&hKey)!=
+		ERROR_SUCCESS)
+	{
+		DEBUG("RegOpenKeyEx错误");
+		return -1;
+	}
+
+	//获取子键信息---------------------------------------------------------------
+	if(RegQueryInfoKey(hKey,NULL,NULL,NULL,NULL,NULL,NULL,&NameCnt,&NameMaxLen,&MaxDateLen,NULL,NULL)!=ERROR_SUCCESS)
+	{
+		DEBUG("RegQueryInfoKey错误");
+		RegCloseKey(hKey);
+		return -1;
+	}
+	//枚举键值信息--------------------------------------------------------------
+	for(dwIndex=0;dwIndex<NameCnt;dwIndex++)    //枚举键
+	{
+		DataSize=MaxDateLen+1;
+		NameSize=NameMaxLen+1;
+		szValueName=(char *)malloc(NameSize);
+		szValueData=(LPBYTE)malloc(DataSize);
+
+		memset(szValueName, 0, NameSize);
+		memset(szValueData, 0, DataSize);
+
+		RegEnumValueA(hKey,dwIndex,szValueName,&NameSize,NULL,&Type,szValueData,&DataSize);//读取键
+
+		DEBUG("%s %s\n", szValueName, szValueData);
+
+		if(0 == (strcmp(szValueName,REG_VALUE_SIGNTYPE_KEYNAME)))
+		{
+			if(NULL != pszSignType)
+			{
+				* puiSignTypeLen = DataSize;
+				memcpy(pszSignType, szValueData, DataSize);
+			}
+			else
+			{
+				* puiSignTypeLen = DataSize;
 			}
 			bFalg = TRUE;
 			break;
@@ -315,7 +398,7 @@ unsigned int __stdcall WTF_EnumDev(char * pszDevsName,unsigned int *puiDevsNameL
 	}
 
 
-	// 赋�?
+	// 赋值
 	pCertContent = (SK_CERT_CONTENT *)data_value;
 
 	if (NULL == pszDevsName || *puiDevsNameLen < ulOutLen)
@@ -2269,6 +2352,195 @@ err:
 	return ulRet;
 }
 
+unsigned int __stdcall WTF_SM2SignDigestV2(
+		SK_CERT_DESC_PROPERTY *pCertProperty, 
+		const char *pszPIN, 
+		BYTE *pbDigest, unsigned int uiDigestLen, 
+		BYTE *pbData, unsigned int uiDataLen, 
+		PECCSIGNATUREBLOB pSignature,unsigned int *puiRetryCount)
+{
+	HINSTANCE ghInst = NULL;
+
+	/*
+	SKF函数地址
+	*/
+
+	FUNC_NAME_DECLARE(func_, EnumDev,);
+	FUNC_NAME_DECLARE(func_, ConnectDev,);
+	FUNC_NAME_DECLARE(func_, DisConnectDev,);
+	FUNC_NAME_DECLARE(func_, ChangePIN,);
+	FUNC_NAME_DECLARE(func_, OpenApplication,);
+	FUNC_NAME_DECLARE(func_, CloseApplication,);
+	FUNC_NAME_DECLARE(func_, EnumApplication,);
+	FUNC_NAME_DECLARE(func_, ExportCertificate,);
+	FUNC_NAME_DECLARE(func_, EnumContainer,);
+	FUNC_NAME_DECLARE(func_, OpenContainer,);
+	FUNC_NAME_DECLARE(func_, CloseContainer,);
+	FUNC_NAME_DECLARE(func_, VerifyPIN,);
+	FUNC_NAME_DECLARE(func_, GetContainerType,);
+	FUNC_NAME_DECLARE(func_, ECCSignData,);
+	FUNC_NAME_DECLARE(func_, ECCVerify,);
+	FUNC_NAME_DECLARE(func_, ExtECCVerify,);
+	FUNC_NAME_DECLARE(func_, GetDevInfo,);
+	FUNC_NAME_DECLARE(func_, LockDev,);
+	FUNC_NAME_DECLARE(func_, UnlockDev,);
+
+	FUNC_NAME_DECLARE(func_, GenerateKeyWithECCEx,);
+	FUNC_NAME_DECLARE(func_, GenerateAgreementDataWithECC,);
+	FUNC_NAME_DECLARE(func_, GenerateAgreementDataWithECCEx, );
+	FUNC_NAME_DECLARE(func_, GenerateAgreementDataAndKeyWithECCEx, );
+
+	unsigned int ulRet = 0;
+
+
+	unsigned int dllPathLen = BUFFER_LEN_1K;
+	char dllPathValue[BUFFER_LEN_1K] = {0};
+
+	unsigned int signTypeLen = BUFFER_LEN_1K;
+	char signTypeValue[BUFFER_LEN_1K] = {0};
+
+	DEVHANDLE hDev = NULL;
+	HAPPLICATION hAPP = NULL;
+	HCONTAINER hCon = NULL;
+
+	ulRet = WTF_ReadSKFPath(pCertProperty->szSKFName, dllPathValue, &dllPathLen);
+
+	if (0 != ulRet)
+	{
+		ulRet = EErr_SMC_DLL_REG_PATH;
+		goto err;
+	}
+
+	// there may be fail, so don't judge return value
+	WTF_ReadSKFSignType(pCertProperty->szSKFName, signTypeValue, &signTypeLen);
+
+	ghInst=LoadLibraryA(dllPathValue);//动态加载Dll
+
+	if (!ghInst)
+	{
+		ulRet = EErr_SMC_DLL_PATH;
+		goto err;
+	}
+
+	FUNC_NAME_INIT(func_, EnumDev,);
+	FUNC_NAME_INIT(func_, ConnectDev,);
+	FUNC_NAME_INIT(func_, DisConnectDev,);
+	FUNC_NAME_INIT(func_, ChangePIN,);
+	FUNC_NAME_INIT(func_, OpenApplication,);
+	FUNC_NAME_INIT(func_, CloseApplication,);
+	FUNC_NAME_INIT(func_, EnumApplication,);
+	FUNC_NAME_INIT(func_, ExportCertificate,);
+	FUNC_NAME_INIT(func_, EnumContainer,);
+	FUNC_NAME_INIT(func_, OpenContainer,);
+	FUNC_NAME_INIT(func_, CloseContainer,);
+	FUNC_NAME_INIT(func_, VerifyPIN,);
+	FUNC_NAME_INIT_GetContainerType(func_, GetContainerType,);
+	FUNC_NAME_INIT(func_, ECCSignData,);
+	FUNC_NAME_INIT(func_, LockDev,);
+	FUNC_NAME_INIT(func_, UnlockDev,);
+
+	{
+
+
+		ulRet = func_ConnectDev(pCertProperty->szDeviceName, &hDev);
+		if (0 != ulRet)
+		{
+			goto err;
+		}
+
+#if USE_SELF_MUTEX
+		if(ulRet=SDSCWaitMutex(mutex_buffer,INFINITE,&hMutex))
+		{
+			goto err;
+		}
+#else
+		ulRet = func_LockDev(hDev,0xFFFFFFFF);
+		if (0 != ulRet)
+		{
+			goto err;
+		}
+#endif
+
+		ulRet = func_OpenApplication(hDev,pCertProperty->szApplicationName,&hAPP);
+		if (0 != ulRet)
+		{
+			goto err;
+		}
+
+		ulRet = func_VerifyPIN(hAPP, 1, pszPIN, puiRetryCount);
+		if (0 != ulRet)
+		{
+			goto err;
+		}
+
+		ulRet = func_OpenContainer(hAPP, pCertProperty->szContainerName, &hCon);
+		if (0 != ulRet)
+		{
+			goto err;
+		}
+
+		if(0 == memcmp("data", signTypeValue,4))
+		{
+			ulRet = func_ECCSignData(hCon,pbData,uiDataLen,pSignature);
+		}
+		else
+		{
+			ulRet = func_ECCSignData(hCon,pbDigest,uiDigestLen,pSignature);
+		}
+
+		if (0 != ulRet)
+		{
+			goto err;
+		}
+
+		ulRet = func_CloseContainer(hCon);
+		if (0 != ulRet)
+		{
+			goto err;
+		}
+
+		ulRet = func_CloseApplication(hAPP);
+		if (0 != ulRet)
+		{
+			goto err;
+		}
+
+#if USE_SELF_MUTEX
+		SDSCReleaseMutex(hMutex);
+#else
+		func_UnlockDev(hDev);
+#endif
+
+		ulRet = func_DisConnectDev(hDev);hDev = NULL;
+		if (0 != ulRet)
+		{
+			goto err;
+		}
+	}
+
+err:
+
+	if(hDev)
+	{
+#if USE_SELF_MUTEX
+		SDSCReleaseMutex(hMutex);
+#else
+		func_UnlockDev(hDev);
+#endif
+		func_DisConnectDev(hDev);hDev = NULL;
+	}
+
+	if(ghInst)
+	{
+		FreeLibrary(ghInst);//释放Dll函数
+		ghInst = NULL;
+	}
+
+	return ulRet;
+}
+
+
+
 unsigned int __stdcall WTF_SM2VerifyDigest(ECCPUBLICKEYBLOB* pECCPubKeyBlob, BYTE *pbData, ULONG  ulDataLen, PECCSIGNATUREBLOB pSignature)
 {
 	unsigned int ulRet = 0;
@@ -2412,7 +2684,7 @@ unsigned int __stdcall WTF_VerifyCert(unsigned int ulFlag,unsigned int ulAlgType
 	{
 	case CERT_ALG_RSA_FLAG:
 		{
-			// 创建上下�?
+			// 创建上下文
 			certContext_IN = CertCreateCertificateContext(X509_ASN_ENCODING, pbCert,ulCertLen);
 			if (!certContext_IN)
 			{
@@ -2432,7 +2704,7 @@ unsigned int __stdcall WTF_VerifyCert(unsigned int ulFlag,unsigned int ulAlgType
 			// SIGN CERT
 			if (CERT_VERIFY_CHAIN_FLAG & ulFlag)
 			{
-				// 打开存储�?		
+				// 打开存储区		
 				hCertStore = CertOpenStore(
 					CERT_STORE_PROV_SYSTEM,          // The store provider type
 					0,                               // The encoding type is
@@ -2450,18 +2722,18 @@ unsigned int __stdcall WTF_VerifyCert(unsigned int ulFlag,unsigned int ulAlgType
 					goto err;
 				}
 
-				// 查找颁发者证�?
+				// 查找颁发者证书
 				certContext_OUT = CertFindCertificateInStore(hCertStore,X509_ASN_ENCODING,0,CERT_FIND_ISSUER_OF,certContext_IN,NULL);
 
 				if (NULL == certContext_OUT)
 				{
 					if (hCertStore)
 					{
-						// 关闭存储�?
+						// 关闭存储区
 						CertCloseStore(hCertStore, CERT_CLOSE_STORE_CHECK_FLAG);
 					}
 
-					// 打开存储�?		
+					// 打开存储区		
 					hCertStore = CertOpenStore(
 						CERT_STORE_PROV_SYSTEM,          // The store provider type
 						0,                               // The encoding type is
@@ -2479,7 +2751,7 @@ unsigned int __stdcall WTF_VerifyCert(unsigned int ulFlag,unsigned int ulAlgType
 						goto err;
 					}
 
-					// 查找颁发者证�?
+					// 查找颁发者证书
 					certContext_OUT = CertFindCertificateInStore(hCertStore,X509_ASN_ENCODING,0,CERT_FIND_ISSUER_OF,certContext_IN,NULL);
 				}
 
@@ -2487,10 +2759,10 @@ unsigned int __stdcall WTF_VerifyCert(unsigned int ulFlag,unsigned int ulAlgType
 				{
 					DWORD  dwFlags = CERT_STORE_SIGNATURE_FLAG;
 
-					// 验证颁发者证�?
+					// 验证颁发者证书
 					if (0 == memcmp(certContext_OUT->pbCertEncoded, pbCert, ulCertLen))
 					{
-						// 验证根证�?
+						// 验证根证书
 						//ulRet = WTF_VerifyRootCert(ulFlag,ulAlgType, certContext_OUT->pbCertEncoded,certContext_OUT->cbCertEncoded);
 					}
 					else
@@ -2535,7 +2807,7 @@ unsigned int __stdcall WTF_VerifyCert(unsigned int ulFlag,unsigned int ulAlgType
 		break;
 	case CERT_ALG_SM2_FLAG:
 		{
-			// 创建上下�?
+			// 创建上下文
 			certContext_IN = SMC_CertCreateCertificateContext(X509_ASN_ENCODING, pbCert,ulCertLen);
 			if (!certContext_IN)
 			{
@@ -2555,7 +2827,7 @@ unsigned int __stdcall WTF_VerifyCert(unsigned int ulFlag,unsigned int ulAlgType
 			// SIGN CERT
 			if (CERT_VERIFY_CHAIN_FLAG & ulFlag)
 			{
-				// 创建存储�?
+				// 创建存储区
 				ulRet = SMC_CertCreateSMCStores();
 
 				if(TRUE != ulRet)
@@ -2564,7 +2836,7 @@ unsigned int __stdcall WTF_VerifyCert(unsigned int ulFlag,unsigned int ulAlgType
 					goto err;
 				}
 
-				// 打开存储�?		
+				// 打开存储区	
 
 				hCertStore = SMC_CertOpenStore(0,CERT_SYSTEM_STORE_CURRENT_USER, DEFAULT_SMC_STORE_SM2_ROOT_ID);
 
@@ -2574,12 +2846,12 @@ unsigned int __stdcall WTF_VerifyCert(unsigned int ulFlag,unsigned int ulAlgType
 					goto err;
 				}
 
-				// 查找颁发者证�?
+				// 查找颁发者证书
 				certContext_OUT = SMC_CertFindCertificateInStore(hCertStore,X509_ASN_ENCODING,CERT_FIND_ISSUER_OF,certContext_IN,NULL);
 
 				if (NULL != certContext_OUT)
 				{
-					// 验证颁发者证�?
+					// 验证颁发者证书
 					if (0 == memcmp(certContext_OUT->pbCertEncoded, pbCert, ulCertLen))
 					{
 						// 验证
@@ -2641,13 +2913,13 @@ unsigned int __stdcall WTF_VerifyCert(unsigned int ulFlag,unsigned int ulAlgType
 	}
 
 err:
-	// 释放上下�?
+	// 释放上下文
 	if(certContext_OUT)
 	{
 		SMC_CertFreeCertificateContext(certContext_OUT);
 	}
 
-	// 释放上下�?
+	// 释放上下文
 	if(certContext_IN)
 	{
 		SMC_CertFreeCertificateContext(certContext_IN);
@@ -2655,7 +2927,7 @@ err:
 
 	if (hCertStore)
 	{
-		// 关闭存储�?
+		// 关闭存储区
 		SMC_CertCloseStore(hCertStore, CERT_CLOSE_STORE_CHECK_FLAG);
 	}
 
@@ -2673,7 +2945,7 @@ unsigned int __stdcall WTF_VerifyRootCert(unsigned int ulFlag,unsigned int ulAlg
 	{
 	case CERT_ALG_RSA_FLAG:
 		{
-			// 创建上下�?
+			// 创建上下文
 			certContext_IN = CertCreateCertificateContext(X509_ASN_ENCODING, pbCert,ulCertLen);
 			if (!certContext_IN)
 			{
@@ -2718,7 +2990,7 @@ unsigned int __stdcall WTF_VerifyRootCert(unsigned int ulFlag,unsigned int ulAlg
 
 	case CERT_ALG_SM2_FLAG:
 		{
-			// 创建上下�?
+			// 创建上下文
 			certContext_IN = SMC_CertCreateCertificateContext(X509_ASN_ENCODING, pbCert,ulCertLen);
 			if (!certContext_IN)
 			{
@@ -2817,9 +3089,9 @@ unsigned int __stdcall WTF_CertGetProperty(BYTE* pbCert, unsigned int ulCertLen,
 		}
 
 		//3.获取证书信息
-		pCertContext->pCertInfo->dwVersion; // 证书版本�?
+		pCertContext->pCertInfo->dwVersion; // 证书版本
 		snBlob = pCertContext->pCertInfo->SerialNumber; // 证书SN
-		issuerBlob = pCertContext->pCertInfo->Issuer; // 证书颁发�?
+		issuerBlob = pCertContext->pCertInfo->Issuer; // 证书颁发者
 		subjectBlob = pCertContext->pCertInfo->Subject; // 证书主题
 
 		// 证书有效起始日期
@@ -2827,13 +3099,13 @@ unsigned int __stdcall WTF_CertGetProperty(BYTE* pbCert, unsigned int ulCertLen,
 		FileTimeToSystemTime(&pCertContext->pCertInfo->NotBefore, &sysTime);
 		SystemTimeToTime_t( sysTime,&(pCertProperty->ulNotBefore));
 		memset(szTime, 0, sizeof(szTime));
-		sprintf_s(szTime, 128, "%d�?d�?d�?%d:%d:%d", sysTime.wYear, sysTime.wMonth, sysTime.wDay, sysTime.wHour, sysTime.wMinute, sysTime.wSecond);
+		sprintf_s(szTime, 128, "%04d-%02d-%02d %d:%d:%d", sysTime.wYear, sysTime.wMonth, sysTime.wDay, sysTime.wHour, sysTime.wMinute, sysTime.wSecond);
 		// 证书有效终止日期
 		memset(&sysTime, 0, sizeof(sysTime));
 		FileTimeToSystemTime(&pCertContext->pCertInfo->NotAfter, &sysTime);
 		SystemTimeToTime_t( sysTime,&(pCertProperty->ulNotAfter));
 		memset(szTime, 0, sizeof(szTime));
-		sprintf_s(szTime, 128, "%d�?d�?d�?%d:%d:%d", sysTime.wYear, sysTime.wMonth, sysTime.wDay, sysTime.wHour, sysTime.wMinute, sysTime.wSecond);
+		sprintf_s(szTime, 128, "%04d-%02d-%02d %d:%d:%d", sysTime.wYear, sysTime.wMonth, sysTime.wDay, sysTime.wHour, sysTime.wMinute, sysTime.wSecond);
 
 		CertGetNameStringA(pCertContext,CERT_NAME_ATTR_TYPE,0,NULL, pCertProperty->szCommonName, 64);
 
@@ -2880,7 +3152,7 @@ COMMON_API unsigned int __stdcall WTF_ClearStore(unsigned int ulStoreID)
 	PCCERT_CONTEXT certContext_OUT = NULL;
 	HCERTSTORE hCertStore = NULL;
 
-	// 创建存储�?
+	// 创建存储区
 	ulRet = SMC_CertCreateSMCStores();
 
 	if (!ulRet)
@@ -2889,7 +3161,7 @@ COMMON_API unsigned int __stdcall WTF_ClearStore(unsigned int ulStoreID)
 		goto err;
 	}
 
-	// 打开存储�?
+	// 打开存储区
 
 	hCertStore = SMC_CertOpenStore(0,CERT_SYSTEM_STORE_CURRENT_USER, ulStoreID);
 
@@ -2902,7 +3174,7 @@ COMMON_API unsigned int __stdcall WTF_ClearStore(unsigned int ulStoreID)
 	// 枚举证书
 	do 
 	{
-		// 从第一个开�?
+		// 从第一个开始
 
 		certContext_OUT = SMC_CertEnumCertificatesInStore(hCertStore, NULL);
 
@@ -2935,7 +3207,7 @@ err:
 
 	if (hCertStore)
 	{
-		// 关闭存储�?
+		// 关闭存储区
 		ulRet = SMC_CertCloseStore(hCertStore, CERT_CLOSE_STORE_CHECK_FLAG);
 	}
 
@@ -2956,7 +3228,7 @@ COMMON_API unsigned int __stdcall WTF_ImportCaCert(BYTE * pbCert, unsigned int u
 	unsigned long bRootCert = 0; // 是否是根CA
 	unsigned long bSM2cert = 0; // 是否是SM2证书
 
-	// 存储区证书属�?
+	// 存储区证书
 	SK_CERT_DESC_PROPERTY * descProperty_IN = NULL;
 
 	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "ulRet");
@@ -3019,7 +3291,7 @@ COMMON_API unsigned int __stdcall WTF_ImportCaCert(BYTE * pbCert, unsigned int u
 	{
 		if (bRootCert)
 		{
-			// 打开存储�?		
+			// 打开存储区	
 			hCertStore = CertOpenStore(
 				CERT_STORE_PROV_SYSTEM,          // The store provider type
 				0,                               // The encoding type is
@@ -3033,7 +3305,7 @@ COMMON_API unsigned int __stdcall WTF_ImportCaCert(BYTE * pbCert, unsigned int u
 		}
 		else
 		{
-			// 打开存储�?		
+			// 打开存储区	
 			hCertStore = CertOpenStore(
 				CERT_STORE_PROV_SYSTEM,          // The store provider type
 				0,                               // The encoding type is
@@ -3061,10 +3333,10 @@ COMMON_API unsigned int __stdcall WTF_ImportCaCert(BYTE * pbCert, unsigned int u
 		goto err;
 	}
 
-	// 置空属�?
+	// 置空属性
 	memset(descProperty_IN, 0,sizeof(SK_CERT_DESC_PROPERTY));
 
-	// 创建上下�?
+	// 创建上下文
 	certContext_IN = SMC_CertCreateCertificateContext(X509_ASN_ENCODING, (BYTE *)pbCert,ulCertLen);
 	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "certContext_IN");
 	FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, certContext_IN);
@@ -3075,7 +3347,7 @@ COMMON_API unsigned int __stdcall WTF_ImportCaCert(BYTE * pbCert, unsigned int u
 		goto err;
 	}
 
-	// 设置属�?
+	// 设置属性
 	ulRet = SMC_CertSetCertificateContextProperty(certContext_IN, CERT_DESC_PROP_ID,CERT_STORE_NO_CRYPT_RELEASE_FLAG, descProperty_IN);
 
 	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "ulRet");
@@ -3123,13 +3395,13 @@ err:
 
 	if(certContext_IN)
 	{
-		// 释放上下�?
+		// 释放上下文
 		SMC_CertFreeCertificateContext(certContext_IN);
 	}
 
 	if (hCertStore)
 	{
-		// 关闭存储�?
+		// 关闭存储区
 		SMC_CertCloseStore(hCertStore, CERT_CLOSE_STORE_CHECK_FLAG);
 	}
 
@@ -3372,7 +3644,7 @@ unsigned int __stdcall WTF_EnumCertInternalBySKF(const char * pszSKFName, void *
 					goto err;
 				}
 
-				//�?表示为RSA容器，为2表示为ECC容器
+				//1表示为RSA容器，为2表示为ECC容器
 				ulRet = func_GetContainerType(hCon, &ulContainerType);
 				if (ulRet)
 				{
@@ -3468,7 +3740,7 @@ unsigned int __stdcall WTF_EnumCertInternalBySKF(const char * pszSKFName, void *
 					}
 					else if (0x0A00001C == ulRet)
 					{
-						// 证书未发�?
+						// 证书未发现
 						ulRet = 0;
 					}
 					else
@@ -3552,7 +3824,7 @@ unsigned int __stdcall WTF_EnumCertInternalBySKF(const char * pszSKFName, void *
 					}
 					else if (0x0A00001C == ulRet)
 					{
-						// 证书未发�?
+						// 证书未发现
 						ulRet = 0;
 					}
 					else
@@ -3813,7 +4085,7 @@ unsigned int __stdcall WTF_EnumCertInternalByProperty(SK_CERT_DESC_PROPERTY * pC
 					goto err;
 				}
 
-				//�?表示为RSA容器，为2表示为ECC容器
+				//1表示为RSA容器，为2表示为ECC容器
 				ulRet = func_GetContainerType(hCon, &ulContainerType);
 				if (ulRet)
 				{
@@ -3904,7 +4176,7 @@ unsigned int __stdcall WTF_EnumCertInternalByProperty(SK_CERT_DESC_PROPERTY * pC
 					}
 					else if (0x0A00001C == ulRet)
 					{
-						// 证书未发�?
+						// 证书未发现
 						ulRet = 0;
 					}
 					else
@@ -3989,7 +4261,7 @@ unsigned int __stdcall WTF_EnumCertInternalByProperty(SK_CERT_DESC_PROPERTY * pC
 					}
 					else if (0x0A00001C == ulRet)
 					{
-						// 证书未发�?
+						// 证书未发现
 						ulRet = 0;
 					}
 					else
@@ -4211,13 +4483,13 @@ unsigned int __stdcall WTF_FindSM2CACert(BYTE* pbCert, unsigned int ulCertLen,
 	}
 
 err:
-	// 释放上下�?
+	// 释放上下文
 	if(certContext_OUT)
 	{
 		SMC_CertFreeCertificateContext(certContext_OUT);
 	}
 
-	// 释放上下�?
+	// 释放上下文
 	if(certContext_IN)
 	{
 		SMC_CertFreeCertificateContext(certContext_IN);
@@ -4225,7 +4497,7 @@ err:
 
 	if (hCertStore)
 	{
-		// 关闭存储�?
+		// 关闭存储区
 		SMC_CertCloseStore(hCertStore, CERT_CLOSE_STORE_CHECK_FLAG);
 	}
 
