@@ -158,3 +158,105 @@ unsigned int OPF_ClearExistHandleNodeDataFromLink(OPST_HANDLE_NODE * * ppstHeade
 
 	return 0;
 }
+
+#if defined(UNICODE)
+
+#include <windows.h>
+
+// 二进制与HEX相互转换
+unsigned int OPF_WStr2Bin(const wchar_t *pbIN, unsigned int uiINLen, unsigned char *pbOUT, unsigned int * puiOUTLen)
+{
+	unsigned int length = WideCharToMultiByte(CP_UTF8, 0, pbIN, uiINLen, NULL, 0, NULL, NULL);
+	unsigned char * convert = NULL;
+	unsigned int uiRet = -1;
+	int i;
+	unsigned int sn_len = uiINLen / 2;
+
+	if (length != uiINLen)
+	{
+		uiRet = -1;
+		goto err;
+	}
+
+	convert = (unsigned char *)malloc(length);
+
+	WideCharToMultiByte(CP_UTF8, 0, pbIN, uiINLen, convert, length, NULL, NULL);
+
+
+	if (sn_len > *puiOUTLen)
+	{
+		*puiOUTLen = sn_len;
+		uiRet = -1;
+		goto err;
+	}
+
+	*puiOUTLen = sn_len;
+
+	if (0 == pbOUT)
+	{
+
+	}
+	else
+	{
+		memset(pbOUT, 0, sn_len);
+		for (i = 0; i < sn_len; i++) {
+			pbOUT[i] += CHAR_TO_16(*(pbIN + i * 2)) * 16;
+			pbOUT[i] += CHAR_TO_16(*(pbIN + i * 2 + 1));
+		}
+	}
+	uiRet = 0;
+
+err:
+	if (NULL != convert)
+	{
+		free(convert);
+	}
+
+	return uiRet;
+
+}
+// 二进制与HEX相互转换
+unsigned int OPF_Bin2WStr(const unsigned char *pbIN, unsigned int uiINLen, wchar_t *pbOUT, unsigned int * puiOUTLen)
+{
+	char * convert = NULL;
+	unsigned int uiRet = -1;
+	int i;
+
+	unsigned int sn_len = uiINLen * 2;
+
+	if (sn_len > *puiOUTLen)
+	{
+		*puiOUTLen = sn_len;
+		uiRet = -1;
+		goto err;
+	}
+
+	*puiOUTLen = sn_len;
+
+	if (0 == pbOUT)
+	{
+
+	}
+	else
+	{
+		convert = (char *)malloc(uiINLen * 2+2);
+
+		for (i = 0; i < uiINLen; i++) {
+			sprintf(convert + 2 * i, "%02X", pbIN[i]);
+		}
+
+		MultiByteToWideChar(CP_UTF8, 0, convert, uiINLen * 2, pbOUT, *puiOUTLen, NULL, NULL);
+	}
+
+	uiRet = 0;
+
+err:
+	if (NULL != convert)
+	{
+		free(convert);
+	}
+
+	return uiRet;
+}
+
+#endif

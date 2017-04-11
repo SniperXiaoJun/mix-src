@@ -557,6 +557,10 @@ BOOL WINAPI SMC_CertFreeCertificateContext(
 	return CertFreeCertificateContext(pCertContext);
 }
 
+#if defined(NO_OPENSSL_FUNCTION)
+
+#else
+
 #include "openssl_func_def.h"
 
 BOOL WINAPI SMC_CertVerifyCertificateSignature(	
@@ -579,9 +583,9 @@ BOOL WINAPI SMC_CertVerifyCertificateSignature(
 	}
 
 	ulRet = OpenSSL_SM2VerifyCert(pbCertEncoded, cbCertEncoded,0,
-			pPublicKey->PublicKey.pbData + 1 , SM2_BYTES_LEN,
-			pPublicKey->PublicKey.pbData + 1 + SM2_BYTES_LEN, SM2_BYTES_LEN);
-	
+		pPublicKey->PublicKey.pbData + 1 , SM2_BYTES_LEN,
+		pPublicKey->PublicKey.pbData + 1 + SM2_BYTES_LEN, SM2_BYTES_LEN);
+
 	if (0 == ulRet)
 	{
 		ulRet = TRUE;
@@ -596,6 +600,8 @@ err:
 
 	return ulRet;
 }
+#endif
+
 
 
 unsigned long WINAPI SMC_ImportUserCert(BYTE * pbCert, unsigned long ulCertLen, SK_CERT_DESC_PROPERTY * pCertProperty)

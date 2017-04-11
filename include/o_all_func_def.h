@@ -117,8 +117,15 @@ extern "C" {
 	// 二进制与HEX相互转换
 	COMMON_API unsigned int OPF_Str2Bin(const char *pbIN,unsigned int uiIN,unsigned char *pbOUT,unsigned int * puiOUT);
 	// 二进制与HEX相互转换
-	COMMON_API unsigned int OPF_Bin2Str(const unsigned char *ain_data_value,unsigned int ain_data_len,
-		char *aout_data_value,unsigned int * aout_data_len);
+	COMMON_API unsigned int OPF_Bin2Str(const unsigned char *pbIN, unsigned int uiINLen, char *pbOUT, unsigned int * puiOUTLen);
+		
+		
+#if defined(UNICODE)
+#include <Windows.h>
+	COMMON_API unsigned int OPF_WStr2Bin(const wchar_t *pbIN,unsigned int uiINLen,unsigned char *pbOUT,unsigned int * puiOUTLen);
+	COMMON_API unsigned int OPF_Bin2WStr(const unsigned char *pbIN, unsigned int uiINLen, wchar_t *pbOUT, unsigned int * puiOUTLen);
+#endif		
+		
 
 	// 单向列表操作
 	COMMON_API unsigned int OPF_AddMallocedHandleNodeDataToLink(OPST_HANDLE_NODE * * ppstHeader, void * pvNodeData);

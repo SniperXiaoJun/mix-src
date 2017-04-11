@@ -37,3 +37,24 @@ string UTF8ToGBK(const std::string& strUTF8)
 	delete[]wszGBK; 
 	return strTemp; 
 }
+
+
+// Convert a wide Unicode string to an UTF8 string
+std::string utf8_encode(const std::wstring &wstr) {
+	// when got a empty wstring, vs2010 will break on an asserting: string 
+	// substring out of range
+	if (wstr.size() == 0) return "";
+	int size_needed = WideCharToMultiByte(CP_UTF8, 0, &wstr[0], (int)wstr.size(), NULL, 0, NULL, NULL);
+	std::string strTo(size_needed, 0);
+	WideCharToMultiByte(CP_UTF8, 0, &wstr[0], (int)wstr.size(), &strTo[0], size_needed, NULL, NULL);
+	return strTo;
+}
+
+// Convert an UTF8 string to a wide Unicode String
+std::wstring utf8_decode(const std::string &str) {
+	if (str.size() == 0) return L"";
+	int size_needed = MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), NULL, 0);
+	std::wstring wstrTo(size_needed, 0);
+	MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), &wstrTo[0], size_needed);
+	return wstrTo;
+}
