@@ -8,7 +8,7 @@
 
 #define RT_SM2_CON_NAME                                   "RT_SM_CON"
 #define RT_SM2_CON_NAME_SIGN                              "RT_SM_CON-Sign"
-#define RT_SM2_CON_NAME_CRYPT                             "RT_SM_CON-enc"
+#define RT_SM2_CON_NAME_CRYPT                             "RT_SM_CON-Enc"
 #define RT_SECID                                          "RT_SECID"
 #define RT_HMAC_KEY                                       "RT_HMAC_KEY"
 #define RT_ZM_SIGN                                        "RT_ZM_SIGN"

@@ -267,9 +267,9 @@ int RT_P11_API_SetMetas(
 				break;
 			case '2':
 				//B0类用户CKA_VALUE：
-				//	04 + {02+20+HK2} + {06+20+HK6} + {07+20+HK7} + {08+20+HK8}
+				//	05 + {02+20+HK2} + {06+20+HK6} + {07+20+HK7} + {08+20+HK8}  + {09+20+HK9}
 				pos = 0;
-				bHMACKey[pos] = 0x04;
+				bHMACKey[pos] = 0x05;
 				pos+=1;
 				bHMACKey[pos] = 0x02;
 				pos+=1;
@@ -295,13 +295,19 @@ int RT_P11_API_SetMetas(
 				pos+=1;
 				memcpy(bHMACKey+pos,pHMac+(0x08-1)*32,32);
 				pos+=32;
+				bHMACKey[pos] = 0x09;
+				pos+=1;
+				bHMACKey[pos] = 0x20;
+				pos+=1;
+				memcpy(bHMACKey+pos,pHMac+(0x09-1)*32,32);
+				pos+=32;
 				KPXTemplate[5].ulValueLen = pos;
 				break;
 			case '3':
 				//B1类用户CKA_VALUE：
-				//	02 + {03+20+HK3} + {08+20+HK8}
+				//	03 + {03+20+HK3} + {08+20+HK8} + {09+20+HK9}
 				pos = 0;
-				bHMACKey[pos] = 0x02;
+				bHMACKey[pos] = 0x03;
 				pos+=1;
 				bHMACKey[pos] = 0x03;
 				pos+=1;
@@ -315,25 +321,25 @@ int RT_P11_API_SetMetas(
 				pos+=1;
 				memcpy(bHMACKey+pos,pHMac+(0x08-1)*32,32);
 				pos+=32;
+				bHMACKey[pos] = 0x09;
+				pos+=1;
+				bHMACKey[pos] = 0x20;
+				pos+=1;
+				memcpy(bHMACKey+pos,pHMac+(0x09-1)*32,32);
+				pos+=32;
 				KPXTemplate[5].ulValueLen = pos;
 				break;
 			case '4':
 				//C类用户CKA_VALUE：
-				//	03 + {04+20+HK4} + {08+20+HK8} + {09+20+HK9}
+				//	02 + {04+20+HK4} + {09+20+HK9}
 				pos = 0;
-				bHMACKey[pos] = 0x03;
+				bHMACKey[pos] = 0x02;
 				pos+=1;
 				bHMACKey[pos] = 0x04;
 				pos+=1;
 				bHMACKey[pos] = 0x20;
 				pos+=1;
 				memcpy(bHMACKey+pos,pHMac+(0x04-1)*32,32);
-				pos+=32;
-				bHMACKey[pos] = 0x08;
-				pos+=1;
-				bHMACKey[pos] = 0x20;
-				pos+=1;
-				memcpy(bHMACKey+pos,pHMac+(0x08-1)*32,32);
 				pos+=32;
 				bHMACKey[pos] = 0x09;
 				pos+=1;
