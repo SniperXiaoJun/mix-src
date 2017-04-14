@@ -8,6 +8,7 @@
 #include "o_all_type_def.h"
 #include "FILE_LOG.h"
 #include "SKFInterface.h"
+#include "SKFError.h"
 #pragma warning(disable:4996)
 
 #if USE_SELF_MUTEX
@@ -1634,12 +1635,28 @@ COMMON_API unsigned int __stdcall WTF_SM2SignDigestProcessV2(SK_CERT_DESC_PROPER
 
 
 	ulRet = WTF_SM2SignDigestProcess(&args,pbData,ulDataLen,pSignature);
-	if (0 != ulRet)
+	if (SAR_FAIL == ulRet)
 	{
-		goto err;
-	}
-err:
+		WTF_SM2SignFinalizeV2(&args);
+		memcpy(&args,&argsZERO,sizeof(OPST_HANDLE_ARGS));
+		ulRet = WTF_SM2SignInitializeV2(pCertProperty,&args);
 
+		WTF_ArgsPut(pCertProperty,&args);
+
+		if (0 != ulRet)
+		{
+			goto err;
+		}
+
+		ulRet = WTF_SM2SignDigestProcess(&args,pbData,ulDataLen,pSignature);
+
+		if (0 != ulRet)
+		{
+			goto err;
+		}
+	} 
+
+err:
 	if (ulRet)
 	{
 		WTF_SM2SignFinalizeV2(&args);
