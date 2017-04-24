@@ -1548,12 +1548,14 @@ COMMON_API unsigned int __stdcall WTF_SM2SignInitializeV2(SK_CERT_DESC_PROPERTY 
 				else
 				{
 					ulRet = EErr_SMC_FAIL;
+					goto err;
 				}
 
 			}
 			else
 			{
-				return EErr_SMC_FAIL;
+				ulRet = EErr_SMC_FAIL;
+				goto err;
 			}
 
 			return 0;
@@ -2034,12 +2036,14 @@ unsigned int __stdcall WTF_SM2SignInitializeVerifyPINByCertProperty(SK_CERT_DESC
 				else
 				{
 					ulRet = EErr_SMC_FAIL;
+					goto err;
 				}
 
 			}
 			else
 			{
-				return EErr_SMC_FAIL;
+				ulRet = EErr_SMC_FAIL;
+				goto err;
 			}
 
 			return 0;
@@ -3551,11 +3555,6 @@ unsigned int __stdcall WTF_EnumCertInternalBySKF(const char * pszSKFName, void *
 
 		if (0 != ulRet)
 		{
-#if USE_SELF_MUTEX
-			SDSCReleaseMutex(hMutex);
-#else
-			func_UnlockDev(hDev);
-#endif
 			goto err;
 		}
 
@@ -3567,11 +3566,6 @@ unsigned int __stdcall WTF_EnumCertInternalBySKF(const char * pszSKFName, void *
 
 			if (0 != ulRet)
 			{
-#if USE_SELF_MUTEX
-				SDSCReleaseMutex(hMutex);
-#else
-				func_UnlockDev(hDev);
-#endif
 				goto err;
 			}
 
@@ -3601,22 +3595,12 @@ unsigned int __stdcall WTF_EnumCertInternalBySKF(const char * pszSKFName, void *
 
 			if (0 != ulRet)
 			{
-#if USE_SELF_MUTEX
-				SDSCReleaseMutex(hMutex);
-#else
-				func_UnlockDev(hDev);
-#endif
 				goto err;
 			}
 
 			if (0 == ulConSize)
 			{
 				ulRet = EErr_SMC_DLL_PATH;
-#if USE_SELF_MUTEX
-				SDSCReleaseMutex(hMutex);
-#else
-				func_UnlockDev(hDev);
-#endif
 				goto err;
 			}
 
@@ -3630,11 +3614,6 @@ unsigned int __stdcall WTF_EnumCertInternalBySKF(const char * pszSKFName, void *
 				ulRet = func_OpenContainer(hAPP, ptrContainer, &hCon);
 				if (ulRet)
 				{
-#if USE_SELF_MUTEX
-					SDSCReleaseMutex(hMutex);
-#else
-					func_UnlockDev(hDev);
-#endif
 					goto err;
 				}
 
@@ -3642,11 +3621,6 @@ unsigned int __stdcall WTF_EnumCertInternalBySKF(const char * pszSKFName, void *
 				ulRet = func_GetContainerType(hCon, &ulContainerType);
 				if (ulRet)
 				{
-#if USE_SELF_MUTEX
-					SDSCReleaseMutex(hMutex);
-#else
-					func_UnlockDev(hDev);
-#endif
 					goto err;
 				}
 
@@ -3830,11 +3804,6 @@ unsigned int __stdcall WTF_EnumCertInternalBySKF(const char * pszSKFName, void *
 				ulRet = func_CloseContainer(hCon);
 				if (ulRet)
 				{
-#if USE_SELF_MUTEX
-					SDSCReleaseMutex(hMutex);
-#else
-					func_UnlockDev(hDev);
-#endif
 					goto err;
 				}
 
@@ -4762,6 +4731,11 @@ unsigned int __stdcall WTF_FindEnCertificateByCertDescProperty(
 		{
 			goto err;
 		}
+#if USE_SELF_MUTEX
+		SDSCReleaseMutex(hMutex);
+#else
+		func_UnlockDev(hDev);
+#endif
 		ulRet = func_DisConnectDev(hDev);hDev = NULL;
 		if (0 != ulRet)
 		{
