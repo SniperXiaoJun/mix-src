@@ -78,7 +78,7 @@ HINSTANCE __stdcall WTF_LoadLibrary(char * pszDllPath)
 {
 	HINSTANCE ghInst = NULL;
 
-	for(std::map<std::string, OPST_HANDLE_ARGS>::iterator iter = g_currentArgs.begin(); iter != g_currentArgs.end(); iter++)  
+	for(std::map<std::string, HINSTANCE>::iterator iter = g_currentInst.begin(); iter != g_currentInst.end(); iter++)  
 	{  
 		if (0 == strcmp(iter->first.c_str(), pszDllPath))
 		{
