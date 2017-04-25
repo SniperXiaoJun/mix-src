@@ -2548,8 +2548,8 @@ err:
 
 	if(ghInst)
 	{
-		FreeLibrary(ghInst);//释放Dll函数
-		ghInst = NULL;
+		//FreeLibrary(ghInst);//释放Dll函数
+		//ghInst = NULL;
 	}
 
 	return ulRet;
@@ -3898,8 +3898,8 @@ err:
 
 	if(ghInst)
 	{
-		FreeLibrary(ghInst);//释放Dll函数
-		ghInst = NULL;
+		//FreeLibrary(ghInst);//释放Dll函数
+		//ghInst = NULL;
 	}
 
 
