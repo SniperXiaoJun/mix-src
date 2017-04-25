@@ -223,6 +223,8 @@ extern "C" {
 	COMMON_API unsigned int __stdcall WTF_ArgsPut(SK_CERT_DESC_PROPERTY * pCertProperty, OPST_HANDLE_ARGS * args);
 	COMMON_API unsigned int __stdcall WTF_ArgsClr();
 
+	COMMON_API HINSTANCE __stdcall WTF_LoadLibrary(char * pszDllPath);
+
 	/*
 	功能名称:	获取设备信息
 	函数名称:	WTF_GetDevInfoByCertProperty

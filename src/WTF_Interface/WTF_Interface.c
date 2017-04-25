@@ -38,20 +38,6 @@ HANDLE hMutex = 0;
 { \
 } 
 
-//#define FUNC_NAME_INIT_CONTINUE(FUNC_NAME_PREFIX,FUNC_NAME,FUNC_NAME_SUFFIX) (##FUNC_NAME_PREFIX##FUNC_NAME##FUNC_NAME_SUFFIX) = (pSKF_##FUNC_NAME)GetProcAddress(ghInst,"SKF_"#FUNC_NAME); \
-//	if(!##FUNC_NAME_PREFIX##FUNC_NAME##FUNC_NAME_SUFFIX) \
-//	{ \
-//	ulRet = EErr_SMC_DLL_PATH; \
-//	FreeLibrary(ghInst); \
-//	ghInst = NULL; \
-//	ptr_SKF += strlen(ptr_SKF) + 1;\
-//	continue; \
-//	}\
-//	else \
-//	{ \
-//	} 
-
-
 #define FUNC_NAME_INIT_GetContainerType(FUNC_NAME_PREFIX,FUNC_NAME,FUNC_NAME_SUFFIX) \
 	(##FUNC_NAME_PREFIX##FUNC_NAME##FUNC_NAME_SUFFIX) = (pSKF_##FUNC_NAME)GetProcAddress(ghInst,"SKF_"#FUNC_NAME); \
 	if (!##FUNC_NAME_PREFIX##FUNC_NAME##FUNC_NAME_SUFFIX) \
@@ -66,26 +52,6 @@ HANDLE hMutex = 0;
 	else \
 { \
 } 
-
-//#define FUNC_NAME_INIT_CONTINUE_GetContainerType(FUNC_NAME_PREFIX,FUNC_NAME,FUNC_NAME_SUFFIX) \
-//	(##FUNC_NAME_PREFIX##FUNC_NAME##FUNC_NAME_SUFFIX) = (pSKF_##FUNC_NAME)GetProcAddress(ghInst,"SKF_"#FUNC_NAME); \
-//	if (!##FUNC_NAME_PREFIX##FUNC_NAME##FUNC_NAME_SUFFIX) \
-//	{\
-//	(##FUNC_NAME_PREFIX##FUNC_NAME##FUNC_NAME_SUFFIX) = (pSKF_##FUNC_NAME)GetProcAddress(ghInst,"SKF_GetContianerType"); \
-//	}\
-//	if(!##FUNC_NAME_PREFIX##FUNC_NAME##FUNC_NAME_SUFFIX) \
-//	{ \
-//	ulRet = EErr_SMC_DLL_PATH; \
-//	FreeLibrary(ghInst); \
-//	ghInst = NULL; \
-//	ptr_SKF += strlen(ptr_SKF) + 1;\
-//	continue; \
-//	}\
-//	else \
-//	{ \
-//	} 
-
-
 
 typedef ULONG (DEVAPI *pSKF_EnumDev)(BOOL bPresent, LPSTR szNameList, ULONG *puiSize);
 typedef ULONG (DEVAPI *pSKF_ConnectDev)(LPSTR szName, DEVHANDLE *phDev);
@@ -697,7 +663,11 @@ unsigned int __stdcall WTF_ChangePIN(const char *pszDevName,unsigned int ulPINTy
 		goto err;
 	}
 
-	ghInst=LoadLibraryA(dllPathValue);//动态加载Dll
+#if defined(USE_LOAD_LIBRARY)
+	ghInst = LoadLibraryA(dllPathValue);//动态加载Dll
+#else
+	ghInst = WTF_LoadLibrary(dllPathValue);
+#endif
 
 	if (!ghInst)
 	{
@@ -786,8 +756,10 @@ err:
 
 	if(ghInst)
 	{
+#if defined(USE_FREE_GHINST)
 		FreeLibrary(ghInst);//释放Dll函数
 		ghInst = NULL;
+#endif
 	}
 
 	if (data_value)
@@ -881,7 +853,11 @@ unsigned int __stdcall WTF_VerifyPIN(const char *pszDevName,unsigned int ulPINTy
 		goto err;
 	}
 
-	ghInst=LoadLibraryA(dllPathValue);//动态加载Dll
+#if defined(USE_LOAD_LIBRARY)
+	ghInst = LoadLibraryA(dllPathValue);//动态加载Dll
+#else
+	ghInst = WTF_LoadLibrary(dllPathValue);
+#endif
 
 	if (!ghInst)
 	{
@@ -971,8 +947,10 @@ err:
 
 	if(ghInst)
 	{
+#if defined(USE_FREE_GHINST)
 		FreeLibrary(ghInst);//释放Dll函数
 		ghInst = NULL;
+#endif
 	}
 
 	if (data_value)
@@ -1033,7 +1011,11 @@ unsigned int __stdcall WTF_ChangePINByCertProperty(SK_CERT_DESC_PROPERTY * pCert
 		goto err;
 	}
 
-	ghInst=LoadLibraryA(dllPathValue);//动态加载Dll
+#if defined(USE_LOAD_LIBRARY)
+	ghInst = LoadLibraryA(dllPathValue);//动态加载Dll
+#else
+	ghInst = WTF_LoadLibrary(dllPathValue);
+#endif
 
 	if (!ghInst)
 	{
@@ -1124,8 +1106,10 @@ err:
 
 	if(ghInst)
 	{
+#if defined(USE_FREE_GHINST)
 		FreeLibrary(ghInst);//释放Dll函数
 		ghInst = NULL;
+#endif
 	}
 
 
@@ -1183,7 +1167,11 @@ unsigned int __stdcall WTF_GetDevInfoByCertProperty(SK_CERT_DESC_PROPERTY * pCer
 		goto err;
 	}
 
-	ghInst=LoadLibraryA(dllPathValue);//动态加载Dll
+#if defined(USE_LOAD_LIBRARY)
+	ghInst = LoadLibraryA(dllPathValue);//动态加载Dll
+#else
+	ghInst = WTF_LoadLibrary(dllPathValue);
+#endif
 
 	if (!ghInst)
 	{
@@ -1263,8 +1251,10 @@ err:
 
 	if(ghInst)
 	{
+#if defined(USE_FREE_GHINST)
 		FreeLibrary(ghInst);//释放Dll函数
 		ghInst = NULL;
+#endif
 	}
 
 	return ulRet;
@@ -1320,7 +1310,11 @@ unsigned int __stdcall WTF_VerifyPINByCertProperty(SK_CERT_DESC_PROPERTY * pCert
 		goto err;
 	}
 
-	ghInst=LoadLibraryA(dllPathValue);//动态加载Dll
+#if defined(USE_LOAD_LIBRARY)
+	ghInst = LoadLibraryA(dllPathValue);//动态加载Dll
+#else
+	ghInst = WTF_LoadLibrary(dllPathValue);
+#endif
 
 	if (!ghInst)
 	{
@@ -1411,8 +1405,10 @@ err:
 
 	if(ghInst)
 	{
+#if defined(USE_FREE_GHINST)
 		FreeLibrary(ghInst);//释放Dll函数
 		ghInst = NULL;
+#endif
 	}
 
 	return ulRet;
@@ -1479,7 +1475,11 @@ COMMON_API unsigned int __stdcall WTF_SM2SignInitializeV2(SK_CERT_DESC_PROPERTY 
 		goto err;
 	}
 
-	ghInst=LoadLibraryA(dllPathValue);//动态加载Dll
+#if defined(USE_LOAD_LIBRARY)
+	ghInst = LoadLibraryA(dllPathValue);//动态加载Dll
+#else
+	ghInst = WTF_LoadLibrary(dllPathValue);
+#endif
 
 	if (!ghInst)
 	{
@@ -1622,8 +1622,10 @@ err:
 
 	if(ghInst)
 	{
+#if defined(USE_FREE_GHINST)
 		FreeLibrary(ghInst);//释放Dll函数
 		ghInst = NULL;
+#endif
 	}
 
 	return ulRet;
@@ -1884,7 +1886,11 @@ unsigned int __stdcall WTF_SM2SignInitializeVerifyPINByCertProperty(SK_CERT_DESC
 		goto err;
 	}
 
-	ghInst=LoadLibraryA(dllPathValue);//动态加载Dll
+#if defined(USE_LOAD_LIBRARY)
+	ghInst = LoadLibraryA(dllPathValue);//动态加载Dll
+#else
+	ghInst = WTF_LoadLibrary(dllPathValue);
+#endif
 
 	if (!ghInst)
 	{
@@ -2110,8 +2116,10 @@ err:
 
 	if(ghInst)
 	{
+#if defined(USE_FREE_GHINST)
 		FreeLibrary(ghInst);//释放Dll函数
 		ghInst = NULL;
+#endif
 	}
 
 	return ulRet;
@@ -2215,8 +2223,10 @@ err:
 
 	if(ghInst)
 	{
+#if defined(USE_FREE_GHINST)
 		FreeLibrary(ghInst);//释放Dll函数
 		ghInst = NULL;
+#endif
 	}
 
 	return ulRet;
@@ -2274,7 +2284,11 @@ unsigned int __stdcall WTF_SM2SignDigest(SK_CERT_DESC_PROPERTY * pCertProperty, 
 		goto err;
 	}
 
-	ghInst=LoadLibraryA(dllPathValue);//动态加载Dll
+#if defined(USE_LOAD_LIBRARY)
+	ghInst = LoadLibraryA(dllPathValue);//动态加载Dll
+#else
+	ghInst = WTF_LoadLibrary(dllPathValue);
+#endif
 
 	if (!ghInst)
 	{
@@ -2384,8 +2398,10 @@ err:
 
 	if(ghInst)
 	{
+#if defined(USE_FREE_GHINST)
 		FreeLibrary(ghInst);//释放Dll函数
 		ghInst = NULL;
+#endif
 	}
 
 	return ulRet;
@@ -2453,7 +2469,11 @@ unsigned int __stdcall WTF_SM2SignDigestV2(
 	// there may be fail, so don't judge return value
 	WTF_ReadSKFSignType(pCertProperty->szSKFName, signTypeValue, &signTypeLen);
 
-	ghInst=LoadLibraryA(dllPathValue);//动态加载Dll
+#if defined(USE_LOAD_LIBRARY)
+	ghInst = LoadLibraryA(dllPathValue);//动态加载Dll
+#else
+	ghInst = WTF_LoadLibrary(dllPathValue);
+#endif
 
 	if (!ghInst)
 	{
@@ -2548,8 +2568,10 @@ err:
 
 	if(ghInst)
 	{
-		//FreeLibrary(ghInst);//释放Dll函数
-		//ghInst = NULL;
+#if defined(USE_FREE_GHINST)
+		FreeLibrary(ghInst);//释放Dll函数
+		ghInst = NULL;
+#endif
 	}
 
 	return ulRet;
@@ -3511,7 +3533,11 @@ unsigned int __stdcall WTF_EnumCertInternalBySKF(const char * pszSKFName, void *
 		goto err;
 	}
 
-	ghInst=LoadLibraryA(dllPathValue);//动态加载Dll
+#if defined(USE_LOAD_LIBRARY)
+	ghInst = LoadLibraryA(dllPathValue);//动态加载Dll
+#else
+	ghInst = WTF_LoadLibrary(dllPathValue);
+#endif
 
 	if (!ghInst)
 	{
@@ -3898,8 +3924,10 @@ err:
 
 	if(ghInst)
 	{
-		//FreeLibrary(ghInst);//释放Dll函数
-		//ghInst = NULL;
+#if defined(USE_FREE_GHINST)
+		FreeLibrary(ghInst);//释放Dll函数
+		ghInst = NULL;
+#endif
 	}
 
 
@@ -4128,7 +4156,11 @@ unsigned int __stdcall WTF_FindSKFDriver(const char * pszSKFName, char * szVersi
 		goto err;
 	}
 
-	ghInst=LoadLibraryA(dllPathValue);//动态加载Dll
+#if defined(USE_LOAD_LIBRARY)
+	ghInst = LoadLibraryA(dllPathValue);//动态加载Dll
+#else
+	ghInst = WTF_LoadLibrary(dllPathValue);
+#endif
 
 	if (!ghInst)
 	{
@@ -4167,10 +4199,13 @@ unsigned int __stdcall WTF_FindSKFDriver(const char * pszSKFName, char * szVersi
 	sprintf(szVersion,"%d.%d.%d.%d",HIWORD(pFileInfo->dwFileVersionMS), LOWORD(pFileInfo->dwFileVersionMS), HIWORD(pFileInfo->dwFileVersionLS),LOWORD(pFileInfo->dwFileVersionLS));
 
 err:
-	FreeLibrary(ghInst);//释放Dll函数
-
-	ghInst = NULL;
-
+	if(ghInst)
+	{
+#if defined(USE_FREE_GHINST)
+		FreeLibrary(ghInst);//释放Dll函数
+		ghInst = NULL;
+#endif
+	}
 
 	if (pbVersionInfo)
 	{
@@ -4262,7 +4297,11 @@ unsigned int __stdcall WTF_FindEnCertificateByCertDescProperty(
 		goto err;
 	}
 
-	ghInst=LoadLibraryA(dllPathValue);//动态加载Dll
+#if defined(USE_LOAD_LIBRARY)
+	ghInst = LoadLibraryA(dllPathValue);//动态加载Dll
+#else
+	ghInst = WTF_LoadLibrary(dllPathValue);
+#endif
 
 	if (!ghInst)
 	{
@@ -4361,8 +4400,10 @@ err:
 
 	if(ghInst)
 	{
+#if defined(USE_FREE_GHINST)
 		FreeLibrary(ghInst);//释放Dll函数
 		ghInst = NULL;
+#endif
 	}
 
 
@@ -4436,7 +4477,11 @@ COMMON_API unsigned int __stdcall WTF_SM2GetAgreementKey(
 		goto err;
 	}
 
-	ghInst=LoadLibraryA(dllPathValue);//动态加载Dll
+#if defined(USE_LOAD_LIBRARY)
+	ghInst = LoadLibraryA(dllPathValue);//动态加载Dll
+#else
+	ghInst = WTF_LoadLibrary(dllPathValue);
+#endif
 
 	if (!ghInst)
 	{
@@ -4565,8 +4610,10 @@ err:
 
 	if(ghInst)
 	{
+#if defined(USE_FREE_GHINST)
 		FreeLibrary(ghInst);//释放Dll函数
 		ghInst = NULL;
+#endif
 	}
 
 	return ulRet;

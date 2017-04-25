@@ -71,3 +71,27 @@ unsigned int __stdcall WTF_ArgsClr()
 
 	return 0;
 }
+
+std::map<std::string,HINSTANCE> g_currentInst;
+
+HINSTANCE __stdcall WTF_LoadLibrary(char * pszDllPath)
+{
+	HINSTANCE ghInst = NULL;
+
+	for(std::map<std::string, OPST_HANDLE_ARGS>::iterator iter = g_currentArgs.begin(); iter != g_currentArgs.end(); iter++)  
+	{  
+		if (0 == strcmp(iter->first.c_str(), pszDllPath))
+		{
+			ghInst = g_currentInst[pszDllPath];
+			break;
+		}
+	}  
+
+	if (NULL == ghInst)
+	{
+		ghInst = LoadLibraryA(pszDllPath);
+		g_currentInst[pszDllPath] = ghInst;
+	}
+
+	return ghInst;
+}
