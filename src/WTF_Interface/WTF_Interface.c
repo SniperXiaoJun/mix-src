@@ -270,6 +270,7 @@ unsigned int __stdcall WTF_ReadSKFPath(const char * pszSKFName, char * pszDllPat
 			{
 				* puiDllPathLen = DataSize;
 				memcpy(pszDllPath, szValueData, DataSize);
+				ulRet = 0;
 			}
 
 			break;
@@ -349,6 +350,7 @@ unsigned int __stdcall WTF_ReadSKFSignType(const char * pszSKFName, char * pszSi
 			{
 				* puiSignTypeLen = DataSize;
 				memcpy(pszSignType, szValueData, DataSize);
+				ulRet = 0;
 			}
 			break;
 		}
