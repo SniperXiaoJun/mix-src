@@ -570,11 +570,22 @@ unsigned int __stdcall WTF_EnumCert(const char *pszDevName,void * pvCertsValue,u
 		free(pTmp);
 	}
 #endif
-	if (* puiCertsLen < data_len || (NULL == pvCertsValue))
+
+	ulRet = -1;
+
+	if (NULL == pvCertsValue)
 	{
 		* puiCertsLen = data_len;
 
 		ulRet = 0;
+
+		goto err;
+	}
+	else if (* puiCertsLen < data_len)
+	{
+		* puiCertsLen = data_len;
+
+		ulRet = EErr_SMC_MEM_LES;
 
 		goto err;
 	}
@@ -590,9 +601,8 @@ unsigned int __stdcall WTF_EnumCert(const char *pszDevName,void * pvCertsValue,u
 			pCertContent = (BYTE *)pCertContent + pCertContent->nValueLen + sizeof(SK_CERT_CONTENT) ;
 		}
 
-		
-
 		* puiCertsLen = data_len;
+		ulRet = 0;
 	}
 
 err:
@@ -2638,11 +2648,21 @@ unsigned int __stdcall WTF_EnumCertInternal(const char * pszSKFName, void * pvCe
 		}
 	}
 
-	if (* puiCertsLen < ulOutLen || (NULL == pvCertsValue))
+	ulRet = -1;
+
+	if (NULL == pvCertsValue)
 	{
 		* puiCertsLen = ulOutLen;
 
 		ulRet = 0;
+
+		goto err;
+	}
+	else if (* puiCertsLen < ulOutLen)
+	{
+		* puiCertsLen = ulOutLen;
+
+		ulRet = EErr_SMC_MEM_LES;
 
 		goto err;
 	}
@@ -2660,9 +2680,8 @@ unsigned int __stdcall WTF_EnumCertInternal(const char * pszSKFName, void * pvCe
 		}
 
 		* puiCertsLen = ulOutLen;
+		ulRet = 0;
 	}
-
-	ulRet = 0;
 
 err:
 	if (data_value)
@@ -3847,11 +3866,21 @@ unsigned int __stdcall WTF_EnumCertInternalBySKF(const char * pszSKFName, void *
 		ptrDev += 1;
 	}
 
-	if (* puiCertsLen < ulOutLen || (NULL == pvCertsValue))
+	ulRet = -1;
+
+	if (NULL == pvCertsValue)
 	{
 		* puiCertsLen = ulOutLen;
 
 		ulRet = 0;
+
+		goto err;
+	}
+	else if (* puiCertsLen < ulOutLen)
+	{
+		* puiCertsLen = ulOutLen;
+
+		ulRet = EErr_SMC_MEM_LES;
 
 		goto err;
 	}
@@ -3869,6 +3898,7 @@ unsigned int __stdcall WTF_EnumCertInternalBySKF(const char * pszSKFName, void *
 		}
 
 		* puiCertsLen = ulOutLen;
+		ulRet = 0;
 	}
 
 err:
@@ -4275,11 +4305,21 @@ unsigned int __stdcall WTF_EnumCertInternalByProperty(SK_CERT_DESC_PROPERTY * pC
 
 	}
 
-	if (* puiCertsLen < ulOutLen || (NULL == pvCertsValue))
+	ulRet = -1;
+
+	if (NULL == pvCertsValue)
 	{
 		* puiCertsLen = ulOutLen;
 
 		ulRet = 0;
+
+		goto err;
+	}
+	else if (* puiCertsLen < ulOutLen)
+	{
+		* puiCertsLen = ulOutLen;
+
+		ulRet = EErr_SMC_MEM_LES;
 
 		goto err;
 	}
@@ -4297,6 +4337,7 @@ unsigned int __stdcall WTF_EnumCertInternalByProperty(SK_CERT_DESC_PROPERTY * pC
 		}
 
 		* puiCertsLen = ulOutLen;
+		ulRet = 0;
 	}
 
 
@@ -4435,11 +4476,18 @@ unsigned int __stdcall WTF_FindSM2CACert(BYTE* pbCert, unsigned int ulCertLen,
 	// 查找颁发者证书
 	certContext_OUT = SMC_CertFindCertificateInStore(hCertStore,X509_ASN_ENCODING,CERT_FIND_ISSUER_OF,certContext_IN,NULL);
 
+
+
 	if (NULL != certContext_OUT)
 	{
-		if (* ulCACertLen < certContext_OUT->cbCertEncoded || pbCACert == NULL)
+		if ( pbCACert == NULL)
 		{
 			* ulCACertLen = certContext_OUT->cbCertEncoded;
+		}
+		else if (* ulCACertLen < certContext_OUT->cbCertEncoded)
+		{
+			* ulCACertLen = certContext_OUT->cbCertEncoded;
+			ulRet = EErr_SMC_MEM_LES;
 		}
 		else
 		{
