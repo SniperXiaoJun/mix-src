@@ -33,7 +33,7 @@ extern "C" {
 		unsigned char *pAuthKey, int uiAuthKeyLen,
 		char *pSecID, int uiSecIDLen,
 		unsigned char szR1[32],unsigned char szR2[32], 
-		unsigned char *pZMP, int uiZMPLen,
+		unsigned char *pKPX, int uiKPXLen,
 		unsigned char *pSignKey, int uiSignKeyLen,
 		unsigned char *pCryptKey, int uiCryptKeyLen,
 		unsigned char *pExchangeKey, int uiExchangeKeyLen,

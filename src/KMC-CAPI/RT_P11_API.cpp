@@ -383,7 +383,7 @@ int RT_P11_API_SetZMMetas(
 	unsigned char *pAuthKey, int uiAuthKeyLen,
 	char *pSecID, int uiSecIDLen,
 	unsigned char szR1[32],unsigned char szR2[32], 
-	unsigned char *pZMP, int uiZMPLen,
+	unsigned char *pKPX, int uiKPXLen,
 	unsigned char *pSignKey, int uiSignKeyLen,
 	unsigned char *pCryptKey, int uiCryptKeyLen,
 	unsigned char *pExchangeKey, int uiExchangeKeyLen,
@@ -449,7 +449,7 @@ int RT_P11_API_SetZMMetas(
 	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
 	FILE_LOG_HEX(file_log_name, (unsigned char *)pExchangeKey, uiExchangeKeyLen);
 	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
-	FILE_LOG_HEX(file_log_name, (unsigned char *)pZMP, uiZMPLen);
+	FILE_LOG_HEX(file_log_name, (unsigned char *)pKPX, uiKPXLen);
 
 	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
 	FILE_LOG_HEX(file_log_name, (unsigned char *)szR1, 32);
@@ -512,12 +512,12 @@ int RT_P11_API_SetZMMetas(
 		}
 		FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
 
-		ulLen = uiZMPLen;
+		ulLen = uiKPXLen;
 
 		FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
-		FILE_LOG_HEX(file_log_name, (unsigned char *)pZMP, ulLen);
+		FILE_LOG_HEX(file_log_name, (unsigned char *)pKPX, ulLen);
 
-		rv = g_FunctionPtr->C_Encrypt(hSession, pZMP, ulLen, pZMP, &ulLen);
+		rv = g_FunctionPtr->C_Encrypt(hSession, pKPX, ulLen, pKPX, &ulLen);
 		if (rv != CKR_OK) {
 			FILE_LOG_FMT(file_log_name, "%s %d %d", __FUNCTION__, __LINE__, rv);
 			goto err;
@@ -591,7 +591,7 @@ int RT_P11_API_SetZMMetas(
 	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
 	FILE_LOG_HEX(file_log_name, (unsigned char *)pExchangeKey, uiExchangeKeyLen);
 	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
-	FILE_LOG_HEX(file_log_name, (unsigned char *)pZMP, uiZMPLen);
+	FILE_LOG_HEX(file_log_name, (unsigned char *)pKPX, uiKPXLen);
 
 	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
 	FILE_LOG_HEX(file_log_name, (unsigned char *)szR1, 32);
@@ -621,7 +621,7 @@ int RT_P11_API_SetZMMetas(
 			{CKA_CLASS, &SecretClass, sizeof(SecretClass)},
 			{CKA_KEY_TYPE, &keyType, sizeof(keyType)},
 			{CKA_TOKEN, &bTrue, sizeof(bTrue)},
-			{CKA_ID, RT_ZM_ZMP, strlen(RT_ZM_ZMP)},
+			{CKA_ID, RT_ZM_KPX, strlen(RT_ZM_KPX)},
 			{CKA_ENCRYPT, &bTrue, sizeof(bTrue)},
 			{CKA_VALUE, (unsigned char *)szKPX, ulKPXLen}
 		};
@@ -640,11 +640,11 @@ int RT_P11_API_SetZMMetas(
 			pos+=1;
 			szKPX[pos] = 0x31;
 			pos+=1;
-			memcpy(szKPX+pos,pZMP+(0x31-0x31)*32,32);
+			memcpy(szKPX+pos,pKPX+(0x31-0x31)*32,32);
 			pos+=32;
 			szKPX[pos] = 0x32;
 			pos+=1;
-			memcpy(szKPX+pos,pZMP+(0x32-0x31)*32,32);
+			memcpy(szKPX+pos,pKPX+(0x32-0x31)*32,32);
 			pos+=32;
 			memcpy(szKPX+pos,szR3,32);
 			pos+=32;
@@ -656,11 +656,11 @@ int RT_P11_API_SetZMMetas(
 			pos+=1;
 			szKPX[pos] = 0x32;
 			pos+=1;
-			memcpy(szKPX+pos,pZMP+(0x32-0x31)*32,32);
+			memcpy(szKPX+pos,pKPX+(0x32-0x31)*32,32);
 			pos+=32;
 			szKPX[pos] = 0x33;
 			pos+=1;
-			memcpy(szKPX+pos,pZMP+(0x33-0x31)*32,32);
+			memcpy(szKPX+pos,pKPX+(0x33-0x31)*32,32);
 			pos+=32;
 			memcpy(szKPX+pos,szR3,32);
 			pos+=32;
@@ -672,7 +672,7 @@ int RT_P11_API_SetZMMetas(
 			pos+=1;
 			szKPX[pos] = 0x33;
 			pos+=1;
-			memcpy(szKPX+pos,pZMP+(0x33-0x31)*32,32);
+			memcpy(szKPX+pos,pKPX+(0x33-0x31)*32,32);
 			pos+=32;
 			memcpy(szKPX+pos,szR3,32);
 			pos+=32;
@@ -706,7 +706,7 @@ int RT_P11_API_SetZMMetas(
 	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
 	FILE_LOG_HEX(file_log_name, (unsigned char *)pExchangeKey, uiExchangeKeyLen);
 	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
-	FILE_LOG_HEX(file_log_name, (unsigned char *)pZMP, uiZMPLen);
+	FILE_LOG_HEX(file_log_name, (unsigned char *)pKPX, uiKPXLen);
 
 	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
 	FILE_LOG_HEX(file_log_name, (unsigned char *)szR1, 32);
@@ -910,7 +910,7 @@ int RT_P11_API_SetZMMetas(
 	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
 	FILE_LOG_HEX(file_log_name, (unsigned char *)pExchangeKey, uiExchangeKeyLen);
 	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
-	FILE_LOG_HEX(file_log_name, (unsigned char *)pZMP, uiZMPLen);
+	FILE_LOG_HEX(file_log_name, (unsigned char *)pKPX, uiKPXLen);
 
 	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
 	FILE_LOG_HEX(file_log_name, (unsigned char *)szR1, 32);
