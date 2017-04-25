@@ -13,7 +13,7 @@
 
 #if USE_SELF_MUTEX
 #include "SDSCMutex.h"
-static char mutex_buffer[10] = "mutex";
+static char mutex_buffer[25] = "mutex_wtf_interface";
 HANDLE hMutex = 0;
 #endif
 
@@ -137,7 +137,7 @@ typedef ULONG (DEVAPI *pSKF_GenerateKeyWithECCEx)(HANDLE hAgreementHandle,
 
 unsigned int __stdcall WTF_EnumSKF(char * pszSKFNames, unsigned int * puiSKFNamesLen)
 {
-	unsigned int ulRet = 0;
+	unsigned int ulRet = -1;
 	HKEY hKey;
 	unsigned int dwIndex=0,NameSize,NameCnt,NameMaxLen;
 	char data_value[BUFFER_LEN_1K] = {0};
@@ -185,27 +185,33 @@ unsigned int __stdcall WTF_EnumSKF(char * pszSKFNames, unsigned int * puiSKFName
 		len_out += 1;
 	}
 
-	if (NULL == pszSKFNames || * puiSKFNamesLen < len_out)
+	if (NULL == pszSKFNames )
 	{
 		* puiSKFNamesLen = len_out;
-	}	
+		ulRet = 0;
+	}
+	else if(* puiSKFNamesLen < len_out)
+	{
+		* puiSKFNamesLen = len_out;
+		ulRet = EErr_SMC_MEM_LES;
+	}
 	else
 	{
 		* puiSKFNamesLen = len_out;
 		memcpy(pszSKFNames,data_value,len_out);
+		ulRet = 0;
 	}
 
 	RegCloseKey(hKey);
 
-	return 0;
+	return ulRet;
 }
 
 
 unsigned int __stdcall WTF_ReadSKFPath(const char * pszSKFName, char * pszDllPath, unsigned int *puiDllPathLen)
 {
-	unsigned int ulRet = 0;
+	unsigned int ulRet = -1;
 	HKEY hKey;
-	BOOL bFalg = FALSE;
 	unsigned int DataSize,MaxDateLen;
 	unsigned int dwIndex=0,NameSize,NameCnt,NameMaxLen,Type;
 	char SubKey[BUFFER_LEN_1K] = {0};
@@ -250,16 +256,22 @@ unsigned int __stdcall WTF_ReadSKFPath(const char * pszSKFName, char * pszDllPat
 
 		if(0 == (strcmp(szValueName,REG_VALUE_PATH_KEYNAME)))
 		{
-			if(NULL != pszDllPath)
+			if(NULL == pszDllPath)
 			{
 				* puiDllPathLen = DataSize;
-				memcpy(pszDllPath, szValueData, DataSize);
+				ulRet = 0;
+			}
+			else if(* puiDllPathLen < DataSize)
+			{
+				* puiDllPathLen = DataSize;
+				ulRet = EErr_SMC_MEM_LES;
 			}
 			else
 			{
 				* puiDllPathLen = DataSize;
+				memcpy(pszDllPath, szValueData, DataSize);
 			}
-			bFalg = TRUE;
+
 			break;
 		}
 
@@ -271,23 +283,14 @@ unsigned int __stdcall WTF_ReadSKFPath(const char * pszSKFName, char * pszDllPat
 
 	RegCloseKey(hKey);
 
-	if (bFalg)
-	{
-		ulRet = 0;
-	}
-	else
-	{
-		ulRet = -1;
-	}
 
 	return ulRet;
 }
 
 unsigned int __stdcall WTF_ReadSKFSignType(const char * pszSKFName, char * pszSignType, unsigned int *puiSignTypeLen)
 {
-	unsigned int ulRet = 0;
+	unsigned int ulRet = -1;
 	HKEY hKey;
-	BOOL bFalg = FALSE;
 	unsigned int DataSize,MaxDateLen;
 	unsigned int dwIndex=0,NameSize,NameCnt,NameMaxLen,Type;
 	char SubKey[BUFFER_LEN_1K] = {0};
@@ -332,16 +335,21 @@ unsigned int __stdcall WTF_ReadSKFSignType(const char * pszSKFName, char * pszSi
 
 		if(0 == (strcmp(szValueName,REG_VALUE_SIGNTYPE_KEYNAME)))
 		{
-			if(NULL != pszSignType)
+			if(NULL == pszSignType)
 			{
 				* puiSignTypeLen = DataSize;
-				memcpy(pszSignType, szValueData, DataSize);
+				ulRet = 0;
+			}
+			else if(* puiSignTypeLen < DataSize)
+			{
+				* puiSignTypeLen = DataSize;
+				ulRet = EErr_SMC_MEM_LES;
 			}
 			else
 			{
 				* puiSignTypeLen = DataSize;
+				memcpy(pszSignType, szValueData, DataSize);
 			}
-			bFalg = TRUE;
 			break;
 		}
 
@@ -353,21 +361,12 @@ unsigned int __stdcall WTF_ReadSKFSignType(const char * pszSKFName, char * pszSi
 
 	RegCloseKey(hKey);
 
-	if (bFalg)
-	{
-		ulRet = 0;
-	}
-	else
-	{
-		ulRet = -1;
-	}
-
 	return ulRet;
 }
 
 unsigned int __stdcall WTF_EnumDev(char * pszDevsName,unsigned int *puiDevsNameLen)
 {
-	unsigned int ulRet = 0;
+	unsigned int ulRet = -1;
 
 	char * data_value;
 	unsigned int data_len = BUFFER_LEN_1K * BUFFER_LEN_1K;
@@ -402,9 +401,15 @@ unsigned int __stdcall WTF_EnumDev(char * pszDevsName,unsigned int *puiDevsNameL
 	// 赋值
 	pCertContent = (SK_CERT_CONTENT *)data_value;
 
-	if (NULL == pszDevsName || *puiDevsNameLen < ulOutLen)
+	if (NULL == pszDevsName)
 	{
 		*puiDevsNameLen = ulOutLen;
+		ulRet = 0;
+	}
+	else if(*puiDevsNameLen < ulOutLen)
+	{
+		*puiDevsNameLen = ulOutLen;
+		ulRet = EErr_SMC_MEM_LES;
 	}
 	else
 	{
@@ -422,6 +427,7 @@ unsigned int __stdcall WTF_EnumDev(char * pszDevsName,unsigned int *puiDevsNameL
 
 			pCertContent = (BYTE *)pCertContent + pCertContent->nValueLen + sizeof(SK_CERT_CONTENT) ;
 		}
+		ulRet = 0;
 	}
 
 err:
