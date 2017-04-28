@@ -791,7 +791,7 @@ int RT_P11_API_SetZMMetas(
 
 				szKPX[pos] = (unsigned char)crc_val;
 				pos+=1;
-				szKPX[pos] = (unsigned char)crc_val>>8;
+				szKPX[pos] = (unsigned char)(crc_val>>8);
 				pos+=1;
 			}
 #endif
@@ -819,7 +819,7 @@ int RT_P11_API_SetZMMetas(
 
 				szKPX[pos] = (unsigned char)crc_val;
 				pos+=1;
-				szKPX[pos] = (unsigned char)crc_val>>8;
+				szKPX[pos] = (unsigned char)(crc_val>>8);
 				pos+=1;
 			}
 #endif
@@ -843,7 +843,7 @@ int RT_P11_API_SetZMMetas(
 
 				szKPX[pos] = (unsigned char)crc_val;
 				pos+=1;
-				szKPX[pos] = (unsigned char)crc_val>>8;
+				szKPX[pos] = (unsigned char)(crc_val>>8);
 				pos+=1;
 			}
 #endif
