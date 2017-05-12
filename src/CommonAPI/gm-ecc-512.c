@@ -1570,16 +1570,21 @@ int tcm_gmecc512_exchange(unsigned char fA, unsigned char prikey_A[GM_ECC_512_BY
 	{
 		gm_hash_update(&gm_hashCtx, Za, GM_HASH_BYTES_LEN);
 		gm_hash_update(&gm_hashCtx, Zb, GM_HASH_BYTES_LEN);
+		gm_hash_update(&gm_hashCtx, bx1, GM_ECC_512_BYTES_LEN);
+		gm_hash_update(&gm_hashCtx, by1, GM_ECC_512_BYTES_LEN);
+		gm_hash_update(&gm_hashCtx, bx2, GM_ECC_512_BYTES_LEN);
+		gm_hash_update(&gm_hashCtx, by2, GM_ECC_512_BYTES_LEN);
 	}
 	else
 	{
 		gm_hash_update(&gm_hashCtx, Zb, GM_HASH_BYTES_LEN);
 		gm_hash_update(&gm_hashCtx, Za, GM_HASH_BYTES_LEN);
+		gm_hash_update(&gm_hashCtx, bx2, GM_ECC_512_BYTES_LEN);
+		gm_hash_update(&gm_hashCtx, by2, GM_ECC_512_BYTES_LEN);
+		gm_hash_update(&gm_hashCtx, bx1, GM_ECC_512_BYTES_LEN);
+		gm_hash_update(&gm_hashCtx, by1, GM_ECC_512_BYTES_LEN);
 	}
-	gm_hash_update(&gm_hashCtx, bx1, GM_ECC_512_BYTES_LEN);
-	gm_hash_update(&gm_hashCtx, by1, GM_ECC_512_BYTES_LEN);
-	gm_hash_update(&gm_hashCtx, bx2, GM_ECC_512_BYTES_LEN);
-	gm_hash_update(&gm_hashCtx, by2, GM_ECC_512_BYTES_LEN);
+
 	gm_hash_finish(&gm_hashCtx, tmp_digest,EHASH_TYPE_ZY_HASH_256);
 
 	// S1 = SM3(0x02 || yU || tmp_digest)
