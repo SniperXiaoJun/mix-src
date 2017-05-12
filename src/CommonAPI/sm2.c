@@ -1569,16 +1569,21 @@ int tcm_ecc_exchange(unsigned char fA, unsigned char prikey_A[32], unsigned char
 	{
 		tcm_sch_update(&sm3Ctx, Za, SM3_DIGEST_LEN);
 		tcm_sch_update(&sm3Ctx, Zb, SM3_DIGEST_LEN);
+		tcm_sch_update(&sm3Ctx, bx1, SM2_BYTES_LEN);
+		tcm_sch_update(&sm3Ctx, by1, SM2_BYTES_LEN);
+		tcm_sch_update(&sm3Ctx, bx2, SM2_BYTES_LEN);
+		tcm_sch_update(&sm3Ctx, by2, SM2_BYTES_LEN);
 	}
 	else
 	{
 		tcm_sch_update(&sm3Ctx, Zb, SM3_DIGEST_LEN);
 		tcm_sch_update(&sm3Ctx, Za, SM3_DIGEST_LEN);
+		tcm_sch_update(&sm3Ctx, bx2, SM2_BYTES_LEN);
+		tcm_sch_update(&sm3Ctx, by2, SM2_BYTES_LEN);
+		tcm_sch_update(&sm3Ctx, bx1, SM2_BYTES_LEN);
+		tcm_sch_update(&sm3Ctx, by1, SM2_BYTES_LEN);
 	}
-	tcm_sch_update(&sm3Ctx, bx1, SM2_BYTES_LEN);
-	tcm_sch_update(&sm3Ctx, by1, SM2_BYTES_LEN);
-	tcm_sch_update(&sm3Ctx, bx2, SM2_BYTES_LEN);
-	tcm_sch_update(&sm3Ctx, by2, SM2_BYTES_LEN);
+
 	tcm_sch_finish(&sm3Ctx, tmp_digest);
 
 	// S1 = SM3(0x02 || yU || tmp_digest)
