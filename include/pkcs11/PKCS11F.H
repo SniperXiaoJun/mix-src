@@ -1009,9 +1009,67 @@ CK_PKCS11_FUNCTION_INFO(C_ECCGenAgreementKey)
 	CK_ULONG             ulAttributeCount,  /* template length */
 	CK_OBJECT_HANDLE_PTR phKeyA,              /* gets new handle A*/
 	CK_SESSION_HANDLE	hSessionB, 			/* the session's handle */
-	CK_OBJECT_HANDLE_PTR phKeyB              /* gets new handle B*/
+	CK_OBJECT_HANDLE_PTR phKeyB,              /* gets new handle B*/
+	CK_BYTE_PTR			pbSValue    // S值，固定32字节，B方输出，A方输入验证
 );
 #endif
+
+
+/* C_ECCGenAgreementKeyA is an GenAgreement Key operation. */
+CK_PKCS11_FUNCTION_INFO(C_ECCGenAgreementKeyA)
+#ifdef CK_NEED_ARG_LIST
+(
+CK_SESSION_HANDLE		hSession1, 			/* the session's handle */
+CK_ULONG				ulKeyAgreementID,	/* the key agreement ID*/
+CK_BYTE_PTR				pOtherPubKey,		/* the other's public key value*/
+CK_ULONG				ulOtherPubKeyLen,	/* 'pOtherPublicKey' size */
+CK_BYTE_PTR				pTmpOtherPubKey,	/*the other's temp public key value*/
+CK_ULONG				ulTmpOtherPubKeyLen,/* 'pTmpOtherPublicKey' size */
+CK_BYTE_PTR				pOtherUserID,		/*the other's user id*/
+CK_ULONG				ulOtherUserIDLen,	/* 'pOtherUserID' size */
+CK_BYTE_PTR				pMyUserID,			/*My user id*/
+CK_ULONG				ulMyUserIDLen,		/* 'pMyUserID' size */
+CK_OBJECT_HANDLE		hBasePubKey,		/* base public key */
+CK_OBJECT_HANDLE		hBasePriKey,		/* base private key */
+CK_ATTRIBUTE_PTR		pTemplate,			/* new key template */
+CK_ULONG				ulAttributeCount,	/* template length */
+CK_OBJECT_HANDLE_PTR	phKey1,				/* gets new handle A*/
+CK_SESSION_HANDLE		hSession2, 			/* the session's handle */
+CK_OBJECT_HANDLE_PTR	phKey2,				/* gets new handle B*/
+CK_BYTE_PTR				pbSValue,			// S值，B方生成的S
+CK_ULONG				ulSValueLen         // S值长度
+);
+#endif
+
+
+
+
+/* C_ECCGenAgreementKeyB is an GenAgreement Key operation. */
+CK_PKCS11_FUNCTION_INFO(C_ECCGenAgreementKeyB)
+#ifdef CK_NEED_ARG_LIST
+(
+CK_SESSION_HANDLE		hSession1, 			/* the session's handle */
+CK_ULONG				ulKeyAgreementID,	/* the key agreement ID*/
+CK_BYTE_PTR				pOtherPubKey,		/* the other's public key value*/
+CK_ULONG				ulOtherPubKeyLen,	/* 'pOtherPublicKey' size */
+CK_BYTE_PTR				pTmpOtherPubKey,	/*the other's temp public key value*/
+CK_ULONG				ulTmpOtherPubKeyLen,/* 'pTmpOtherPublicKey' size */
+CK_BYTE_PTR				pOtherUserID,		/*the other's user id*/
+CK_ULONG				ulOtherUserIDLen,	/* 'pOtherUserID' size */
+CK_BYTE_PTR				pMyUserID,			/*My user id*/
+CK_ULONG				ulMyUserIDLen,		/* 'pMyUserID' size */
+CK_OBJECT_HANDLE		hBasePubKey,		/* base public key */
+CK_OBJECT_HANDLE		hBasePriKey,		/* base private key */
+CK_ATTRIBUTE_PTR		pTemplate,			/* new key template */
+CK_ULONG				ulAttributeCount,	/* template length */
+CK_OBJECT_HANDLE_PTR	phKey1,				/* gets new handle A*/
+CK_SESSION_HANDLE		hSession2, 			/* the session's handle */
+CK_OBJECT_HANDLE_PTR	phKey2,				/* gets new handle B*/
+CK_BYTE_PTR				pbSValue,			// S值，B方输出S值
+CK_ULONG_PTR			pulSValueLen        // 返回S值长度
+);
+#endif
+
 
 /* C_ECCKeyAgreementFinal finishes an key agreement operation. */
 CK_PKCS11_FUNCTION_INFO(C_ECCKeyAgreementFinal)
@@ -1057,3 +1115,53 @@ CK_SESSION_HANDLE	hSession, 					/* the A session's handle */
 CK_OBJECT_HANDLE	hZMP						/* handle of ZMP  */
 );
 #endif
+
+
+/* C_GetR4 Get random cipher(r4) operation. */
+CK_PKCS11_FUNCTION_INFO(C_GetR4Cipher)
+#ifdef CK_NEED_ARG_LIST
+(
+CK_SESSION_HANDLE	hSession, 					/*[IN] the session's handle */
+CK_BYTE_PTR			pbServerSM2PubKey,			/*[IN] the publickey of server, only support sm2*/
+CK_ULONG			ulServerSM2PubKeyLen,		/*[IN] "pbServerSM2PubKey" length*/
+CK_BYTE_PTR			pbRandCipher,				/*[OUT] return random cipher */
+CK_ULONG_PTR		pulRandCipherLen			/*[OUT] return "pbRandCipher" length*/
+);
+#endif
+
+
+CK_PKCS11_FUNCTION_INFO(C_ZYHMACInit)
+#ifdef CK_NEED_ARG_LIST
+(
+CK_SLOT_ID			ulSlotID,
+CK_SESSION_HANDLE	hSession,
+CK_OBJECT_HANDLE	hHMACKey,
+CK_ULONG			ulHMACAlg,
+CK_ULONG			ulKeyIndex1,
+CK_ULONG			ulKeyIndex2,
+CK_ULONG			*pulHMACSession1,
+CK_ULONG			*pulHMACSession2
+);
+#endif
+
+
+CK_PKCS11_FUNCTION_INFO(C_ZYHMAC)
+#ifdef CK_NEED_ARG_LIST
+(
+CK_SLOT_ID			ulSlotID,
+CK_ULONG			ulHMACSession,
+CK_BYTE_PTR			pbPlaintext,
+CK_ULONG			ulPlaintextLen,
+CK_BYTE_PTR			pbMACValue,
+CK_ULONG			*pulMACValueLen
+);
+#endif
+
+CK_PKCS11_FUNCTION_INFO(C_ZYHMACClose)
+#ifdef CK_NEED_ARG_LIST
+(
+CK_SLOT_ID			ulSlotID,
+CK_ULONG			ulHMACSession
+);
+#endif
+
