@@ -1,35 +1,14 @@
 
-
-#if 0
-
-unsigned int __stdcall UI_ShowCert(SK_CERT_CONTENT * pCertContent)
-{
-	unsigned int ulRet = 0;
-
-	CCertUIDlg dlg;
-
-	dlg.SetCertContent(pCertContent);
-
-	ulRet = dlg.DoModal();
-
-	return ulRet;
-}
-
-#else 
+#include "WTF_Interface.h"
 #include "qt_uilib.h"
 
 unsigned int __stdcall UI_ShowCert(SK_CERT_CONTENT * pCertContent)
 {
 	unsigned int ulRet = 0;
 
-	int argc = 0;
-	char **argv = NULL;
-
-	QT_UILib lib;
-
-	lib.ShowUI(argc, argv,pCertContent);
+	QT_UILIB_ShowUI((unsigned char *)pCertContent + sizeof(SK_CERT_CONTENT), pCertContent->nValueLen);
 
 	return ulRet;
 }
-#endif
+
 
