@@ -53,7 +53,6 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="separator"/>
    <addaction name="actionOpenHTML"/>
    <addaction name="actionShowPlain"/>
    <addaction name="actionShowCipher"/>
@@ -81,17 +80,17 @@
   </action>
   <action name="actionShowPlain">
    <property name="text">
-    <string>showPlain</string>
+    <string>显示明文HTML源码</string>
    </property>
   </action>
   <action name="actionShowCipher">
    <property name="text">
-    <string>showCipher</string>
+    <string>显示密文HTML源码</string>
    </property>
   </action>
   <action name="actionOpenHTML">
    <property name="text">
-    <string>openHTML</string>
+    <string>打开明文HTML</string>
    </property>
   </action>
  </widget>
