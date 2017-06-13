@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>RtCryptHtmlClass</class>
+ <widget class="QMainWindow" name="RtCryptHtmlClass">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1008</width>
+    <height>708</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>RtCryptHtml</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
+     <widget class="QWebView" name="webView">
+      <property name="url">
+       <url>
+        <string>about:blank</string>
+       </url>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1008</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menu_HTML">
+    <property name="title">
+     <string>菜单</string>
+    </property>
+    <addaction name="action_HTML_ImportPlain"/>
+    <addaction name="action_HTML_ImportCipher"/>
+    <addaction name="action_HTML_ExportPlain"/>
+    <addaction name="action_HTML_ExportCipher"/>
+   </widget>
+   <addaction name="menu_HTML"/>
+  </widget>
+  <widget class="QToolBar" name="mainToolBar">
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="separator"/>
+   <addaction name="actionOpenHTML"/>
+   <addaction name="actionShowPlain"/>
+   <addaction name="actionShowCipher"/>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <action name="action_HTML_ImportPlain">
+   <property name="text">
+    <string>导入明文HTML</string>
+   </property>
+  </action>
+  <action name="action_HTML_ImportCipher">
+   <property name="text">
+    <string>导入密文HTML</string>
+   </property>
+  </action>
+  <action name="action_HTML_ExportPlain">
+   <property name="text">
+    <string>导出明文HTML</string>
+   </property>
+  </action>
+  <action name="action_HTML_ExportCipher">
+   <property name="text">
+    <string>导出密文HTML</string>
+   </property>
+  </action>
+  <action name="actionShowPlain">
+   <property name="text">
+    <string>showPlain</string>
+   </property>
+  </action>
+  <action name="actionShowCipher">
+   <property name="text">
+    <string>showCipher</string>
+   </property>
+  </action>
+  <action name="actionOpenHTML">
+   <property name="text">
+    <string>openHTML</string>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>QWebView</class>
+   <extends>QWidget</extends>
+   <header>QtWebKit/QWebView</header>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="rtcrypthtml.qrc"/>
+ </resources>
+ <connections/>
+</ui>
