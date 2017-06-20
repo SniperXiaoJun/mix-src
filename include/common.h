@@ -39,6 +39,9 @@
 #define BUFFER_LEN_1K 1024
 #define SIZE_1K 1024
 #define COUNT_1K 1024
-#define MAX_BUFFER_LEN 1024 * 1024
+#define MAX_BUFFER_LEN (1024 * 1024)
+
+#define IN
+#define OUT
 
 #endif
