@@ -1542,8 +1542,8 @@ COMMON_API unsigned int __stdcall WTF_SM2SignInitializeV2(SK_CERT_DESC_PROPERTY 
 	FUNC_NAME_DECLARE(func_, GenerateAgreementDataWithECCEx, );
 	FUNC_NAME_DECLARE(func_, GenerateAgreementDataAndKeyWithECCEx, );
 
-	FUNC_NAME_DECLARE(func_, GenRandom, );
-	FUNC_NAME_DECLARE(func_, Transmit, );
+	//FUNC_NAME_DECLARE(func_, GenRandom, );
+	//FUNC_NAME_DECLARE(func_, Transmit, );
 	
 
 	unsigned int ulRet = 0;
@@ -1593,8 +1593,8 @@ COMMON_API unsigned int __stdcall WTF_SM2SignInitializeV2(SK_CERT_DESC_PROPERTY 
 
 	FUNC_NAME_INIT(func_, ECCSignData,);
 
-	FUNC_NAME_INIT(func_, GenRandom, );
-	FUNC_NAME_INIT(func_, Transmit, );
+	//FUNC_NAME_INIT(func_, GenRandom, );
+	//FUNC_NAME_INIT(func_, Transmit, );
 
 	{
 		unsigned char bufferRandom[8] = {0};
@@ -4936,8 +4936,8 @@ unsigned int __stdcall WTF_SM2SignProcess(OPST_HANDLE_ARGS *args,
 
 	FUNC_NAME_INIT(func_, ECCSignData,);
 
-	FUNC_NAME_INIT(func_, GenRandom, );
-	FUNC_NAME_INIT(func_, Transmit, );
+	//FUNC_NAME_INIT(func_, GenRandom, );
+	//FUNC_NAME_INIT(func_, Transmit, );
 
 	{
 		if(hCon)
