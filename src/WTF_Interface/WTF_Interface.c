@@ -264,7 +264,7 @@ unsigned int __stdcall WTF_ReadSKFPath(const char * pszSKFName, char * pszDllPat
 
 
 
-unsigned int __stdcall WTF_ReadSKFPinVeify(SK_CERT_DESC_PROPERTY *pCertProperty, char * pszPinVerify, unsigned int *puiPinVerifyLen)
+unsigned int __stdcall WTF_ReadSKFPinVerify(SK_CERT_DESC_PROPERTY *pCertProperty, char * pszPinVerify, unsigned int *puiPinVerifyLen)
 {
 	unsigned int ulRet = -1;
 	HKEY hKey;
@@ -4916,7 +4916,7 @@ unsigned int __stdcall WTF_SM2SignProcess(OPST_HANDLE_ARGS *args,
 
 	// there may be fail, so don't judge return value
 	WTF_ReadSKFSignType(pCertProperty->szSKFName, signTypeValue, &signTypeLen);
-	WTF_ReadSKFPinVeify(pCertProperty, verifyPinValue, &verifyPinLen);
+	WTF_ReadSKFPinVerify(pCertProperty, verifyPinValue, &verifyPinLen);
 
 	FUNC_NAME_INIT(func_, EnumDev,);
 	FUNC_NAME_INIT(func_, ConnectDev,);

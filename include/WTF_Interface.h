@@ -106,7 +106,7 @@ extern "C" {
 
 	/*
 	功能名称:	读取指定SKF的PinVeify类型
-	函数名称:	WTF_ReadSKFPinVeify
+	函数名称:	WTF_ReadSKFPinVerify
 	输入参数:	pCertProperty 证书描述属性
 	输出参数:	
 	pszPinVerify    校验类型 
@@ -118,7 +118,7 @@ extern "C" {
 	失败：
 	功能描述:	读取指定SKF的PinVeify类型
 	*/
-	COMMON_API unsigned int __stdcall WTF_ReadSKFPinVeify(SK_CERT_DESC_PROPERTY *pCertProperty, char * pszPinVerify, unsigned int *puiPinVerifyLen);
+	COMMON_API unsigned int __stdcall WTF_ReadSKFPinVerify(SK_CERT_DESC_PROPERTY *pCertProperty, char * pszPinVerify, unsigned int *puiPinVerifyLen);
 
 	/*
 	功能名称:	枚举证书
