@@ -21,6 +21,7 @@ HANDLE hMutex = 0;
 #define REG_SUB_KEY_PREFIX "SOFTWARE\\Microsoft\\Cryptography\\Defaults\\SKF"
 #define REG_VALUE_PATH_KEYNAME "path"
 #define REG_VALUE_SIGNTYPE_KEYNAME "signtype"
+#define REG_VALUE_PIN_VERIFY_KEYNAME "pin_verify"
 #define REG_CURRENT_SKF "WDSKF"
 
 #define SM2_ALG_BYTES "\x2a\x86\x48\xce\x3d\x02\x01"
@@ -66,9 +67,9 @@ typedef ULONG (DEVAPI *pSKF_CloseContainer)(HCONTAINER hContainer);
 typedef ULONG (DEVAPI *pSKF_VerifyPIN)(HAPPLICATION hApplication, ULONG  ulPINType, LPSTR szPIN, ULONG *puiRetryCount);
 typedef ULONG (DEVAPI *pSKF_ExportCertificate)(HCONTAINER hContainer, BOOL bSignFlag,  BYTE* pbCert, ULONG *puiCertLen);
 typedef ULONG (DEVAPI *pSKF_GetContainerType)(HCONTAINER hContainer, ULONG *puiContainerType);
-typedef ULONG (DEVAPI *pSKF_ECCSignData)(HCONTAINER hContainer, BYTE *pbData, ULONG  ulDataLen, PECCSIGNATUREBLOB pSignature);
-typedef ULONG (DEVAPI *pSKF_ECCVerify)(DEVHANDLE hDev , ECCPUBLICKEYBLOB* pECCPubKeyBlob, BYTE *pbData, ULONG  ulDataLen, PECCSIGNATUREBLOB pSignature);
-typedef ULONG (DEVAPI *pSKF_ExtECCVerify)(DEVHANDLE hDev, ECCPUBLICKEYBLOB*  pECCPubKeyBlob,BYTE* pbData, ULONG ulDataLen, PECCSIGNATUREBLOB pSignature);
+typedef ULONG (DEVAPI *pSKF_ECCSignData)(HCONTAINER hContainer, BYTE *pbData, ULONG  uiDataLen, PECCSIGNATUREBLOB pSignature);
+typedef ULONG (DEVAPI *pSKF_ECCVerify)(DEVHANDLE hDev , ECCPUBLICKEYBLOB* pECCPubKeyBlob, BYTE *pbData, ULONG  uiDataLen, PECCSIGNATUREBLOB pSignature);
+typedef ULONG (DEVAPI *pSKF_ExtECCVerify)(DEVHANDLE hDev, ECCPUBLICKEYBLOB*  pECCPubKeyBlob,BYTE* pbData, ULONG uiDataLen, PECCSIGNATUREBLOB pSignature);
 typedef ULONG (DEVAPI *pSKF_GetDevInfo)(DEVHANDLE hDev, DEVINFO *pDevInfo);
 typedef ULONG (DEVAPI *pSKF_LockDev)(DEVHANDLE hDev, ULONG ulTimeOut);
 typedef ULONG (DEVAPI *pSKF_UnlockDev)(DEVHANDLE hDev);
@@ -100,6 +101,13 @@ typedef ULONG (DEVAPI *pSKF_GenerateKeyWithECCEx)(HANDLE hAgreementHandle,
 
 // 最大设备个数
 #define MAX_SKF_CERT 1024
+
+unsigned int __stdcall WTF_SM2SignProcess(OPST_HANDLE_ARGS *args, 
+	SK_CERT_DESC_PROPERTY *pCertProperty, 
+	char *pszPIN, 
+	BYTE *pbDigest, unsigned int uiDigestLen, 
+	BYTE *pbData, unsigned int uiDataLen, 
+	PECCSIGNATUREBLOB pSignature,ULONG *puiRetryCount);
 
 unsigned int __stdcall WTF_EnumSKF(char * pszSKFNames, unsigned int * puiSKFNamesLen)
 {
@@ -250,6 +258,86 @@ unsigned int __stdcall WTF_ReadSKFPath(const char * pszSKFName, char * pszDllPat
 
 	RegCloseKey(hKey);
 
+
+	return ulRet;
+}
+
+
+
+unsigned int __stdcall WTF_ReadSKFPinVeify(SK_CERT_DESC_PROPERTY *pCertProperty, char * pszPinVerify, unsigned int *puiPinVerifyLen)
+{
+	unsigned int ulRet = -1;
+	HKEY hKey;
+	unsigned int DataSize,MaxDateLen;
+	unsigned int dwIndex=0,NameSize,NameCnt,NameMaxLen,Type;
+	char SubKey[BUFFER_LEN_1K] = {0};
+
+	//LPCSTR SubKey[] =  REG_SUB_KEY_PREFIX;
+
+	char * szValueName;
+	LPBYTE  szValueData;
+
+	strcat(SubKey,REG_SUB_KEY_PREFIX);
+	strcat(SubKey,"\\");
+	strcat(SubKey,pCertProperty->szSKFName);
+
+	if (RegOpenKeyExA(REG_ROOT_KEY,SubKey,0,KEY_READ,&hKey)!=
+		ERROR_SUCCESS)
+	{
+		DEBUG("RegOpenKeyEx错误");
+		return -1;
+	}
+
+	//获取子键信息---------------------------------------------------------------
+	if(RegQueryInfoKey(hKey,NULL,NULL,NULL,NULL,NULL,NULL,&NameCnt,&NameMaxLen,&MaxDateLen,NULL,NULL)!=ERROR_SUCCESS)
+	{
+		DEBUG("RegQueryInfoKey错误");
+		RegCloseKey(hKey);
+		return -1;
+	}
+	//枚举键值信息--------------------------------------------------------------
+	for(dwIndex=0;dwIndex<NameCnt;dwIndex++)    //枚举键
+	{
+		DataSize=MaxDateLen+1;
+		NameSize=NameMaxLen+1;
+		szValueName=(char *)malloc(NameSize);
+		szValueData=(LPBYTE)malloc(DataSize);
+
+		memset(szValueName, 0, NameSize);
+		memset(szValueData, 0, DataSize);
+
+		RegEnumValueA(hKey,dwIndex,szValueName,&NameSize,NULL,&Type,szValueData,&DataSize);//读取键
+
+		DEBUG("%s %s\n", szValueName, szValueData);
+
+		if(0 == (strcmp(szValueName,REG_VALUE_PIN_VERIFY_KEYNAME)))
+		{
+			if(NULL == pszPinVerify)
+			{
+				* puiPinVerifyLen = DataSize;
+				ulRet = 0;
+			}
+			else if(* puiPinVerifyLen < DataSize)
+			{
+				* puiPinVerifyLen = DataSize;
+				ulRet = EErr_SMC_MEM_LES;
+			}
+			else
+			{
+				* puiPinVerifyLen = DataSize;
+				memcpy(pszPinVerify, szValueData, DataSize);
+				ulRet = 0;
+			}
+			break;
+		}
+
+		free(szValueName);
+		free(szValueData);
+		szValueName = 0;
+		szValueData = 0;
+	}
+
+	RegCloseKey(hKey);
 
 	return ulRet;
 }
@@ -1631,7 +1719,7 @@ err:
 	return ulRet;
 }
 
-COMMON_API unsigned int __stdcall WTF_SM2SignDigestProcessV2(SK_CERT_DESC_PROPERTY * pCertProperty, BYTE *pbData, unsigned int ulDataLen, PECCSIGNATUREBLOB pSignature)
+COMMON_API unsigned int __stdcall WTF_SM2SignDigestProcessV2(SK_CERT_DESC_PROPERTY * pCertProperty, BYTE *pbData, unsigned int uiDataLen, PECCSIGNATUREBLOB pSignature)
 {
 	OPST_HANDLE_ARGS args = {0};
 	OPST_HANDLE_ARGS argsZERO = {0};
@@ -1656,7 +1744,7 @@ COMMON_API unsigned int __stdcall WTF_SM2SignDigestProcessV2(SK_CERT_DESC_PROPER
 	}
 
 
-	ulRet = WTF_SM2SignDigestProcess(&args,pbData,ulDataLen,pSignature);
+	ulRet = WTF_SM2SignDigestProcess(&args,pbData,uiDataLen,pSignature);
 	if (SAR_FAIL == ulRet)
 	{
 		WTF_SM2SignFinalizeV2(&args);
@@ -1670,7 +1758,7 @@ COMMON_API unsigned int __stdcall WTF_SM2SignDigestProcessV2(SK_CERT_DESC_PROPER
 			goto err;
 		}
 
-		ulRet = WTF_SM2SignDigestProcess(&args,pbData,ulDataLen,pSignature);
+		ulRet = WTF_SM2SignDigestProcess(&args,pbData,uiDataLen,pSignature);
 
 		if (0 != ulRet)
 		{
@@ -1703,7 +1791,7 @@ err:
 }
 
 
-COMMON_API unsigned int __stdcall WTF_SM2SignDigestForHengBao(SK_CERT_DESC_PROPERTY * pCertProperty,unsigned int ulPINType , CallBackCfcaGetEncryptPIN GetEncryptPIN, void * pArgs/*NULL is able*/, unsigned int *puiRetryCount, BYTE *pbData, unsigned int ulDataLen, PECCSIGNATUREBLOB pSignature)
+COMMON_API unsigned int __stdcall WTF_SM2SignDigestForHengBao(SK_CERT_DESC_PROPERTY * pCertProperty,unsigned int ulPINType , CallBackCfcaGetEncryptPIN GetEncryptPIN, void * pArgs/*NULL is able*/, unsigned int *puiRetryCount, BYTE *pbData, unsigned int uiDataLen, PECCSIGNATUREBLOB pSignature)
 {
 	unsigned int ulRet = 0;
 	OPST_HANDLE_ARGS args = {0};
@@ -1717,7 +1805,7 @@ COMMON_API unsigned int __stdcall WTF_SM2SignDigestForHengBao(SK_CERT_DESC_PROPE
 
 	isInitArgs = 1;
 
-	ulRet = WTF_SM2SignDigestProcess(&args,pbData,ulDataLen,pSignature);
+	ulRet = WTF_SM2SignDigestProcess(&args,pbData,uiDataLen,pSignature);
 	if (0 != ulRet)
 	{
 		goto err;
@@ -1732,7 +1820,7 @@ err:
 }
 
 
-unsigned int __stdcall WTF_SM2SignDigestProcess(OPST_HANDLE_ARGS *args, BYTE *pbData, unsigned int ulDataLen, PECCSIGNATUREBLOB pSignature)
+unsigned int __stdcall WTF_SM2SignDigestProcess(OPST_HANDLE_ARGS *args, BYTE *pbData, unsigned int uiDataLen, PECCSIGNATUREBLOB pSignature)
 {
 	HINSTANCE ghInst = NULL;
 	unsigned int ulRet = 0;
@@ -1814,7 +1902,7 @@ unsigned int __stdcall WTF_SM2SignDigestProcess(OPST_HANDLE_ARGS *args, BYTE *pb
 	{
 		if(hCon)
 		{
-			ulRet = func_ECCSignData(hCon,pbData,ulDataLen,pSignature);
+			ulRet = func_ECCSignData(hCon,pbData,uiDataLen,pSignature);
 			if (0 != ulRet)
 			{
 				goto err;
@@ -2234,7 +2322,7 @@ err:
 
 #endif
 
-unsigned int __stdcall WTF_SM2SignDigest(SK_CERT_DESC_PROPERTY * pCertProperty, const char * pszPIN, BYTE *pbData, unsigned int ulDataLen, PECCSIGNATUREBLOB pSignature,unsigned int * puiRetryCount)
+unsigned int __stdcall WTF_SM2SignDigest(SK_CERT_DESC_PROPERTY * pCertProperty, const char * pszPIN, BYTE *pbData, unsigned int uiDataLen, PECCSIGNATUREBLOB pSignature,unsigned int * puiRetryCount)
 {
 	HINSTANCE ghInst = NULL;
 
@@ -2353,7 +2441,7 @@ unsigned int __stdcall WTF_SM2SignDigest(SK_CERT_DESC_PROPERTY * pCertProperty, 
 			goto err;
 		}
 
-		ulRet = func_ECCSignData(hCon,pbData,ulDataLen,pSignature);
+		ulRet = func_ECCSignData(hCon,pbData,uiDataLen,pSignature);
 		if (0 != ulRet)
 		{
 			goto err;
@@ -2402,6 +2490,68 @@ err:
 		FreeLibrary(ghInst);//释放Dll函数
 		ghInst = NULL;
 #endif
+	}
+
+	return ulRet;
+}
+
+unsigned int __stdcall WTF_SM2Sign(
+	SK_CERT_DESC_PROPERTY *pCertProperty, 
+	char *pszPIN, 
+	BYTE *pbDigest, unsigned int uiDigestLen, 
+	BYTE *pbData, unsigned int uiDataLen, 
+	PECCSIGNATUREBLOB pSignature,ULONG *puiRetryCount)
+{
+	OPST_HANDLE_ARGS args = {0};
+	OPST_HANDLE_ARGS argsZERO = {0};
+	unsigned int ulRet = 0;
+
+	ulRet = WTF_ArgsGet(pCertProperty,&args);
+	if (0 != ulRet)
+	{
+		goto err;
+	}
+
+	if(0 == memcmp(&args, &argsZERO, sizeof(OPST_HANDLE_ARGS)))
+	{
+		ulRet = WTF_SM2SignInitializeV2(pCertProperty,&args);
+
+		WTF_ArgsPut(pCertProperty,&args);
+
+		if (0 != ulRet)
+		{
+			goto err;
+		}
+	}
+
+
+	ulRet = WTF_SM2SignProcess(&args,pCertProperty,pszPIN,pbDigest, uiDigestLen, pbData,uiDataLen,pSignature, puiRetryCount);
+	if (SAR_FAIL == ulRet)
+	{
+		WTF_SM2SignFinalizeV2(&args);
+		memcpy(&args,&argsZERO,sizeof(OPST_HANDLE_ARGS));
+		ulRet = WTF_SM2SignInitializeV2(pCertProperty,&args);
+
+		WTF_ArgsPut(pCertProperty,&args);
+
+		if (0 != ulRet)
+		{
+			goto err;
+		}
+
+		ulRet = WTF_SM2SignProcess(&args,pCertProperty,pszPIN,pbDigest, uiDigestLen, pbData,uiDataLen,pSignature, puiRetryCount);
+
+		if (0 != ulRet)
+		{
+			goto err;
+		}
+	} 
+
+err:
+	if (ulRet)
+	{
+		WTF_SM2SignFinalizeV2(&args);
+		WTF_ArgsClr();
 	}
 
 	return ulRet;
@@ -2579,7 +2729,7 @@ err:
 
 
 
-unsigned int __stdcall WTF_SM2VerifyDigest(ECCPUBLICKEYBLOB* pECCPubKeyBlob, BYTE *pbData, ULONG  ulDataLen, PECCSIGNATUREBLOB pSignature)
+unsigned int __stdcall WTF_SM2VerifyDigest(ECCPUBLICKEYBLOB* pECCPubKeyBlob, BYTE *pbData, ULONG  uiDataLen, PECCSIGNATUREBLOB pSignature)
 {
 	unsigned int ulRet = 0;
 
@@ -2596,7 +2746,7 @@ unsigned int __stdcall WTF_SM2VerifyDigest(ECCPUBLICKEYBLOB* pECCPubKeyBlob, BYT
 		goto err;
 	}
 
-	ulRet = OpenSSL_SM2VerifyDigest(pbData, ulDataLen,
+	ulRet = OpenSSL_SM2VerifyDigest(pbData, uiDataLen,
 		sigValue,sigLen,
 		pECCPubKeyBlob->XCoordinate + SM2_BYTES_LEN, SM2_BYTES_LEN,
 		pECCPubKeyBlob->YCoordinate + SM2_BYTES_LEN, SM2_BYTES_LEN);
@@ -4692,4 +4842,160 @@ COMMON_API unsigned int __stdcall WTF_SM2GetAgreementKeyEx(
 	memcpy(pbTempECCPubKeyBlobA + 1 + uiECCLen, pTempECCPubKeyBlobA.YCoordinate + 64 - uiECCLen, uiECCLen);
 
 	return uiRet;
+}
+
+
+unsigned int __stdcall WTF_SM2SignProcess(OPST_HANDLE_ARGS *args, 
+	SK_CERT_DESC_PROPERTY *pCertProperty, 
+	char *pszPIN, 
+	BYTE *pbDigest, unsigned int uiDigestLen, 
+	BYTE *pbData, unsigned int uiDataLen, 
+	PECCSIGNATUREBLOB pSignature,ULONG *puiRetryCount)
+{
+	HINSTANCE ghInst = NULL;
+	unsigned int ulRet = 0;
+
+	FUNC_NAME_DECLARE(func_, EnumDev,);
+	FUNC_NAME_DECLARE(func_, ConnectDev,);
+	FUNC_NAME_DECLARE(func_, DisConnectDev,);
+	FUNC_NAME_DECLARE(func_, ChangePIN,);
+	FUNC_NAME_DECLARE(func_, OpenApplication,);
+	FUNC_NAME_DECLARE(func_, CloseApplication,);
+	FUNC_NAME_DECLARE(func_, EnumApplication,);
+	FUNC_NAME_DECLARE(func_, ExportCertificate,);
+	FUNC_NAME_DECLARE(func_, EnumContainer,);
+	FUNC_NAME_DECLARE(func_, OpenContainer,);
+	FUNC_NAME_DECLARE(func_, CloseContainer,);
+	FUNC_NAME_DECLARE(func_, VerifyPIN,);
+	FUNC_NAME_DECLARE(func_, GetContainerType,);
+	FUNC_NAME_DECLARE(func_, ECCSignData,);
+	FUNC_NAME_DECLARE(func_, ECCVerify,);
+	FUNC_NAME_DECLARE(func_, ExtECCVerify,);
+	FUNC_NAME_DECLARE(func_, GetDevInfo,);
+	FUNC_NAME_DECLARE(func_, LockDev,);
+	FUNC_NAME_DECLARE(func_, UnlockDev,);
+
+	FUNC_NAME_DECLARE(func_, GenerateKeyWithECCEx,);
+	FUNC_NAME_DECLARE(func_, GenerateAgreementDataWithECC,);
+	FUNC_NAME_DECLARE(func_, GenerateAgreementDataWithECCEx, );
+	FUNC_NAME_DECLARE(func_, GenerateAgreementDataAndKeyWithECCEx, );
+
+	FUNC_NAME_DECLARE(func_, GenRandom, );
+	FUNC_NAME_DECLARE(func_, Transmit, );
+
+
+	DEVHANDLE hDev = NULL;
+	HAPPLICATION hAPP = NULL;
+	HCONTAINER hCon = NULL;
+
+	unsigned int signTypeLen = BUFFER_LEN_1K;
+	char signTypeValue[BUFFER_LEN_1K] = {0};
+	unsigned int verifyPinLen = BUFFER_LEN_1K;
+	char verifyPinValue[BUFFER_LEN_1K] = {0};
+
+
+	OPST_HANDLE_ARGS * handleArgs = args;
+
+	if (handleArgs)
+	{
+		ghInst = handleArgs->ghInst;
+		hDev = handleArgs->hDev;
+		hAPP = handleArgs->hAPP;
+		hCon = handleArgs->hCon;
+	}
+	else
+	{
+		return EErr_SMC_FAIL;
+	}
+
+	if (!ghInst)
+	{
+		ulRet = EErr_SMC_DLL_PATH;
+		goto err;
+	}
+
+	// there may be fail, so don't judge return value
+	WTF_ReadSKFSignType(pCertProperty->szSKFName, signTypeValue, &signTypeLen);
+	WTF_ReadSKFPinVeify(pCertProperty, verifyPinValue, &verifyPinLen);
+
+	FUNC_NAME_INIT(func_, EnumDev,);
+	FUNC_NAME_INIT(func_, ConnectDev,);
+	FUNC_NAME_INIT(func_, DisConnectDev,);
+	FUNC_NAME_INIT(func_, ChangePIN,);
+	FUNC_NAME_INIT(func_, OpenApplication,);
+	FUNC_NAME_INIT(func_, CloseApplication,);
+	FUNC_NAME_INIT(func_, EnumApplication,);
+	FUNC_NAME_INIT(func_, ExportCertificate,);
+	FUNC_NAME_INIT(func_, EnumContainer,);
+	FUNC_NAME_INIT(func_, OpenContainer,);
+	FUNC_NAME_INIT(func_, CloseContainer,);
+	FUNC_NAME_INIT(func_, VerifyPIN,);
+	FUNC_NAME_INIT_GetContainerType(func_, GetContainerType,);
+	FUNC_NAME_INIT(func_, LockDev,);
+	FUNC_NAME_INIT(func_, UnlockDev,);
+
+	FUNC_NAME_INIT(func_, ECCSignData,);
+
+	FUNC_NAME_INIT(func_, GenRandom, );
+	FUNC_NAME_INIT(func_, Transmit, );
+
+	{
+		if(hCon)
+		{
+
+			//  "0" || "" ：标准PIN有效使用
+			//	"1"：无需调用校验PIN接口
+			//	"2"：PIN无效，但需调用校验PIN接口
+			if (0 == memcmp("2", verifyPinValue,1))
+			{
+				ulRet = func_VerifyPIN(hAPP, 1, pszPIN, puiRetryCount);
+				if (0 != ulRet)
+				{
+					goto err;
+				}
+			}
+			else if(0 == memcmp("1", verifyPinValue,1))
+			{
+
+			}
+			else if(0 == memcmp("0", verifyPinValue,1))
+			{
+				ulRet = func_VerifyPIN(hAPP, 1, pszPIN, puiRetryCount);
+				if (0 != ulRet)
+				{
+					goto err;
+				}
+			}
+			else if(0 == memcmp("", verifyPinValue,1))
+			{
+				ulRet = func_VerifyPIN(hAPP, 1, pszPIN, puiRetryCount);
+				if (0 != ulRet)
+				{
+					goto err;
+				}
+			}
+			
+
+			if(0 == memcmp("data", signTypeValue,4))
+			{
+				ulRet = func_ECCSignData(hCon,pbData,uiDataLen,pSignature);
+			}
+			else
+			{
+				ulRet = func_ECCSignData(hCon,pbDigest,uiDigestLen,pSignature);
+			}
+			if (0 != ulRet)
+			{
+				goto err;
+			}
+		}
+		else
+		{
+			ulRet = EErr_SMC_FAIL;
+		}
+	}
+
+err:
+
+	return ulRet;
 }

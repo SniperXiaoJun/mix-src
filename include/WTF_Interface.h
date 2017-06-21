@@ -95,13 +95,30 @@ extern "C" {
 	函数名称:	WTF_ReadSKFSignType
 	输入参数:	pszSKFName SKF库
 	输出参数:	
-				pszSignType		SKF库加载路径
+				pszSignType		SKF库签名类型
 				puiSignTypeLen	长度
 	返回值: 
 	失败：
 	功能描述:	读取指定SKF签名类型
 	*/
 	COMMON_API unsigned int __stdcall WTF_ReadSKFSignType(const char * pszSKFName, char * pszSignType, unsigned int *puiSignTypeLen);
+
+
+	/*
+	功能名称:	读取指定SKF的PinVeify类型
+	函数名称:	WTF_ReadSKFPinVeify
+	输入参数:	pCertProperty 证书描述属性
+	输出参数:	
+	pszPinVerify    校验类型 
+		"0" || "" ：标准PIN有效使用
+		"1"：无需调用校验PIN接口
+		"2"：PIN无效，但需调用校验PIN接口
+	puiPinVerifyLen	长度
+	返回值: 
+	失败：
+	功能描述:	读取指定SKF的PinVeify类型
+	*/
+	COMMON_API unsigned int __stdcall WTF_ReadSKFPinVeify(SK_CERT_DESC_PROPERTY *pCertProperty, char * pszPinVerify, unsigned int *puiPinVerifyLen);
 
 	/*
 	功能名称:	枚举证书
@@ -292,6 +309,14 @@ extern "C" {
 		BYTE *pbDigest, unsigned int uiDigestLen, 
 		BYTE *pbData, unsigned int uiDataLen, 
 		PECCSIGNATUREBLOB pSignature,unsigned int *puiRetryCount);
+
+
+	COMMON_API unsigned int __stdcall WTF_SM2Sign(
+		SK_CERT_DESC_PROPERTY *pCertProperty, 
+		char *pszPIN, 
+		BYTE *pbDigest, unsigned int uiDigestLen, 
+		BYTE *pbData, unsigned int uiDataLen, 
+		PECCSIGNATUREBLOB pSignature,ULONG *puiRetryCount);
 	
 
 	/*
