@@ -4,6 +4,8 @@
 
 #include "common.h"
 
+#if 0
+
 // 证书(验证标志) 可以做按位与操作
 typedef enum _SMB_CERT_VERIFY_FLAG
 {
@@ -46,7 +48,7 @@ typedef enum _SMB_CERT_FILTER_FLAG
 	CERT_FILTER_FLAG_FALSE = 0x00000000,		// 不过滤
 	CERT_FILTER_FLAG_TRUE = 0x00000001,		// 过滤
 }SMB_CERT_FILTER_FLAG;
-
+#endif
 //数据
 typedef struct _SMB_CS_Data
 {
