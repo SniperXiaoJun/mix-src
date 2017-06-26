@@ -498,6 +498,8 @@ extern "C" {
 		_In_ const char * pszPIN,
 		_Inout_ int * puiRetryCount);
 
+	COMMON_API unsigned int __stdcall WTF_ReadCSPPath(const char *pszCSPName, char * pszDllPath, unsigned int *puiDllPathLen);
+
 #ifdef __cplusplus
 }
 #endif

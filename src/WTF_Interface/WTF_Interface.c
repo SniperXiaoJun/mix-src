@@ -19,7 +19,9 @@ HANDLE hMutex = 0;
 
 #define REG_ROOT_KEY HKEY_LOCAL_MACHINE
 #define REG_SUB_KEY_PREFIX "SOFTWARE\\Microsoft\\Cryptography\\Defaults\\SKF"
+#define REG_SUB_KEY_PREFIX_CSP "SOFTWARE\\Microsoft\\Cryptography\\Defaults\\Provider"
 #define REG_VALUE_PATH_KEYNAME "path"
+#define REG_VALUE_Image_PATH_KEYNAME "Image Path"
 #define REG_VALUE_SIGNTYPE_KEYNAME "signtype"
 #define REG_VALUE_PIN_VERIFY_KEYNAME "pin_verify"
 #define REG_CURRENT_SKF "WDSKF"
@@ -177,6 +179,86 @@ unsigned int __stdcall WTF_EnumSKF(char * pszSKFNames, unsigned int * puiSKFName
 	}
 
 	RegCloseKey(hKey);
+
+	return ulRet;
+}
+
+unsigned int __stdcall WTF_ReadCSPPath(const char *pszCSPName, char * pszDllPath, unsigned int *puiDllPathLen)
+{
+	unsigned int ulRet = -1;
+	HKEY hKey;
+	unsigned int DataSize,MaxDateLen;
+	unsigned int dwIndex=0,NameSize,NameCnt,NameMaxLen,Type;
+	char SubKey[BUFFER_LEN_1K] = {0};
+
+	//LPCSTR SubKey[] =  REG_SUB_KEY_PREFIX;
+
+	char * szValueName;
+	LPBYTE  szValueData;
+
+	strcat(SubKey,REG_SUB_KEY_PREFIX_CSP);
+	strcat(SubKey,"\\");
+	strcat(SubKey,pszCSPName);
+
+	if (RegOpenKeyExA(REG_ROOT_KEY,SubKey,0,KEY_READ,&hKey)!=
+		ERROR_SUCCESS)
+	{
+		DEBUG("RegOpenKeyEx错误");
+		return -1;
+	}
+
+	//获取子键信息---------------------------------------------------------------
+	if(RegQueryInfoKey(hKey,NULL,NULL,NULL,NULL,NULL,NULL,&NameCnt,&NameMaxLen,&MaxDateLen,NULL,NULL)!=ERROR_SUCCESS)
+	{
+		DEBUG("RegQueryInfoKey错误");
+		RegCloseKey(hKey);
+		return -1;
+	}
+	//枚举键值信息--------------------------------------------------------------
+	for(dwIndex=0;dwIndex<NameCnt;dwIndex++)    //枚举键
+	{
+		DataSize=MaxDateLen+1;
+		NameSize=NameMaxLen+1;
+		szValueName=(char *)malloc(NameSize);
+		szValueData=(LPBYTE)malloc(DataSize);
+
+		memset(szValueName, 0, NameSize);
+		memset(szValueData, 0, DataSize);
+
+		RegEnumValueA(hKey,dwIndex,szValueName,&NameSize,NULL,&Type,szValueData,&DataSize);//读取键
+
+		DEBUG("%s %s\n", szValueName, szValueData);
+
+		if(0 == (strcmp(szValueName,REG_VALUE_Image_PATH_KEYNAME)))
+		{
+			if(NULL == pszDllPath)
+			{
+				* puiDllPathLen = DataSize;
+				ulRet = 0;
+			}
+			else if(* puiDllPathLen < DataSize)
+			{
+				* puiDllPathLen = DataSize;
+				ulRet = EErr_SMC_MEM_LES;
+			}
+			else
+			{
+				* puiDllPathLen = DataSize;
+				memcpy(pszDllPath, szValueData, DataSize);
+				ulRet = 0;
+			}
+
+			break;
+		}
+
+		free(szValueName);
+		free(szValueData);
+		szValueName = 0;
+		szValueData = 0;
+	}
+
+	RegCloseKey(hKey);
+
 
 	return ulRet;
 }
