@@ -1981,6 +1981,19 @@ unsigned int __stdcall WTF_SM2SignDigestProcess(OPST_HANDLE_ARGS *args, BYTE *pb
 	FUNC_NAME_INIT(func_, GenRandom, );
 	FUNC_NAME_INIT(func_, Transmit, );
 
+#if USE_SELF_MUTEX
+	if(ulRet=SDSCWaitMutex(mutex_buffer,INFINITE,&hMutex))
+	{
+		goto err;
+	}
+#else
+	ulRet = func_LockDev(hDev,0xFFFFFFFF);
+	if (0 != ulRet)
+	{
+		goto err;
+	}
+#endif
+
 	{
 		if(hCon)
 		{
@@ -1997,6 +2010,15 @@ unsigned int __stdcall WTF_SM2SignDigestProcess(OPST_HANDLE_ARGS *args, BYTE *pb
 	}
 
 err:
+
+	if(hDev)
+	{
+#if USE_SELF_MUTEX
+		SDSCReleaseMutex(hMutex);
+#else
+		func_UnlockDev(hDev);
+#endif
+	}
 
 	return ulRet;
 }
@@ -2739,6 +2761,19 @@ unsigned int __stdcall WTF_SM2SignDigestV2(
 			goto err;
 		}
 
+#if USE_SELF_MUTEX
+		if(ulRet=SDSCWaitMutex(mutex_buffer,INFINITE,&hMutex))
+		{
+			goto err;
+		}
+#else
+		ulRet = func_LockDev(hDev,0xFFFFFFFF);
+		if (0 != ulRet)
+		{
+			goto err;
+		}
+#endif
+
 
 		ulRet = func_OpenApplication(hDev,pCertProperty->szApplicationName,&hAPP);
 		if (0 != ulRet)
@@ -2795,6 +2830,11 @@ err:
 
 	if(hDev)
 	{
+#if USE_SELF_MUTEX
+		SDSCReleaseMutex(hMutex);
+#else
+		func_UnlockDev(hDev);
+#endif
 		func_DisConnectDev(hDev);hDev = NULL;
 	}
 
@@ -5165,6 +5205,19 @@ unsigned int __stdcall WTF_SM2SignProcess(OPST_HANDLE_ARGS *args,
 	//FUNC_NAME_INIT(func_, GenRandom, );
 	//FUNC_NAME_INIT(func_, Transmit, );
 
+#if USE_SELF_MUTEX
+		if(ulRet=SDSCWaitMutex(mutex_buffer,INFINITE,&hMutex))
+		{
+			goto err;
+		}
+#else
+		ulRet = func_LockDev(hDev,0xFFFFFFFF);
+		if (0 != ulRet)
+		{
+			goto err;
+		}
+#endif
+
 	{
 		if(hCon)
 		{
@@ -5222,6 +5275,15 @@ unsigned int __stdcall WTF_SM2SignProcess(OPST_HANDLE_ARGS *args,
 	}
 
 err:
+
+	if(hDev)
+	{
+#if USE_SELF_MUTEX
+		SDSCReleaseMutex(hMutex);
+#else
+		func_UnlockDev(hDev);
+#endif
+	}
 
 	return ulRet;
 }
