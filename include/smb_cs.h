@@ -200,9 +200,10 @@ typedef enum _EErr_SMB
 													EErr_SMB_CREATE_CERT_CONTEXT,					// 创建证书上下文
 													EErr_SMB_ADD_CERT_TO_STORE,						// 保存证书
 													EErr_SMB_NO_RIGHT,								// 没有权限
-													EErr_SMB_SET_CERT_CONTEXT_PROPERTY,				// 设置属性                        // 参数错误
+													EErr_SMB_SET_CERT_CONTEXT_PROPERTY,				// 设置属性
 													EErr_SMB_MEM_LES,                               // 内存不足
 													EErr_SMB_INVALID_ARG,                           // 参数错误
+													EErr_SMB_NO_CERT,                               // 没找见证书
 													EErr_SMB_FAIL = -1,
 
 }EErr_SMB;
@@ -214,122 +215,132 @@ extern "C" {
 	数据库路径初始化
 	pDbPath:NULL 默认路径C:\Users\xxxxx\AppData\Roaming\xxxx.smb_cs.db
 	*/
-	COMMON_API unsigned int SMB_CS_SetPath(char * pDbPath);
+	COMMON_API unsigned int CALL_CONVENTION SMB_CS_SetPath(char * pDbPath);
 
 	/*
 	数据库初始化
 	*/
-	COMMON_API unsigned int SMB_CS_Init();
+	COMMON_API unsigned int CALL_CONVENTION SMB_CS_Init();
 
 	/*
 	创建证书上下文
 	*/
-	COMMON_API unsigned int SMB_CS_CreateCertCtx(OUT SMB_CS_CertificateContext **ppCertCtx, IN unsigned char *pCertificate, IN unsigned int uiCertificateLen);
+	COMMON_API unsigned int CALL_CONVENTION SMB_CS_CreateCertCtx(OUT SMB_CS_CertificateContext **ppCertCtx, IN unsigned char *pCertificate, IN unsigned int uiCertificateLen);
 
 	/*
 	释放证书上下文
 	*/
-	COMMON_API unsigned int SMB_CS_FreeCertCtx(IN SMB_CS_CertificateContext *pCertCtx);
+	COMMON_API unsigned int CALL_CONVENTION SMB_CS_FreeCertCtx(IN SMB_CS_CertificateContext *pCertCtx);
+
+	/*
+	拷贝证书属性
+	*/
+	COMMON_API unsigned int CALL_CONVENTION SMB_CS_DuplicateCertAttr(IN SMB_CS_CertificateContext *pCertCtx, IN OUT SMB_CS_CertificateAttr **ppCertAttr);
+
+	/*
+	释放证书属性
+	*/
+	COMMON_API unsigned int CALL_CONVENTION SMB_CS_FreeCertAttr(IN SMB_CS_CertificateAttr *pCertAttr);
 
 	/*
 	添加证书到数据库 ucStoreType 1:CA&ROOT 2:USER
 	*/
-	COMMON_API unsigned int SMB_CS_AddCertCtx(IN SMB_CS_CertificateContext *pCertCtx, IN unsigned char ucStoreType);
+	COMMON_API unsigned int CALL_CONVENTION SMB_CS_AddCertCtx(IN SMB_CS_CertificateContext *pCertCtx, IN unsigned char ucStoreType);
 
 	/*
 	从数据库删除证书
 	*/
-	COMMON_API unsigned int SMB_CS_DelCertCtx(IN SMB_CS_CertificateContext *pCertCtx);
+	COMMON_API unsigned int CALL_CONVENTION SMB_CS_DelCertCtx(IN SMB_CS_CertificateContext *pCertCtx);
 
 	/*
 	清空数据库
 	*/
-	COMMON_API unsigned int SMB_CS_ClrAllCertCtx(IN unsigned char ucStoreType);
+	COMMON_API unsigned int CALL_CONVENTION SMB_CS_ClrAllCertCtx(IN unsigned char ucStoreType);
 
 	/*
 	从数据库查找证书
 	*/
-	COMMON_API unsigned int SMB_CS_FindCertCtx(IN SMB_CS_CertificateFindAttr *pCertificateFindAttr, OUT SMB_CS_CertificateContext_NODE **ppCertCtxNodeHeader);
+	COMMON_API unsigned int CALL_CONVENTION SMB_CS_FindCertCtx(IN SMB_CS_CertificateFindAttr *pCertificateFindAttr, OUT SMB_CS_CertificateContext_NODE **ppCertCtxNodeHeader);
 
 	/*
 	从数据库遍历证书
 	*/
-	COMMON_API unsigned int SMB_CS_EnumCertCtx(OUT SMB_CS_CertificateContext_NODE **ppCertCtxNodeHeader, IN unsigned char ucStoreType);
+	COMMON_API unsigned int CALL_CONVENTION SMB_CS_EnumCertCtx(OUT SMB_CS_CertificateContext_NODE **ppCertCtxNodeHeader, IN unsigned char ucStoreType);
 
 	/*
 	从数据库删除证书上
 	*/
-	COMMON_API unsigned int SMB_CS_DelCertCtxLink(IN SMB_CS_CertificateContext_NODE *pCertCtxNodeHeader);
+	COMMON_API unsigned int CALL_CONVENTION SMB_CS_DelCertCtxLink(IN SMB_CS_CertificateContext_NODE *pCertCtxNodeHeader);
 
 	/*
 	释放证书上下文链表
 	*/
-	COMMON_API unsigned int SMB_CS_FreeCertCtxLink(IN OUT SMB_CS_CertificateContext_NODE **ppCertCtxNodeHeader);
+	COMMON_API unsigned int CALL_CONVENTION SMB_CS_FreeCertCtxLink(IN OUT SMB_CS_CertificateContext_NODE **ppCertCtxNodeHeader);
 
 	/*
 	通过证书获取上下文
 	*/
-	COMMON_API unsigned int SMB_CS_GetCertCtxByCert(OUT SMB_CS_CertificateContext **ppCertCtx, IN unsigned char *pCertificate, IN unsigned int uiCertificateLen);
+	COMMON_API unsigned int CALL_CONVENTION SMB_CS_GetCertCtxByCert(OUT SMB_CS_CertificateContext **ppCertCtx, IN unsigned char *pCertificate, IN unsigned int uiCertificateLen);
 
 	/*
 	从数据库遍历CSP
 	*/
-	COMMON_API unsigned int SMB_CS_EnumCSP(OUT SMB_CS_CSP_NODE **ppNodeHeader);
+	COMMON_API unsigned int CALL_CONVENTION SMB_CS_EnumCSP(OUT SMB_CS_CSP_NODE **ppNodeHeader);
 
 	/*
 	释放CSP链表
 	*/
-	COMMON_API unsigned int SMB_CS_FreeCSPLink(IN OUT SMB_CS_CSP_NODE **ppNodeHeader);
+	COMMON_API unsigned int CALL_CONVENTION SMB_CS_FreeCSPLink(IN OUT SMB_CS_CSP_NODE **ppNodeHeader);
 
 	/*
 	释放结构
 	*/
-	COMMON_API unsigned int SMB_CS_FreeCSP(IN SMB_CS_CSP *pPtr);
+	COMMON_API unsigned int CALL_CONVENTION SMB_CS_FreeCSP(IN SMB_CS_CSP *pPtr);
 
 	/*
 	从数据库遍历SKF
 	*/
-	COMMON_API unsigned int SMB_CS_EnumSKF(OUT SMB_CS_SKF_NODE **ppNodeHeader);
+	COMMON_API unsigned int CALL_CONVENTION SMB_CS_EnumSKF(OUT SMB_CS_SKF_NODE **ppNodeHeader);
 
 	/*
 	释放SKF链表
 	*/
-	COMMON_API unsigned int SMB_CS_FreeSKFLink(IN OUT SMB_CS_SKF_NODE **ppNodeHeader);
+	COMMON_API unsigned int CALL_CONVENTION SMB_CS_FreeSKFLink(IN OUT SMB_CS_SKF_NODE **ppNodeHeader);
 
 	/*
 	释放结构
 	*/
-	COMMON_API unsigned int SMB_CS_FreeSKF(IN SMB_CS_SKF *pPtr);
+	COMMON_API unsigned int CALL_CONVENTION SMB_CS_FreeSKF(IN SMB_CS_SKF *pPtr);
 
 	/*
 	从数据库遍历PIDVID
 	*/
-	COMMON_API unsigned int SMB_CS_EnumPIDVID(OUT SMB_CS_PIDVID_NODE **ppNodeHeader);
+	COMMON_API unsigned int CALL_CONVENTION SMB_CS_EnumPIDVID(OUT SMB_CS_PIDVID_NODE **ppNodeHeader);
 
 	/*
 	释放PIDVID链表
 	*/
-	COMMON_API unsigned int SMB_CS_FreePIDVIDLink(IN OUT SMB_CS_PIDVID_NODE **ppNodeHeader);
+	COMMON_API unsigned int CALL_CONVENTION SMB_CS_FreePIDVIDLink(IN OUT SMB_CS_PIDVID_NODE **ppNodeHeader);
 
 	/*
 	释放结构
 	*/
-	COMMON_API unsigned int SMB_CS_FreePIDVID(IN SMB_CS_PIDVID *pPtr);
+	COMMON_API unsigned int CALL_CONVENTION SMB_CS_FreePIDVID(IN SMB_CS_PIDVID *pPtr);
 
 	/*
 	从数据库遍历FileInfo
 	*/
-	COMMON_API unsigned int SMB_CS_EnumFileInfo(OUT SMB_CS_FileInfo_NODE **ppNodeHeader);
+	COMMON_API unsigned int CALL_CONVENTION SMB_CS_EnumFileInfo(OUT SMB_CS_FileInfo_NODE **ppNodeHeader);
 
 	/*
 	释放FileInfo链表
 	*/
-	COMMON_API unsigned int SMB_CS_FreeFileInfoLink(IN OUT SMB_CS_FileInfo_NODE **ppNodeHeader);
+	COMMON_API unsigned int CALL_CONVENTION SMB_CS_FreeFileInfoLink(IN OUT SMB_CS_FileInfo_NODE **ppNodeHeader);
 
 	/*
 	释放结构
 	*/
-	COMMON_API unsigned int SMB_CS_FreeFileInfo(IN SMB_CS_FileInfo *pPtr);
+	COMMON_API unsigned int CALL_CONVENTION SMB_CS_FreeFileInfo(IN SMB_CS_FileInfo *pPtr);
 
 	/*
 	工具类xxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -337,17 +348,17 @@ extern "C" {
 	/*
 	设置用户自定义数据
 	*/
-	COMMON_API unsigned int SMB_CS_SetCertCtxVendor(IN OUT SMB_CS_CertificateContext *pCertCtx, IN unsigned char *pVendor, IN unsigned int uiVendorLen);
+	COMMON_API unsigned int CALL_CONVENTION SMB_CS_SetCertCtxVendor(IN OUT SMB_CS_CertificateContext *pCertCtx, IN unsigned char *pVendor, IN unsigned int uiVendorLen);
 
 	/*
 	验证证书的合法性
 	*/
-	COMMON_API unsigned int SMB_CS_VerifyCert(IN unsigned int uiFlag, IN unsigned char *pbCert, IN unsigned int uiCertLen);
+	COMMON_API unsigned int CALL_CONVENTION SMB_CS_VerifyCert(IN unsigned int uiFlag, IN unsigned char *pbCert, IN unsigned int uiCertLen);
 
 	/*
 	导入CA&ROOT证书
 	*/
-	COMMON_API unsigned int SMB_CS_ImportCaCert(IN unsigned char *pbCert, IN unsigned int uiCertLen, OUT unsigned int *pulAlgType);
+	COMMON_API unsigned int CALL_CONVENTION SMB_CS_ImportCaCert(IN unsigned char *pbCert, IN unsigned int uiCertLen, OUT unsigned int *pulAlgType);
 
 #ifdef __cplusplus
 }

@@ -8,11 +8,14 @@
 #ifdef _WINDOWS
 #ifdef DLL_EXPORTS
 #define COMMON_API __declspec(dllexport)
+#define CALL_CONVENTION __stdcall
 #else
-#define COMMON_API 
+#define COMMON_API
+#define CALL_CONVENTION __stdcall
 #endif
 #else
 #define COMMON_API 
+#define CALL_CONVENTION
 #endif
 
 // redefine func and class and route
