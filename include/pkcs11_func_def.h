@@ -21,7 +21,7 @@ extern "C" {
 	失败：
 	功能描述:	初始化PKCS11
 	*/
-	COMMON_API unsigned long PKCS11_Initialize();
+	COMMON_API unsigned int PKCS11_Initialize();
 
 	/*
 	功能名称:	释放资源
@@ -32,7 +32,7 @@ extern "C" {
 	失败：
 	功能描述:	释放资源
 	*/
-	COMMON_API unsigned long PKCS11_Finalize();
+	COMMON_API unsigned int PKCS11_Finalize();
 
 	/*
 	功能名称:	枚举设备
@@ -45,7 +45,7 @@ extern "C" {
 	失败：
 	功能描述:	枚举并记录当前设备
 	*/
-	COMMON_API unsigned long PKCS11_EnumDevices(OPST_DEV pszDevicesInfo[], unsigned long * pulDevCount);
+	COMMON_API unsigned int PKCS11_EnumDevices(OPST_DEV pszDevicesInfo[], unsigned int * pulDevCount);
 
 	/*
 	功能名称:	打开设备
@@ -56,7 +56,7 @@ extern "C" {
 	失败：
 	功能描述:	打开设备
 	*/
-	COMMON_API unsigned long PKCS11_OpenDevice(OPST_DEV stDeviceInfo,OPT_HDEVICE * phHandleDev);
+	COMMON_API unsigned int PKCS11_OpenDevice(OPST_DEV stDeviceInfo,OPT_HDEVICE * phHandleDev);
 
 	/*
 	功能名称:	关闭设备
@@ -67,7 +67,7 @@ extern "C" {
 	失败：
 	功能描述:	关闭设备
 	*/
-	COMMON_API unsigned long PKCS11_CloseDevice(OPT_HDEVICE hHandleDev);
+	COMMON_API unsigned int PKCS11_CloseDevice(OPT_HDEVICE hHandleDev);
 
 	/*
 	功能名称:	登录设备
@@ -81,8 +81,8 @@ extern "C" {
 	失败：
 	功能描述:	登录当前设备
 	*/
-	COMMON_API unsigned long PKCS11_Login(OPT_HDEVICE hHandleDev, unsigned long ulLoginType,
-		const unsigned char*pbPin, unsigned long ulPinLen, unsigned long *pulRetryTimes);
+	COMMON_API unsigned int PKCS11_Login(OPT_HDEVICE hHandleDev, unsigned int ulLoginType,
+		const unsigned char*pbPin, unsigned int ulPinLen, unsigned int *pulRetryTimes);
 
 	/*
 	功能名称:	注销登录设备
@@ -93,7 +93,7 @@ extern "C" {
 	失败：
 	功能描述:	注销登录当前设备
 	*/
-	COMMON_API unsigned long PKCS11_Logout(OPT_HDEVICE hHandleDev);
+	COMMON_API unsigned int PKCS11_Logout(OPT_HDEVICE hHandleDev);
 
 	/*
 	功能名称:	创建容器
@@ -106,8 +106,8 @@ extern "C" {
 	失败：
 	功能描述:	创建容器
 	*/
-	COMMON_API unsigned long PKCS11_CreateContainer(OPT_HDEVICE hHandleDev,
-		const unsigned char * pbConNameValue, unsigned long ulConNameLen);
+	COMMON_API unsigned int PKCS11_CreateContainer(OPT_HDEVICE hHandleDev,
+		const unsigned char * pbConNameValue, unsigned int ulConNameLen);
 
 	/*
 	功能名称:	删除容器
@@ -120,8 +120,8 @@ extern "C" {
 	失败：
 	功能描述:	删除容器
 	*/
-	COMMON_API unsigned long PKCS11_DeleteContainer(OPT_HDEVICE hHandleDev, 
-		const unsigned char * pbConNameValue, unsigned long ulConNameLen);
+	COMMON_API unsigned int PKCS11_DeleteContainer(OPT_HDEVICE hHandleDev, 
+		const unsigned char * pbConNameValue, unsigned int ulConNameLen);
 
 	/*
 	功能名称:	枚举容器
@@ -135,8 +135,8 @@ extern "C" {
 	失败：
 	功能描述:	枚举容器
 	*/
-	COMMON_API unsigned long PKCS11_EnumContainers(OPT_HDEVICE hHandleDev, OPST_CONTAINER pszContainers[], 
-		unsigned long * pulConCount);
+	COMMON_API unsigned int PKCS11_EnumContainers(OPT_HDEVICE hHandleDev, OPST_CONTAINER pszContainers[], 
+		unsigned int * pulConCount);
 
 	/*
 	功能名称:	检测容器是否存在
@@ -149,8 +149,8 @@ extern "C" {
 	失败：
 	功能描述:	检测容器是否存在
 	*/
-	COMMON_API unsigned long PKCS11_CheckContainerExist(OPT_HDEVICE hHandleDev, 
-		const unsigned char * pbConNameValue, unsigned long ulConNameLen);
+	COMMON_API unsigned int PKCS11_CheckContainerExist(OPT_HDEVICE hHandleDev, 
+		const unsigned char * pbConNameValue, unsigned int ulConNameLen);
 
 	/*
 	功能名称:	打开容器
@@ -165,8 +165,8 @@ extern "C" {
 	失败：
 	功能描述:	打开容器
 	*/
-	COMMON_API unsigned long PKCS11_OpenContainer(OPT_HDEVICE hHandleDev,const unsigned char * pbConNameValue, 
-		unsigned long ulConNameLen,unsigned long ulConType, OPT_HCONTAINER * phHandleCon);
+	COMMON_API unsigned int PKCS11_OpenContainer(OPT_HDEVICE hHandleDev,const unsigned char * pbConNameValue, 
+		unsigned int ulConNameLen,unsigned int ulConType, OPT_HCONTAINER * phHandleCon);
 
 	/*
 	功能名称:	关闭容器
@@ -177,7 +177,7 @@ extern "C" {
 	失败：
 	功能描述:	关闭容器
 	*/
-	COMMON_API unsigned long PKCS11_CloseContainer(OPT_HCONTAINER hHandle);
+	COMMON_API unsigned int PKCS11_CloseContainer(OPT_HCONTAINER hHandle);
 
 	/*
 	功能名称:	生成SM2公私钥对
@@ -188,7 +188,7 @@ extern "C" {
 	失败：
 	功能描述:	生成SM2密钥对（P11）
 	*/
-	COMMON_API unsigned long PKCS11_SM2GenKeys(OPT_HCONTAINER hHandle);
+	COMMON_API unsigned int PKCS11_SM2GenKeys(OPT_HCONTAINER hHandle);
 
 	/*
 	功能名称:	导出公钥
@@ -202,9 +202,9 @@ extern "C" {
 	失败：
 	功能描述:	导出公钥
 	*/
-	COMMON_API unsigned long PKCS11_SM2ExportKeys(OPT_HCONTAINER hHandle,
-		unsigned char *pbPubKeyX, unsigned long *pulPubKeyLenX, unsigned char *pbPubKeyY, 
-		unsigned long *pulPubKeyLenY);
+	COMMON_API unsigned int PKCS11_SM2ExportKeys(OPT_HCONTAINER hHandle,
+		unsigned char *pbPubKeyX, unsigned int *pulPubKeyLenX, unsigned char *pbPubKeyY, 
+		unsigned int *pulPubKeyLenY);
 
 	/*
 	功能名称:	导入SM2公私钥对
@@ -222,10 +222,10 @@ extern "C" {
 	失败：
 	功能描述:	将SM2公私钥导入到容器
 	*/
-	COMMON_API unsigned long PKCS11_SM2ImportKeys(OPT_HCONTAINER hHandle,OPT_HCONTAINER ulHandleEnDecypt, 
-		const unsigned char * pbPrvkey, unsigned long ulPrvKeyLen, 
-		const unsigned char * pbPubkeyX, unsigned long ulPubkeyXLen, 
-		const unsigned char * pbPubkeyY, unsigned long ulPubkeyYLen);
+	COMMON_API unsigned int PKCS11_SM2ImportKeys(OPT_HCONTAINER hHandle,OPT_HCONTAINER ulHandleEnDecypt, 
+		const unsigned char * pbPrvkey, unsigned int ulPrvKeyLen, 
+		const unsigned char * pbPubkeyX, unsigned int ulPubkeyXLen, 
+		const unsigned char * pbPubkeyY, unsigned int ulPubkeyYLen);
 
 
 	/*
@@ -241,9 +241,9 @@ extern "C" {
 	失败：
 	功能描述:	将证书导入到容器
 	*/
-	COMMON_API unsigned long PKCS11_CertImport(OPT_HCONTAINER hHandle,
-		const unsigned char * pbCert, unsigned long ulCertLen,
-		const unsigned char * pbSubject, unsigned long ulSubjectLen);
+	COMMON_API unsigned int PKCS11_CertImport(OPT_HCONTAINER hHandle,
+		const unsigned char * pbCert, unsigned int ulCertLen,
+		const unsigned char * pbSubject, unsigned int ulSubjectLen);
 
 	/*
 	功能名称:	导出证书
@@ -255,7 +255,7 @@ extern "C" {
 	失败：
 	功能描述:	将证书从容器导出
 	*/
-	COMMON_API unsigned long PKCS11_CertExport(OPT_HCONTAINER hHandle, unsigned char * pbCert, unsigned long * pulCertLen);
+	COMMON_API unsigned int PKCS11_CertExport(OPT_HCONTAINER hHandle, unsigned char * pbCert, unsigned int * pulCertLen);
 
 	/*
 	功能名称:	签名消息
@@ -270,9 +270,9 @@ extern "C" {
 	失败：
 	功能描述:	签名消息
 	*/
-	COMMON_API unsigned long PKCS11_SM2SignMSG(OPT_HCONTAINER hHandle,
-		const unsigned char *pbIn, unsigned long ulInLen,unsigned long ulAlg,
-		unsigned char * pbSigValue, unsigned long * pulSigLen);
+	COMMON_API unsigned int PKCS11_SM2SignMSG(OPT_HCONTAINER hHandle,
+		const unsigned char *pbIn, unsigned int ulInLen,unsigned int ulAlg,
+		unsigned char * pbSigValue, unsigned int * pulSigLen);
 
 
 	/*
@@ -289,9 +289,9 @@ extern "C" {
 	失败：
 	功能描述:	验证消息
 	*/
-	COMMON_API unsigned long PKCS11_SM2VerifyMSG(OPT_HCONTAINER hHandle,
-		const unsigned char *pbMsg, unsigned long ulMsgLen,unsigned long ulAlg,
-		const unsigned char *pbSigValue, unsigned long ulSigLen );
+	COMMON_API unsigned int PKCS11_SM2VerifyMSG(OPT_HCONTAINER hHandle,
+		const unsigned char *pbMsg, unsigned int ulMsgLen,unsigned int ulAlg,
+		const unsigned char *pbSigValue, unsigned int ulSigLen );
 
 #ifdef __cplusplus
 }
