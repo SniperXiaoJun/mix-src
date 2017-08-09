@@ -120,6 +120,9 @@ public:
 	void InitArgsECC512Certs(FB::VariantList variantList);
 	void InitArgsECC512Metas(FB::VariantList variantList);
 
+	void InitArgsIBEMetas(FB::VariantList variantList);
+	
+
 	unsigned char m_szKeySignECC512[4 + 2*64 + 4 + 64];  // 签名密钥对 4 + 2*64 + 4 + 64
 	unsigned char m_szKeyEnECC512[4 + 2*64 + 4 + 64];	 // 加密密钥对
 	unsigned char m_szKeyExECC512[4 + 2*64 + 4 + 64];	 // 交换密钥对
@@ -223,6 +226,18 @@ public:
 	static char m_szAuthKey[BUFFER_LEN_1K]; 
 
 	static int m_iKeyCount; 
+
+	// those are for ibe(sm9)
+	unsigned char m_bUserID[8];
+	unsigned int m_ulUserIDLen;
+	unsigned char m_bPubKeySign[128]; //G2 
+	unsigned int m_ulPubKeySignLen; 
+	unsigned char m_bPriKeySign[64+32+64+1]; 
+	unsigned int m_ulPriKeySignLen;
+	unsigned char m_bPubKeyExc[64]; //G1 
+	unsigned int m_ulPubKeyExcLen;
+	unsigned char m_bPriKeyExc[128+32+64+1];
+	unsigned int m_ulPriKeyExcLen;
 
 private:
     FBCommonWeakPtr m_plugin;

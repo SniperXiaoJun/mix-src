@@ -1584,10 +1584,6 @@ err:
 	return ulRet;
 }
 
-
-
-#if defined(VERIFY_PIN_USE_ENCRYPT)
-
 #include "modp_b64.h"
 
 
@@ -2423,8 +2419,6 @@ err:
 
 	return ulRet;
 }
-
-#endif
 
 unsigned int __stdcall WTF_SM2SignDigest(SK_CERT_DESC_PROPERTY * pCertProperty, const char * pszPIN, BYTE *pbData, unsigned int uiDataLen, PECCSIGNATUREBLOB pSignature,unsigned int * puiRetryCount)
 {

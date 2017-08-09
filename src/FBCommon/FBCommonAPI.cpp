@@ -23,6 +23,10 @@
 #include "WTF_Interface.h"
 #include "RT_P11_API.h"
 
+#include "KMS_CAPI_IBE.h"
+
+HANDLE hDevIBE;
+
 static char DEFAULT_CONTAINER[] = "ContainerSM2";
 static char DEFAULT_APPLICATION[] = "DEFAULT_APPLICATION";
 
@@ -1587,6 +1591,57 @@ void FBCommonAPI::ExecCommonFuncID(long ulFuncID, FB::VariantList aArrayArgIN, F
 		break;
 #endif
 
+	case 30:
+		{
+
+			InitArgsSKFSetUserPIN(aArrayArgIN);
+
+			if (0 != ulResult)
+			{
+				return;
+			}
+
+			ulResult = CAPI_IBE_Initialize(m_szPIN,&m_ulRetry, &hDevIBE);
+			if (0 != ulResult)
+			{
+				return;
+			}
+
+			ulResult = CAPI_IBE_ExportSM2Pubkey(hDevIBE,m_szPublicKeySIGN);
+			if (0 != ulResult)
+			{
+				return;
+			}
+		}
+		break;
+
+	case 31:
+		{
+			InitArgsIBEMetas(aArrayArgIN);
+			if (0 != ulResult)
+			{
+				return;
+			}
+
+			ulResult = CAPI_IBE_SetMetas(hDevIBE,
+				m_bUserID, m_ulUserIDLen,
+				m_bPubKeySign, m_ulPubKeySignLen, 
+				m_bPriKeySign, m_ulPriKeySignLen,
+				m_bPubKeyExc, m_ulPubKeyExcLen,
+				m_bPriKeyExc, m_ulPriKeyExcLen);
+			if (0 != ulResult)
+			{
+				return;
+			}
+
+			ulResult = CAPI_IBE_Finalize(hDevIBE);
+			if (0 != ulResult)
+			{
+				return;
+			}
+		}
+		break;
+
 
 		// 插拔KEY事件检测   用于登录
 	case 0xFF:
@@ -1671,6 +1726,96 @@ void FBCommonAPI::InitArgsECC512Certs(FB::VariantList variantList)
 	GetArrayStrOfIndex(variantList,3, (char *)data_value_cert_b64,(int *) (&data_len_cert_b64));
 
 	m_iCertEXLenECC512 = modp_b64_decode((char *)m_szCertEXECC512, (char *)data_value_cert_b64,data_len_cert_b64);
+
+	ulResult = 0;
+}
+
+void FBCommonAPI::InitArgsIBEMetas(FB::VariantList variantList)
+{
+	int inBuffSize  = 0;
+
+	char szBlobB64[BUFFER_LEN_1K * 4]; 
+	unsigned char szBlob[BUFFER_LEN_1K * 4]; 
+	unsigned int ulBlobB64Len = BUFFER_LEN_1K * 4;
+	unsigned int ulBlobLen = BUFFER_LEN_1K * 4;
+	int tmpLen = 1024;
+
+	char buffer_tmp[BUFFER_LEN_1K] = {0};
+	
+
+	GetArrayLength(variantList,&inBuffSize);
+
+	if (5 != inBuffSize)
+	{
+		ulResult = OPE_ERR_INVALID_PARAM;
+		return;
+	}
+
+	tmpLen = BUFFER_LEN_1K;
+	GetArrayStrOfIndex(variantList,0, buffer_tmp, &tmpLen);
+
+	CAPI_IBE_FormatID(buffer_tmp, 0, m_bUserID);
+	m_ulUserIDLen = 8;
+
+	// m_bPriKeyExc
+	GetArrayStrOfIndex(variantList,1, szBlobB64,(int *)(&ulBlobB64Len));
+	ulBlobLen = modp_b64_decode((char *)&szBlob, szBlobB64,ulBlobB64Len);
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
+	FILE_LOG_HEX(file_log_name, szBlob, ulBlobLen);
+	if (sizeof(m_bPriKeyExc) != ulBlobLen)
+	{
+		ulResult = OPE_ERR_INVALID_PARAM;
+		return;
+	}
+	else
+	{
+		memcpy(m_bPriKeyExc,szBlob,ulBlobLen);
+	}
+
+	// m_bPriKeySign
+	GetArrayStrOfIndex(variantList,2, szBlobB64,(int *)(&ulBlobB64Len));
+	ulBlobLen = modp_b64_decode((char *)&szBlob, szBlobB64,ulBlobB64Len);
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
+	FILE_LOG_HEX(file_log_name, szBlob, ulBlobLen);
+	if (sizeof(m_bPriKeySign) != ulBlobLen)
+	{
+		ulResult = OPE_ERR_INVALID_PARAM;
+		return;
+	}
+	else
+	{
+		memcpy(m_bPriKeySign,szBlob,ulBlobLen);
+	}
+
+	// m_bPubKeyExc
+	GetArrayStrOfIndex(variantList,3, szBlobB64,(int *)(&ulBlobB64Len));
+	ulBlobLen = modp_b64_decode((char *)&szBlob, szBlobB64,ulBlobB64Len);
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
+	FILE_LOG_HEX(file_log_name, szBlob, ulBlobLen);
+	if (sizeof(m_bPubKeyExc) != ulBlobLen)
+	{
+		ulResult = OPE_ERR_INVALID_PARAM;
+		return;
+	}
+	else
+	{
+		memcpy(m_bPubKeyExc,szBlob,ulBlobLen);
+	}
+
+	// m_bPubKeySign
+	GetArrayStrOfIndex(variantList,4, szBlobB64,(int *)(&ulBlobB64Len));
+	ulBlobLen = modp_b64_decode((char *)&szBlob, szBlobB64,ulBlobB64Len);
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
+	FILE_LOG_HEX(file_log_name, szBlob, ulBlobLen);
+	if (sizeof(m_bPubKeySign) != ulBlobLen)
+	{
+		ulResult = OPE_ERR_INVALID_PARAM;
+		return;
+	}
+	else
+	{
+		memcpy(m_bPubKeySign,szBlob,ulBlobLen);
+	}
 
 	ulResult = 0;
 }
