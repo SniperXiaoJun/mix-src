@@ -11,8 +11,6 @@ extern "C" {
 
 	int CAPI_IBE_Initialize(char * pszPIN, unsigned int * pulRetry, HANDLE *phDevice);
 
-	int CAPI_IBE_FormatID(char * pIDSrc, int iIDSrcType,unsigned char pIDDest[8]);
-
 	int CAPI_IBE_Finalize(HANDLE hDevice);
 
 	int CAPI_IBE_ExportSM2Pubkey(HANDLE hDevice, unsigned char pPubkey[32*2+1]);

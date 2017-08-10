@@ -1624,11 +1624,11 @@ void FBCommonAPI::ExecCommonFuncID(long ulFuncID, FB::VariantList aArrayArgIN, F
 			}
 
 			ulResult = CAPI_IBE_SetMetas(hDevIBE,
-				m_bUserID, m_ulUserIDLen,
-				m_bPubKeySign, m_ulPubKeySignLen, 
-				m_bPriKeySign, m_ulPriKeySignLen,
-				m_bPubKeyExc, m_ulPubKeyExcLen,
-				m_bPriKeyExc, m_ulPriKeyExcLen);
+				m_bUserID, sizeof(m_bUserID),
+				m_bPubKeySign, sizeof(m_bPubKeySign), 
+				m_bPriKeySign, sizeof(m_bPriKeySign),
+				m_bPubKeyExc, sizeof(m_bPubKeyExc),
+				m_bPriKeyExc, sizeof(m_bPriKeyExc));
 			if (0 != ulResult)
 			{
 				return;
@@ -1751,11 +1751,22 @@ void FBCommonAPI::InitArgsIBEMetas(FB::VariantList variantList)
 		return;
 	}
 
-	tmpLen = BUFFER_LEN_1K;
-	GetArrayStrOfIndex(variantList,0, buffer_tmp, &tmpLen);
 
-	CAPI_IBE_FormatID(buffer_tmp, 0, m_bUserID);
-	m_ulUserIDLen = 8;
+	// m_bUserID
+	GetArrayStrOfIndex(variantList,0, szBlobB64,(int *)(&ulBlobB64Len));
+	ulBlobLen = modp_b64_decode((char *)&szBlob, szBlobB64,ulBlobB64Len);
+	FILE_LOG_FMT(file_log_name, "%s %d %s", __FUNCTION__, __LINE__, "");
+	FILE_LOG_HEX(file_log_name, szBlob, ulBlobLen);
+	if (sizeof(m_bUserID) != ulBlobLen)
+	{
+		ulResult = OPE_ERR_INVALID_PARAM;
+		return;
+	}
+	else
+	{
+		memcpy(m_bUserID,szBlob,ulBlobLen);
+	}
+
 
 	// m_bPriKeyExc
 	GetArrayStrOfIndex(variantList,1, szBlobB64,(int *)(&ulBlobB64Len));

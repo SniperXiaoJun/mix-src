@@ -4,35 +4,6 @@
 #include "o_all_type_def.h"
 #pragma comment(lib, "SCCrypto.lib")
 
-int CAPI_IBE_FormatID(char * pIDSrc, int iIDSrcType,unsigned char pIDDest[8])
-{
-	int i = 0;
-
-	switch(iIDSrcType)
-	{
-	case 0:
-	case 1:
-	case 2:
-	default:
-		{
-			unsigned long long res = 0;
-
-			for (i = 0; i < strlen(pIDSrc);i++)
-			{
-				res = i << 4;
-				res+= pIDSrc[i] - '0';
-			}
-
-			memcpy(pIDDest, &res, 8);
-		}
-		break;
-	}
-
-	return 0;
-}
-
-
-
 int CAPI_IBE_Initialize(char * pszPIN, unsigned int * pulRetry, HANDLE *phDevice)
 {
 	DWORD ulRet;
