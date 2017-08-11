@@ -53,7 +53,7 @@ err:
 
 int CAPI_IBE_Finalize(HANDLE hDevice)
 {
-	return SC_CryptFinal(hDevice);
+	return SC_DisconnectDev(hDevice);
 }
 
 int CAPI_IBE_ExportSM2Pubkey(HANDLE hDevice, unsigned char pPubkey[32*2])
