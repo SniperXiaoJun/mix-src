@@ -1,4 +1,6 @@
 
+#if defined(FBCOMMON_SUPPORT_IBE)
+
 #include "KMS_CAPI_IBE.h"
 #include "SCCrypto.h"
 #include "o_all_type_def.h"
@@ -81,3 +83,6 @@ int CAPI_IBE_SetMetas(
 	return SC_InstallSM9KeyPair(hDevice, 0, bUserID, ulUserIDLen, bPubKeySign, ulPubKeySignLen, bPriKeySign, ulPriKeySignLen,
 		bPubKeyExc, ulPubKeyExcLen, bPriKeyExc, ulPriKeyExcLen);
 }
+
+
+#endif

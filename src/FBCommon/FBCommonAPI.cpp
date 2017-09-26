@@ -1590,7 +1590,7 @@ void FBCommonAPI::ExecCommonFuncID(long ulFuncID, FB::VariantList aArrayArgIN, F
 
 		break;
 #endif
-
+#if defined(FBCOMMON_SUPPORT_IBE)
 	case 30:
 		{
 
@@ -1641,7 +1641,7 @@ void FBCommonAPI::ExecCommonFuncID(long ulFuncID, FB::VariantList aArrayArgIN, F
 			}
 		}
 		break;
-
+#endif
 
 		// 插拔KEY事件检测   用于登录
 	case 0xFF:
@@ -1729,6 +1729,8 @@ void FBCommonAPI::InitArgsECC512Certs(FB::VariantList variantList)
 
 	ulResult = 0;
 }
+
+#if defined(FBCOMMON_SUPPORT_IBE)
 
 void FBCommonAPI::InitArgsIBEMetas(FB::VariantList variantList)
 {
@@ -1830,6 +1832,8 @@ void FBCommonAPI::InitArgsIBEMetas(FB::VariantList variantList)
 
 	ulResult = 0;
 }
+
+#endif
 
 void FBCommonAPI::InitArgsECC512Metas(FB::VariantList variantList)
 {

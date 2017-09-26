@@ -120,9 +120,6 @@ public:
 	void InitArgsECC512Certs(FB::VariantList variantList);
 	void InitArgsECC512Metas(FB::VariantList variantList);
 
-	void InitArgsIBEMetas(FB::VariantList variantList);
-	
-
 	unsigned char m_szKeySignECC512[4 + 2*64 + 4 + 64];  // 签名密钥对 4 + 2*64 + 4 + 64
 	unsigned char m_szKeyEnECC512[4 + 2*64 + 4 + 64];	 // 加密密钥对
 	unsigned char m_szKeyExECC512[4 + 2*64 + 4 + 64];	 // 交换密钥对
@@ -131,6 +128,8 @@ public:
 	unsigned char m_szHMac[32*9];
 	unsigned char m_szZMP[32*3];
 	char m_szSecID[32];
+#elif defined(FBCOMMON_SUPPORT_IBE)
+	void InitArgsIBEMetas(FB::VariantList variantList);
 #endif
 
 
