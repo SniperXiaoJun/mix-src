@@ -1643,6 +1643,42 @@ void FBCommonAPI::ExecCommonFuncID(long ulFuncID, FB::VariantList aArrayArgIN, F
 		break;
 #endif
 
+	case 32:
+		{
+			InitArgsSKFSetUserPINAndUserInfo(aArrayArgIN);
+
+
+			ulResult = CAPI_KEY_SetMeta(m_szAuthKey, OPE_USB_TARGET_OTHER, &m_stMetaAuthAdd, m_szPIN,(unsigned int *)&m_ulRetry);
+
+			if (ulResult)
+			{
+				return;
+			}
+
+			ulResult = CAPI_KEY_ExportPK(m_szAuthKey, OPE_USB_TARGET_OTHER,1, m_szPublicKeySIGN);
+
+			return;
+		}
+		break;
+
+	case 33:
+		{
+			InitArgsSKFSetUserPINAndUserInfo(aArrayArgIN);
+
+			ulResult = CAPI_KEY_SetMeta(m_szAuthKey, OPE_USB_TARGET_SELF, &m_stMetaAuthAdd, m_szPIN,(unsigned int *)&m_ulRetry);
+
+			if (ulResult)
+			{
+				return;
+			}
+
+			ulResult = CAPI_KEY_ExportPK(m_szAuthKey, OPE_USB_TARGET_SELF,1, m_szPublicKeySIGN);
+
+			return;
+		}
+		break;
+
+
 		// 插拔KEY事件检测   用于登录
 	case 0xFF:
 		{
