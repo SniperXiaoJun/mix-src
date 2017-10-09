@@ -1907,6 +1907,201 @@ err:
 	return rv;
 }
 
+
+
+unsigned int OpenSSL_SM2GenCertEXT(
+	const OPST_USERINFO *pstUserInfo,
+	const unsigned char * pbCSR,unsigned int uiCSRLen,
+	const unsigned char * pbPublicKeyX,  unsigned int uiPublicKeyXLen, 
+	const unsigned char * pbPublicKeyY,  unsigned int uiPublicKeyYLen,
+	const unsigned char * pbX509CACert, unsigned int uiX509CACertLen, 
+	unsigned char * pbSerialNumber,unsigned int uiSerialNumberLen,
+	unsigned int uiNotBefore, unsigned int uiNotAfter, unsigned int uiSignFlag,
+	unsigned char * pbX509Cert, unsigned int * puiX509CertLen)
+{
+	char * strBaseKeyUsage = NULL;
+	char * strExtKeyUsage = "";
+	EVP_PKEY	*pktmp = NULL;			// req�еĹ�Կ
+	X509		*x509 = NULL , *xCAcert = NULL;			// ���ɵ�֤��
+	X509_NAME	*name = NULL;
+	int isCACert = 0;
+	X509_REQ *req = NULL;
+	unsigned int rv = -1;
+	const unsigned char * ptr_in = NULL;
+	unsigned char * ptr_out = NULL;
+	BIGNUM * bnSN = NULL;
+
+	if (OpenSSL_SM2VerifyCSR(pbCSR,uiCSRLen, 0))
+	{
+		goto err;
+	}
+
+	xCAcert = d2i_X509(NULL,&pbX509CACert, uiX509CACertLen);
+
+	req = d2i_X509_REQ(NULL, &pbCSR, uiCSRLen);
+
+	FILE_LOG_FMT(file_log_name, "%s %d", __FUNCTION__, __LINE__);
+
+	if (NULL == req)
+	{
+		goto err;
+	}
+
+	if(0 == uiSignFlag)
+	{
+		strBaseKeyUsage = "nonRepudiation,digitalSignature";
+	}
+	else if(1 == uiSignFlag)
+	{
+		strBaseKeyUsage = "keyEncipherment,dataEncipherment";
+	}
+	else if(2 == uiSignFlag)
+	{
+		strBaseKeyUsage = "dataEncipherment";
+	}
+	else if(3 == uiSignFlag)
+	{
+		strBaseKeyUsage = "keyEncipherment";
+	}
+
+	// �õ�req�еĹ�Կ
+	if((pktmp=OpenSSL_NewEVP_PKEY_OF_SM2_PublicKey(pbPublicKeyX,uiPublicKeyXLen,pbPublicKeyY,uiPublicKeyYLen)) == NULL)
+	{
+		goto err;
+	}
+
+	FILE_LOG_FMT(file_log_name, "%s %d", __FUNCTION__, __LINE__);
+
+	// new x509
+	if((x509 = X509_new()) == NULL)
+	{
+		goto err;
+	}
+
+	if(NULL == (bnSN = BN_new()))
+	{
+		goto err;
+	}
+
+
+	name = X509_get_subject_name(x509);
+
+	OpenSSL_AddNameByName(name, "C", (unsigned char *)pstUserInfo->countryName,pstUserInfo->uiLenC,0);
+	OpenSSL_AddNameByName(name, "ST", (unsigned char *)pstUserInfo->stateOrProvinceName,pstUserInfo->uiLenST,0);
+	OpenSSL_AddNameByName(name, "L", (unsigned char *)pstUserInfo->localityName,pstUserInfo->uiLenL, 0);
+	OpenSSL_AddNameByName(name, "O", (unsigned char *)pstUserInfo->organizationName,pstUserInfo->uiLenO, 0);
+	OpenSSL_AddNameByName(name, "OU",(unsigned char *) pstUserInfo->organizationalUnitName,pstUserInfo->uiLenOU,0);
+	OpenSSL_AddNameByName(name, "CN",(unsigned char *) pstUserInfo->commonName,pstUserInfo->uiLenCN,0);
+	OpenSSL_AddNameByName(name, "emailAddress",(unsigned char *) pstUserInfo->emailAddress,pstUserInfo->uiLenEA,0);
+	OpenSSL_AddNameByName(name, "challengePassword",(unsigned char *)pstUserInfo->challengePassword, pstUserInfo->uiLenCP, 0);
+	OpenSSL_AddNameByName(name, "unstructuredName",(unsigned char *)pstUserInfo->unstructuredName,pstUserInfo->uiLenUN,0);
+
+
+	// 设置版本x509_v3
+	X509_set_version(x509,2);
+
+	// 设置序列号
+	//ASN1_INTEGER_set(X509_get_serialNumber(x509), uiSerialNumber);
+
+	BN_bin2bn(pbSerialNumber, uiSerialNumberLen, bnSN);
+	BN_to_ASN1_INTEGER(bnSN,X509_get_serialNumber(x509));
+
+	// ��Ч��
+	X509_gmtime_adj(X509_get_notBefore(x509), (long)(uiNotBefore*60*60*24));
+	X509_gmtime_adj(X509_get_notAfter(x509), (long)(uiNotAfter*60*60*24));
+
+	FILE_LOG_STRING(file_log_name, "7");
+
+	FILE_LOG_FMT(file_log_name, "%s %d", __FUNCTION__, __LINE__);
+
+	// ������
+	//if(!X509_set_subject_name(x509, X509_REQ_get_subject_name(req)))
+	//	goto err;
+
+	// �䷢��
+	if(!X509_set_issuer_name(x509, X509_get_subject_name(xCAcert)))
+		goto err;
+
+	// ���ù�Կ
+	if(!X509_set_pubkey(x509, pktmp))
+		goto err;
+
+	FILE_LOG_STRING(file_log_name, "8");
+
+	// ����req�Դ���չ��Ϣ
+	if(!copy_extensions(x509, req, EXT_COPY_ALL))
+		goto err;
+
+	//�������� Note if the CA option is false the pathlen option shouid be omitted. 
+	if(isCACert == 0)
+		Add_Ext(x509, x509, NID_basic_constraints, "critical,CA:FALSE,pathlen:1");
+	else if(isCACert == 1)
+		Add_Ext(x509, x509, NID_basic_constraints, "critical,CA:TRUE,pathlen:1");
+
+	//������Կ��ʾ��--------����ӵ���߶����Կ
+	Add_Ext(x509, x509, NID_subject_key_identifier, "hash");
+
+	//Authority��Կ��ʾ��----���ַ������ж��ǩ����Կʱ
+	Add_Ext(x509, xCAcert, NID_authority_key_identifier, "keyid,issuer:always");
+
+	FILE_LOG_STRING(file_log_name, "9");
+
+	// ��Կ��;
+	if(strlen(strBaseKeyUsage))
+		Add_Ext(x509, x509, NID_key_usage, strBaseKeyUsage);
+
+	if(strlen(strExtKeyUsage))
+		Add_Ext(x509, x509, NID_ext_key_usage, strExtKeyUsage);
+
+	X509_ALGOR_set0(x509->cert_info->key->algor,
+		OBJ_txt2obj("1.2.840.10045.2.1",OBJ_NAME_TYPE_PKEY_METH)
+		,V_ASN1_OBJECT,OBJ_txt2obj("1.2.156.10197.1.301",OBJ_NAME_TYPE_PKEY_METH)
+		);
+
+	X509_ALGOR_set0(x509->sig_alg,
+		OBJ_txt2obj("1.2.156.10197.1.501",0), 
+		V_ASN1_UNDEF, NULL);
+
+	X509_ALGOR_set0(x509->cert_info->signature,
+		OBJ_txt2obj("1.2.156.10197.1.501",0), 
+		V_ASN1_UNDEF, NULL);
+
+	ptr_out = pbX509Cert;
+
+	* puiX509CertLen = i2d_X509(x509, &ptr_out);
+
+	rv = 0;
+
+err:
+
+	if(pktmp != NULL)		
+	{
+		EVP_PKEY_free(pktmp);
+	}
+
+	if(x509 != NULL)	
+	{
+		X509_free(x509);
+	}
+
+	if(xCAcert != NULL)	
+	{
+		X509_free(xCAcert);
+	}
+
+	if(req)
+	{
+		X509_REQ_free(req);
+	}
+
+	if (bnSN)
+	{
+		BN_free(bnSN);
+	}
+
+	return rv;
+}
+
 unsigned int OpenSSL_CertGetSubject(const unsigned char * pbX509Cert, unsigned int uiX509CertLen,
 	unsigned char * pbSubject, unsigned int * puiSubjectLen)
 {

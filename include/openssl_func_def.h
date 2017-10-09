@@ -1008,6 +1008,16 @@ extern "C" {
 		unsigned char *pbP7BContent, unsigned int *puiP7BContentLen
 		);
 
+	COMMON_API unsigned int OpenSSL_SM2GenCertEXT(
+		const OPST_USERINFO *pstUserInfo,
+		const unsigned char * pbCSR,unsigned int uiCSRLen,
+		const unsigned char * pbPublicKeyX,  unsigned int uiPublicKeyXLen, 
+		const unsigned char * pbPublicKeyY,  unsigned int uiPublicKeyYLen,
+		const unsigned char * pbX509CACert, unsigned int uiX509CACertLen, 
+		unsigned char * pbSerialNumber,unsigned int uiSerialNumberLen,
+		unsigned int uiNotBefore, unsigned int uiNotAfter, unsigned int uiSignFlag,
+		unsigned char * pbX509Cert, unsigned int * puiX509CertLen);
+
 #ifdef __cplusplus
 }
 #endif
