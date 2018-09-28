@@ -5,7 +5,7 @@
 #define __COMMON_H__
 
 // export
-#ifdef _WINDOWS
+#ifdef _WIN32
 #ifdef DLL_EXPORTS
 #define COMMON_API __declspec(dllexport)
 #define CALL_CONVENTION __stdcall
